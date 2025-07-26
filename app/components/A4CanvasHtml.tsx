@@ -29,12 +29,31 @@ export default function A4CanvasHtml({
   // ピクセル計算（メモ化）
   const { canvasWidth, canvasHeight, popWidth, popHeight } = useMemo(() => {
     const mmToPixel = (mm: number) => Math.round(mm * (dpi / 25.4));
-    return {
+    const result = {
       canvasWidth: mmToPixel(pageData.dimensions.width),
       canvasHeight: mmToPixel(pageData.dimensions.height),
-      popWidth: mmToPixel(pageData.pops[0]?.width || 100),
-      popHeight: mmToPixel(pageData.pops[0]?.height || 74),
+      popWidth: mmToPixel(pageData.pops[0]?.width || 105), // 横向きA7サイズの幅
+      popHeight: mmToPixel(pageData.pops[0]?.height || 74), // 横向きA7サイズの高さ
     };
+
+    console.log("📐 A4CanvasHtml: Layout calculations", {
+      pageData: {
+        dimensions: pageData.dimensions,
+        popCount: pageData.pops.length,
+        firstPop: pageData.pops[0]
+          ? {
+              x: pageData.pops[0].x,
+              y: pageData.pops[0].y,
+              width: pageData.pops[0].width,
+              height: pageData.pops[0].height,
+            }
+          : null,
+      },
+      result,
+      dpi,
+    });
+
+    return result;
   }, [pageData, dpi]);
 
   const renderToCanvas = useCallback(async () => {
@@ -80,6 +99,8 @@ export default function A4CanvasHtml({
         backgroundColor: "#ffffff",
         logging: false,
         useCORS: true,
+        allowTaint: true,
+        foreignObjectRendering: false,
       });
 
       console.log("✅ A4CanvasHtml: html2canvas completed");
@@ -238,6 +259,26 @@ function A4HtmlContent({
 
   return (
     <div style={styles.container}>
+      {/* デバッグ情報 */}
+      {(() => {
+        console.log("🎯 A4HtmlContent: Rendering pops", {
+          popCount: pageData.pops.length,
+          popWidth,
+          popHeight,
+          dpi,
+          pops: pageData.pops.map((pop, index) => ({
+            index,
+            x: pop.x,
+            y: pop.y,
+            width: pop.width,
+            height: pop.height,
+            pixelX: mmToPixel(pop.x),
+            pixelY: mmToPixel(pop.y),
+          })),
+        });
+        return null;
+      })()}
+
       {/* ポップ配置 */}
       {pageData.pops.map((pop, index) => (
         <div

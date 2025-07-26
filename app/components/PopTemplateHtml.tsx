@@ -59,6 +59,8 @@ export default function PopTemplateHtml({
           backgroundColor: "#ffffff",
           logging: false,
           useCORS: true,
+          allowTaint: true,
+          foreignObjectRendering: false,
         });
 
         // コンポーネントがアンマウントされていたら処理を中止

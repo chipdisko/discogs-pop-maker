@@ -17,6 +17,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import PopCard from "../components/PopCard";
 import { ThemeToggle } from "../components/ThemeToggle";
 
+// 一時的なクリアボタン（テスト用）
+const clearLocalStorage = () => {
+  localStorage.clear();
+  window.location.reload();
+};
+
 export default function PopMakerPage() {
   // Services
   const popService = usePopService();
@@ -259,7 +265,15 @@ export default function PopMakerPage() {
               レコード屋さんのポップを簡単作成✨
             </p>
           </div>
-          <ThemeToggle />
+          <div className='flex items-center gap-2'>
+            <button
+              onClick={clearLocalStorage}
+              className='px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600'
+            >
+              クリア（テスト用）
+            </button>
+            <ThemeToggle />
+          </div>
         </div>
 
         {/* エラー表示 */}

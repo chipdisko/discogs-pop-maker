@@ -31,7 +31,7 @@ export class PrintLayoutService {
   private static readonly POPS_PER_PAGE = 8; // 2x4配置（A7サイズ用）
   private static readonly COLUMNS = 2;
   private static readonly ROWS = 4;
-  private static readonly MARGIN = 5; // mm（A7サイズ用にマージンを調整）
+  private static readonly MARGIN = 0; // mm（横向きA7サイズ用にマージンを0に調整）
 
   /**
    * PopリストからA4レイアウトを生成
