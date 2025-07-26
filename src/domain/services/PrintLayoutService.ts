@@ -72,26 +72,21 @@ export class PrintLayoutService {
     const popWidth = popDimensions.getWidth();
     const popHeight = popDimensions.getHeight();
 
-    // レイアウト計算
-    const availableWidth =
-      PrintLayoutService.A4_WIDTH - PrintLayoutService.MARGIN * 2;
-    const availableHeight =
-      PrintLayoutService.A4_HEIGHT - PrintLayoutService.MARGIN * 2;
+    // レイアウト計算（マージン0で敷き詰め）
+    const availableWidth = PrintLayoutService.A4_WIDTH;
+    const availableHeight = PrintLayoutService.A4_HEIGHT;
 
-    const spacingX =
-      (availableWidth - popWidth * PrintLayoutService.COLUMNS) /
-      (PrintLayoutService.COLUMNS - 1);
-    const spacingY =
-      (availableHeight - popHeight * PrintLayoutService.ROWS) /
-      (PrintLayoutService.ROWS - 1);
+    // マージン0で敷き詰める場合のスペーシング
+    const spacingX = 0; // 横の間隔を0に
+    const spacingY = 0; // 縦の間隔を0に
 
     // 各ポップの位置を計算
     pops.forEach((pop, index) => {
       const col = index % PrintLayoutService.COLUMNS;
       const row = Math.floor(index / PrintLayoutService.COLUMNS);
 
-      const x = PrintLayoutService.MARGIN + col * (popWidth + spacingX);
-      const y = PrintLayoutService.MARGIN + row * (popHeight + spacingY);
+      const x = col * (popWidth + spacingX);
+      const y = row * (popHeight + spacingY);
 
       positions.push({
         pop,

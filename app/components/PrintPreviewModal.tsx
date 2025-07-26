@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from "react";
-import A4CanvasHtml from "./A4CanvasHtml";
+import React, { useState, useCallback, useRef, useEffect } from "react";
+import A4Canvas from "./A4Canvas";
 import type { PrintDataResponse } from "../../src/application";
 
 interface PrintPreviewModalProps {
@@ -16,16 +16,23 @@ export default function PrintPreviewModal({
   const [currentPage, setCurrentPage] = useState(0);
   const [canvases, setCanvases] = useState<HTMLCanvasElement[]>([]);
   const [dpi, setDpi] = useState(300);
+  const currentPageRef = useRef(currentPage);
+
+  // currentPageRefを更新
+  useEffect(() => {
+    currentPageRef.current = currentPage;
+  }, [currentPage]);
 
   const handleCanvasReady = useCallback(
-    (canvas: HTMLCanvasElement, pageIndex: number) => {
+    (canvas: HTMLCanvasElement) => {
+      const pageIndex = currentPageRef.current;
       setCanvases((prev) => {
         const newCanvases = [...prev];
         newCanvases[pageIndex] = canvas;
         return newCanvases;
       });
     },
-    []
+    [] // 依存配列を空にして、関数を安定化
   );
 
   // DPI変更時にキャンバスをクリア
@@ -144,13 +151,11 @@ export default function PrintPreviewModal({
             <div className='flex-1 overflow-auto p-6 bg-gray-50'>
               <div className='flex justify-center items-center min-h-full'>
                 {currentPageData && (
-                  <A4CanvasHtml
+                  <A4Canvas
                     pageData={currentPageData}
                     dpi={dpi}
                     scale={0.25}
-                    onCanvasReady={(canvas: HTMLCanvasElement) =>
-                      handleCanvasReady(canvas, currentPage)
-                    }
+                    onCanvasReady={handleCanvasReady}
                   />
                 )}
               </div>
