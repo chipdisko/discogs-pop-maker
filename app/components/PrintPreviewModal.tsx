@@ -212,7 +212,7 @@ export default function PrintPreviewModal({
                 </h3>
 
                 <div className='space-y-3'>
-                  {currentPageData.pops.map((popPosition, index) => (
+                  {currentPageData.pops.map((popPosition) => (
                     <div
                       key={popPosition.pop.id}
                       className='p-4 bg-white rounded-lg border border-gray-200 text-sm text-gray-800 shadow-sm'

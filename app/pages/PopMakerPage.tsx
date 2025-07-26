@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { usePopService, usePrintService } from "../../src/infrastructure";
 import type {
   PopResponse,
-  ErrorResponse,
   CreatePopRequest,
   PrintDataResponse,
 } from "../../src/application";
@@ -44,7 +43,7 @@ export default function PopMakerPage() {
   /**
    * 全ポップを読み込み
    */
-  const loadAllPops = async () => {
+  const loadAllPops = useCallback(async () => {
     try {
       const result = await popService.getAllPops();
       if ("message" in result) {
@@ -54,10 +53,10 @@ export default function PopMakerPage() {
         // 成功レスポンス
         setPops(result.pops);
       }
-    } catch (err) {
+    } catch {
       setError("ポップの読み込みに失敗しました");
     }
-  };
+  }, [popService]);
 
   /**
    * Discogs URLからポップ作成
@@ -100,7 +99,7 @@ export default function PopMakerPage() {
         // 成功メッセージ（オプション）
         console.log("ポップが正常に作成されました:", result.release.fullTitle);
       }
-    } catch (err) {
+    } catch {
       setError("ポップの作成に失敗しました");
     } finally {
       setIsLoading(false);
@@ -124,7 +123,7 @@ export default function PopMakerPage() {
         setPops((prev) => prev.filter((pop) => pop.id !== popId));
         setSelectedPopIds((prev) => prev.filter((id) => id !== popId));
       }
-    } catch (err) {
+    } catch {
       setError("ポップの削除に失敗しました");
     }
   };
@@ -185,7 +184,7 @@ export default function PopMakerPage() {
         // 編集状態をリセット
         handleCancelEdit();
       }
-    } catch (err) {
+    } catch {
       setError("ポップの更新に失敗しました");
     } finally {
       setIsLoading(false);
@@ -217,7 +216,7 @@ export default function PopMakerPage() {
         setPrintData(result);
         setIsPreviewOpen(true);
       }
-    } catch (err) {
+    } catch {
       setError("印刷データの生成に失敗しました");
     } finally {
       setIsLoading(false);

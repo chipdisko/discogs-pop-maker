@@ -100,7 +100,7 @@ export default function PopTemplateHtml({
     return () => {
       isMounted = false;
     };
-  }, [pop, width, height, dpi]);
+  }, [pop, width, height, dpi, actualWidth, actualHeight, scaleFactor]);
 
   return (
     <div style={{ position: "relative" }}>
@@ -179,14 +179,6 @@ interface PopHtmlContentProps {
 }
 
 function PopHtmlContent({ pop, scaleFactor }: PopHtmlContentProps) {
-  // 動的スタイル（Tailwindでは対応できない部分）
-  const dynamicStyles = {
-    fontSize: `${20 * scaleFactor}px`,
-    padding: `${8 * scaleFactor}px`,
-    gap: `${4 * scaleFactor}px`,
-    borderRadius: `${4 * scaleFactor}px`,
-  };
-
   const badgeColors: Record<string, string> = {
     RECOMMEND: "#22c55e",
     MUST: "#ef4444",

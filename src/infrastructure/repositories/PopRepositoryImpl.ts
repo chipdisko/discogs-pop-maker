@@ -148,12 +148,8 @@ export class PopRepositoryImpl implements PopRepository {
       });
 
       return sortedPops.map((popData) => this.storageDataToPop(popData));
-    } catch (error) {
-      throw new Error(
-        `ソート済みPopの取得に失敗しました: ${
-          error instanceof Error ? error.message : "不明なエラー"
-        }`
-      );
+    } catch {
+      throw new Error("ソート済みPopの取得に失敗しました");
     }
   }
 
@@ -169,8 +165,8 @@ export class PopRepositoryImpl implements PopRepository {
         return [];
       }
       return JSON.parse(data) as PopStorageData[];
-    } catch (error) {
-      console.error("LocalStorageからのデータ読み込みエラー:", error);
+    } catch {
+      console.error("LocalStorageからのデータ読み込みエラー");
       return [];
     }
   }
@@ -181,7 +177,7 @@ export class PopRepositoryImpl implements PopRepository {
   private saveToStorage(pops: PopStorageData[]): void {
     try {
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(pops));
-    } catch (error) {
+    } catch {
       throw new Error("LocalStorageへの保存に失敗しました");
     }
   }

@@ -76,7 +76,7 @@ export default function A4Canvas({
       ctx.translate(popX, popY);
 
       // ポップテンプレートを描画
-      drawPopTemplate(ctx, popPosition.pop, popWidth, popHeight, dpi);
+      drawPopTemplate(ctx, popPosition.pop, popWidth, popHeight);
 
       ctx.restore();
     });
@@ -91,8 +91,7 @@ export default function A4Canvas({
     ctx: CanvasRenderingContext2D,
     pop: PopResponse,
     canvasWidth: number,
-    canvasHeight: number,
-    dpi: number
+    canvasHeight: number
   ) => {
     // 背景を白で塗りつぶし
     ctx.fillStyle = "#ffffff";
@@ -136,12 +135,7 @@ export default function A4Canvas({
 
     // 3. タイトル（太字）
     ctx.font = `bold ${baseFontSize}px Arial, sans-serif`;
-    const titleLines = wrapText(
-      ctx,
-      pop.release.title,
-      contentWidth,
-      baseFontSize * 1.2
-    );
+    const titleLines = wrapText(ctx, pop.release.title, contentWidth);
     titleLines.forEach((line) => {
       ctx.fillText(line, padding, currentY);
       currentY += baseFontSize * 1.2;
@@ -180,8 +174,7 @@ export default function A4Canvas({
       const genreLines = wrapText(
         ctx,
         pop.release.genreStyleString,
-        contentWidth,
-        baseFontSize
+        contentWidth
       );
       genreLines.forEach((line) => {
         ctx.fillText(line, padding, currentY);
@@ -197,12 +190,7 @@ export default function A4Canvas({
       ctx.fillStyle = "#222222";
 
       // コメント背景
-      const commentLines = wrapText(
-        ctx,
-        pop.comment,
-        contentWidth,
-        baseFontSize
-      );
+      const commentLines = wrapText(ctx, pop.comment, contentWidth);
       const commentHeight = commentLines.length * baseFontSize * 1.1;
 
       ctx.fillStyle = "#f5f5f5";
@@ -325,8 +313,7 @@ export default function A4Canvas({
   const wrapText = (
     ctx: CanvasRenderingContext2D,
     text: string,
-    maxWidth: number,
-    lineHeight: number
+    maxWidth: number
   ): string[] => {
     // まず改行文字で分割
     const paragraphs = text.split("\n");

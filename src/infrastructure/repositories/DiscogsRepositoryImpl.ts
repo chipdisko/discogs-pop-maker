@@ -1,9 +1,5 @@
 import { DiscogsRepository, DiscogsUrl, Release } from "../../domain";
-import {
-  DiscogsReleaseData,
-  DiscogsApiResponse,
-  DiscogsApiErrorResponse,
-} from "../external/DiscogsApiTypes";
+import { DiscogsReleaseData } from "../external/DiscogsApiTypes";
 
 export class DiscogsRepositoryImpl implements DiscogsRepository {
   /**
@@ -31,7 +27,7 @@ export class DiscogsRepositoryImpl implements DiscogsRepository {
       }
 
       // Discogs APIレスポンスをReleaseエンティティに変換
-      return this.mapDiscogsDataToRelease(result.data, result.type);
+      return this.mapDiscogsDataToRelease(result.data);
     } catch (error) {
       if (error instanceof Error) {
         throw error;
@@ -72,10 +68,7 @@ export class DiscogsRepositoryImpl implements DiscogsRepository {
   /**
    * Discogs APIレスポンスをReleaseエンティティに変換
    */
-  private mapDiscogsDataToRelease(
-    data: DiscogsReleaseData,
-    type: string
-  ): Release {
+  private mapDiscogsDataToRelease(data: DiscogsReleaseData): Release {
     // アーティスト名を抽出
     const artistName = this.extractArtistName(data);
 

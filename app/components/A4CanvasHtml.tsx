@@ -6,11 +6,7 @@ import React, {
   useCallback,
 } from "react";
 import html2canvas from "html2canvas";
-import type {
-  A4PageResponse,
-  PopResponse,
-  CutLineResponse,
-} from "../../src/application";
+import type { A4PageResponse, PopResponse } from "../../src/application";
 
 interface A4CanvasProps {
   pageData: A4PageResponse;
@@ -119,7 +115,7 @@ export default function A4CanvasHtml({
       isRenderingRef.current = false;
       setIsRendering(false);
     }
-  }, [canvasWidth, canvasHeight]); // onCanvasReadyを依存配列から削除
+  }, [canvasWidth, canvasHeight, onCanvasReady]);
 
   useEffect(() => {
     console.log("🔄 A4CanvasHtml: useEffect triggered", { pageData, dpi });
@@ -131,7 +127,7 @@ export default function A4CanvasHtml({
     }
 
     renderToCanvas();
-  }, [pageData, dpi]); // renderToCanvasを依存配列から削除
+  }, [pageData, dpi, renderToCanvas]);
 
   return (
     <div style={{ position: "relative" }}>
@@ -151,8 +147,6 @@ export default function A4CanvasHtml({
       >
         <A4HtmlContent
           pageData={pageData}
-          canvasWidth={canvasWidth}
-          canvasHeight={canvasHeight}
           popWidth={popWidth}
           popHeight={popHeight}
           dpi={dpi}
@@ -209,8 +203,6 @@ export default function A4CanvasHtml({
 // HTML版A4レイアウトコンテンツ
 interface A4HtmlContentProps {
   pageData: A4PageResponse;
-  canvasWidth: number;
-  canvasHeight: number;
   popWidth: number;
   popHeight: number;
   dpi: number;
@@ -218,8 +210,6 @@ interface A4HtmlContentProps {
 
 function A4HtmlContent({
   pageData,
-  canvasWidth,
-  canvasHeight,
   popWidth,
   popHeight,
   dpi,
