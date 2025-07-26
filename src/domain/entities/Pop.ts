@@ -2,6 +2,8 @@ import { PopId } from "./PopId";
 import { Release } from "./Release";
 import { Comment } from "../value-objects/Comment";
 import { Badge } from "../value-objects/Badge";
+import { Condition } from "../value-objects/Condition";
+import { Price } from "../value-objects/Price";
 import { PopDimensions } from "../value-objects/PopDimensions";
 
 export class Pop {
@@ -12,6 +14,8 @@ export class Pop {
     private release: Release,
     private comment: Comment,
     private badges: Badge[],
+    private condition: Condition,
+    private price: Price,
     private readonly dimensions: PopDimensions,
     private readonly createdAt: Date,
     private updatedAt: Date
@@ -30,6 +34,8 @@ export class Pop {
     release: Release,
     comment?: Comment,
     badges?: Badge[],
+    condition?: Condition,
+    price?: Price,
     dimensions?: PopDimensions
   ): Pop {
     const now = new Date();
@@ -38,6 +44,8 @@ export class Pop {
       release,
       comment || Comment.empty(),
       badges || [],
+      condition || Condition.create("New"),
+      price || Price.empty(),
       dimensions || PopDimensions.STANDARD,
       now,
       now
@@ -50,6 +58,8 @@ export class Pop {
     release: Release,
     comment: Comment,
     badges: Badge[],
+    condition: Condition,
+    price: Price,
     dimensions: PopDimensions,
     createdAt: Date,
     updatedAt: Date
@@ -59,6 +69,8 @@ export class Pop {
       release,
       comment,
       badges,
+      condition,
+      price,
       dimensions,
       createdAt,
       updatedAt
@@ -83,6 +95,16 @@ export class Pop {
   // バッジ一覧を取得
   getBadges(): Badge[] {
     return [...this.badges];
+  }
+
+  // コンディションを取得
+  getCondition(): Condition {
+    return this.condition;
+  }
+
+  // 価格を取得
+  getPrice(): Price {
+    return this.price;
   }
 
   // サイズを取得
@@ -152,6 +174,18 @@ export class Pop {
     }
 
     this.badges = [...badges];
+    this.updatedAt = new Date();
+  }
+
+  // コンディションを更新
+  updateCondition(condition: Condition): void {
+    this.condition = condition;
+    this.updatedAt = new Date();
+  }
+
+  // 価格を更新
+  updatePrice(price: Price): void {
+    this.price = price;
     this.updatedAt = new Date();
   }
 

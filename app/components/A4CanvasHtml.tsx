@@ -115,7 +115,7 @@ export default function A4CanvasHtml({
       isRenderingRef.current = false;
       setIsRendering(false);
     }
-  }, [canvasWidth, canvasHeight, onCanvasReady]);
+  }, [canvasWidth, canvasHeight]); // onCanvasReadyを依存配列から除外
 
   useEffect(() => {
     console.log("🔄 A4CanvasHtml: useEffect triggered", { pageData, dpi });
@@ -127,7 +127,7 @@ export default function A4CanvasHtml({
     }
 
     renderToCanvas();
-  }, [pageData, dpi, renderToCanvas]);
+  }, [pageData, dpi]); // renderToCanvasを依存配列から除外
 
   return (
     <div style={{ position: "relative" }}>
@@ -295,8 +295,8 @@ function PopHtmlContent({ pop, scaleFactor }: PopHtmlContentProps) {
     },
     badges: {
       position: "absolute" as const,
-      top: 0,
-      right: 0,
+      top: `${8 * scaleFactor}px`, // 折りたたみ線より上に配置
+      right: `${8 * scaleFactor}px`,
       display: "flex",
       gap: `${4 * scaleFactor}px`,
       flexDirection: "row-reverse" as const,
@@ -312,7 +312,7 @@ function PopHtmlContent({ pop, scaleFactor }: PopHtmlContentProps) {
       fontSize: `${20 * scaleFactor}px`,
       fontWeight: "bold" as const,
       marginBottom: `${8 * scaleFactor}px`,
-      marginTop: `${pop.badges.length > 0 ? 24 * scaleFactor : 0}px`,
+      paddingTop: `${15 * (scaleFactor * 3.7795) + 8 * scaleFactor}px`, // 折りたたみ線より下に配置
     },
     title: {
       fontSize: `${16 * scaleFactor}px`,
@@ -359,6 +359,19 @@ function PopHtmlContent({ pop, scaleFactor }: PopHtmlContentProps) {
 
   return (
     <div style={styles.container}>
+      {/* 折りたたみ線（15mmの位置） */}
+      <div
+        style={{
+          position: "absolute",
+          top: `${15 * (scaleFactor * 3.7795)}px`,
+          left: 0,
+          right: 0,
+          height: "2px",
+          borderTop: "2px dashed #999999",
+          zIndex: 10,
+        }}
+      />
+
       {/* バッジ */}
       {pop.badges.length > 0 && (
         <div style={styles.badges}>
@@ -400,6 +413,14 @@ function PopHtmlContent({ pop, scaleFactor }: PopHtmlContentProps) {
       {pop.release.genreStyleString && (
         <div style={styles.genres}>{pop.release.genreStyleString}</div>
       )}
+
+      {/* コンディション */}
+      <div style={styles.label}>Condition: {pop.condition}</div>
+
+      {/* 価格 */}
+      <div style={styles.label}>
+        Price: {pop.price === 0 ? "FREE" : `¥${pop.price.toLocaleString()}`}
+      </div>
 
       {/* コメント */}
       {pop.comment && <div style={styles.comment}>{pop.comment}</div>}

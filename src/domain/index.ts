@@ -1,12 +1,14 @@
 // Value Objects
 export { Badge, type BadgeType } from "./value-objects/Badge";
 export { Comment } from "./value-objects/Comment";
+export { Condition, type ConditionType } from "./value-objects/Condition";
 export {
   DiscogsUrl,
   type DiscogsUrlType,
   type DiscogsUrlInfo,
 } from "./value-objects/DiscogsUrl";
 export { PopDimensions } from "./value-objects/PopDimensions";
+export { Price } from "./value-objects/Price";
 
 // Entities
 export { PopId } from "./entities/PopId";

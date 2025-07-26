@@ -1,4 +1,4 @@
-import { BadgeType } from "../../domain";
+import { BadgeType, ConditionType } from "../../domain";
 
 // ========== リクエストDTO ==========
 
@@ -6,12 +6,16 @@ export interface CreatePopRequest {
   discogsUrl: string;
   comment?: string;
   badges?: BadgeType[];
+  condition?: ConditionType;
+  price?: number;
 }
 
 export interface UpdatePopRequest {
   id: string;
   comment?: string;
   badges?: BadgeType[];
+  condition?: ConditionType;
+  price?: number;
 }
 
 export interface AddBadgeRequest {
@@ -31,6 +35,8 @@ export interface PopResponse {
   release: ReleaseResponse;
   comment: string;
   badges: BadgeResponse[];
+  condition: ConditionType;
+  price: number;
   dimensions: DimensionsResponse;
   createdAt: string;
   updatedAt: string;

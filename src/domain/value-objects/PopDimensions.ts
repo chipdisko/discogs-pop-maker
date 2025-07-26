@@ -1,6 +1,6 @@
 export class PopDimensions {
-  // 標準サイズ（ハガキの半分）
-  static readonly STANDARD = new PopDimensions(100, 74);
+  // 標準サイズ（A7サイズ）
+  static readonly STANDARD = new PopDimensions(74, 105);
 
   constructor(private readonly width: number, private readonly height: number) {
     this.validate(width, height);

@@ -4,6 +4,8 @@ import {
   Release,
   Comment,
   Badge,
+  Condition,
+  Price,
   DiscogsUrl,
   PopDimensions,
   DiscogsRepository,
@@ -52,8 +54,16 @@ export class PopApplicationService {
         ? request.badges.map((b) => Badge.fromString(b))
         : [];
 
-      // 5. Popを作成
-      const pop = Pop.create(release, comment, badges);
+      // 5. コンディションを作成
+      const condition = request.condition
+        ? Condition.fromString(request.condition)
+        : Condition.create("New");
+
+      // 6. 価格を作成
+      const price = request.price ? Price.create(request.price) : undefined;
+
+      // 7. Popを作成
+      const pop = Pop.create(release, comment, badges, condition, price);
 
       // 6. 保存
       await this.popRepository.save(pop);
@@ -100,7 +110,19 @@ export class PopApplicationService {
         pop.setBadges(badges);
       }
 
-      // 4. 保存
+      // 4. コンディションを更新
+      if (request.condition !== undefined) {
+        const condition = Condition.fromString(request.condition);
+        pop.updateCondition(condition);
+      }
+
+      // 5. 価格を更新
+      if (request.price !== undefined) {
+        const price = Price.create(request.price);
+        pop.updatePrice(price);
+      }
+
+      // 6. 保存
       await this.popRepository.save(pop);
 
       // 5. レスポンス形式に変換
@@ -286,6 +308,8 @@ export class PopApplicationService {
       release: this.toReleaseResponse(pop.getRelease()),
       comment: pop.getComment().getValue(),
       badges: pop.getBadges().map((badge) => this.toBadgeResponse(badge)),
+      condition: pop.getCondition().getValue(),
+      price: pop.getPrice().getValue(),
       dimensions: this.toDimensionsResponse(pop.getDimensions()),
       createdAt: pop.getCreatedAt().toISOString(),
       updatedAt: pop.getUpdatedAt().toISOString(),

@@ -7,8 +7,15 @@ import type {
   CreatePopRequest,
   PrintDataResponse,
 } from "../../src/application";
-import type { BadgeType } from "../../src/domain";
+import type { BadgeType, ConditionType } from "../../src/domain";
 import PrintPreviewModal from "../components/PrintPreviewModal";
+import CreatePopModal, {
+  type CreatePopFormData,
+} from "../components/CreatePopModal";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import PopCard from "../components/PopCard";
+import { ThemeToggle } from "../components/ThemeToggle";
 
 export default function PopMakerPage() {
   // Services
@@ -29,16 +36,28 @@ export default function PopMakerPage() {
   const [editingPopId, setEditingPopId] = useState<string | null>(null);
   const [editComment, setEditComment] = useState("");
   const [editBadges, setEditBadges] = useState<string[]>([]);
+  const [editCondition, setEditCondition] = useState<ConditionType>("New");
+  const [editPrice, setEditPrice] = useState<string>("");
+  const [newlyCreatedPopIds, setNewlyCreatedPopIds] = useState<string[]>([]);
 
-  // Form state
-  const [discogsUrl, setDiscogsUrl] = useState("");
-  const [comment, setComment] = useState("");
-  const [selectedBadges, setSelectedBadges] = useState<string[]>([]);
+  // Form state (モーダルで管理するため削除)
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   // 初期化時に既存のポップを読み込み
   useEffect(() => {
     loadAllPops();
   }, []);
+
+  // 新しく作成されたポップのアニメーションを3秒後に削除
+  useEffect(() => {
+    if (newlyCreatedPopIds.length > 0) {
+      const timer = setTimeout(() => {
+        setNewlyCreatedPopIds([]);
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [newlyCreatedPopIds]);
 
   /**
    * 全ポップを読み込み
@@ -59,27 +78,19 @@ export default function PopMakerPage() {
   }, [popService]);
 
   /**
-   * Discogs URLからポップ作成
+   * モーダルからポップ作成
    */
-  const handleCreatePop = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!discogsUrl.trim()) {
-      setError("Discogs URLを入力してください");
-      return;
-    }
-
+  const handleCreatePopFromModal = async (formData: CreatePopFormData) => {
     setIsLoading(true);
     setError(null);
 
     try {
       const request: CreatePopRequest = {
-        discogsUrl: discogsUrl.trim(),
-        comment: comment.trim() || undefined,
-        badges:
-          selectedBadges.length > 0
-            ? (selectedBadges as BadgeType[])
-            : undefined,
+        discogsUrl: formData.discogsUrl.trim(),
+        comment: formData.comment.trim() || undefined,
+        badges: formData.badges.length > 0 ? formData.badges : undefined,
+        condition: formData.condition,
+        price: formData.price > 0 ? formData.price : undefined,
       };
 
       const result = await popService.createPopFromDiscogsUrl(request);
@@ -91,10 +102,14 @@ export default function PopMakerPage() {
         // 成功レスポンス
         setPops((prev) => [result, ...prev]);
 
-        // フォームリセット
-        setDiscogsUrl("");
-        setComment("");
-        setSelectedBadges([]);
+        // 新しく作成されたポップを自動選択
+        setSelectedPopIds((prev) => [result.id, ...prev]);
+
+        // 新しく作成されたポップとしてマーク
+        setNewlyCreatedPopIds((prev) => [result.id, ...prev]);
+
+        // モーダルを閉じる
+        setIsCreateModalOpen(false);
 
         // 成功メッセージ（オプション）
         console.log("ポップが正常に作成されました:", result.release.fullTitle);
@@ -146,6 +161,8 @@ export default function PopMakerPage() {
     setEditingPopId(pop.id);
     setEditComment(pop.comment);
     setEditBadges(pop.badges.map((badge) => badge.type));
+    setEditCondition(pop.condition);
+    setEditPrice(pop.price.toString());
   };
 
   /**
@@ -155,6 +172,8 @@ export default function PopMakerPage() {
     setEditingPopId(null);
     setEditComment("");
     setEditBadges([]);
+    setEditCondition("New");
+    setEditPrice("");
   };
 
   /**
@@ -171,6 +190,8 @@ export default function PopMakerPage() {
         id: editingPopId,
         comment: editComment.trim() || undefined,
         badges: editBadges.length > 0 ? (editBadges as BadgeType[]) : undefined,
+        condition: editCondition,
+        price: editPrice ? parseInt(editPrice) : undefined,
       });
 
       if ("message" in result) {
@@ -229,270 +250,90 @@ export default function PopMakerPage() {
     <div className='min-h-screen bg-background p-6'>
       <div className='max-w-6xl mx-auto space-y-8'>
         {/* ヘッダー */}
-        <div className='text-center'>
-          <h1 className='text-4xl font-bold text-foreground mb-2'>
-            Discogs Pop Maker
-          </h1>
-          <p className='text-gray-700'>レコード屋さんのポップを簡単作成✨</p>
+        <div className='flex justify-between items-center'>
+          <div className='text-center flex-1'>
+            <h1 className='text-4xl font-bold text-foreground mb-2'>
+              Discogs Pop Maker
+            </h1>
+            <p className='text-muted-foreground'>
+              レコード屋さんのポップを簡単作成✨
+            </p>
+          </div>
+          <ThemeToggle />
         </div>
 
         {/* エラー表示 */}
         {error && (
           <div className='bg-destructive/10 border border-destructive text-destructive px-4 py-3 rounded'>
-            {error}
+            <div className='flex items-center space-x-2'>
+              <span className='text-destructive'>⚠️</span>
+              <span>{error}</span>
+            </div>
           </div>
         )}
 
-        {/* ポップ作成フォーム */}
-        <div className='bg-card border border-border rounded-lg p-6'>
-          <h2 className='text-2xl font-semibold mb-4'>新しいポップを作成</h2>
-
-          <form onSubmit={handleCreatePop} className='space-y-4'>
-            <div>
-              <label
-                htmlFor='discogsUrl'
-                className='block text-sm font-medium mb-2'
-              >
-                Discogs URL
-              </label>
-              <input
-                id='discogsUrl'
-                type='url'
-                value={discogsUrl}
-                onChange={(e) => setDiscogsUrl(e.target.value)}
-                placeholder='https://www.discogs.com/release/...'
-                className='w-full px-3 py-2 border border-border rounded-md'
-                disabled={isLoading}
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor='comment'
-                className='block text-sm font-medium mb-2'
-              >
-                コメント（任意）
-              </label>
-              <textarea
-                id='comment'
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                placeholder='このレコードについてのコメント...
-（改行可能）'
-                rows={3}
-                maxLength={200}
-                className='w-full px-3 py-2 border border-border rounded-md'
-                disabled={isLoading}
-              />
-              <p className='text-xs text-gray-600 mt-1'>
-                {comment.length}/200文字
-              </p>
-            </div>
-
-            <div>
-              <label className='block text-sm font-medium mb-2'>
-                バッジ（複数選択可）
-              </label>
-              <div className='flex flex-wrap gap-2'>
-                {availableBadges.map((badge) => (
-                  <label
-                    key={badge}
-                    className='flex items-center space-x-2 cursor-pointer'
-                  >
-                    <input
-                      type='checkbox'
-                      checked={selectedBadges.includes(badge)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectedBadges((prev) => [...prev, badge]);
-                        } else {
-                          setSelectedBadges((prev) =>
-                            prev.filter((b) => b !== badge)
-                          );
-                        }
-                      }}
-                      disabled={isLoading}
-                    />
-                    <span className='px-3 py-1 bg-primary/10 text-primary rounded text-sm'>
-                      {badge}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <button
-              type='submit'
-              disabled={isLoading}
-              className='w-full bg-primary text-primary-foreground py-2 px-4 rounded-md hover:bg-primary/90 disabled:opacity-50'
+        {/* ポップ作成ボタン */}
+        <Card>
+          <CardHeader>
+            <CardTitle>新しいポップを作成</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Button
+              onClick={() => setIsCreateModalOpen(true)}
+              className='w-full'
+              size='lg'
             >
-              {isLoading ? "作成中..." : "ポップを作成"}
-            </button>
-          </form>
-        </div>
+              ＋ 新しいポップを作成
+            </Button>
+          </CardContent>
+        </Card>
 
         {/* ポップ一覧・印刷機能 */}
         {pops.length > 0 && (
-          <div className='bg-card border border-border rounded-lg p-6'>
-            <div className='flex justify-between items-center mb-4'>
-              <h2 className='text-2xl font-semibold'>
-                作成済みポップ ({pops.length}個)
-              </h2>
-
-              {selectedPopIds.length > 0 && (
-                <button
-                  onClick={handleGeneratePrint}
-                  disabled={isLoading}
-                  className='bg-secondary text-secondary-foreground py-2 px-4 rounded-md hover:bg-secondary/90'
-                >
-                  選択したポップを印刷 ({selectedPopIds.length}個)
-                </button>
-              )}
-            </div>
-
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-              {pops.map((pop) => (
-                <div key={pop.id} className='border rounded-lg p-4'>
-                  <div className='flex items-start justify-between mb-2'>
-                    <input
-                      type='checkbox'
-                      checked={selectedPopIds.includes(pop.id)}
-                      onChange={() => togglePopSelection(pop.id)}
-                      className='mt-1'
-                      disabled={editingPopId === pop.id}
-                    />
-                    <div className='flex space-x-2'>
-                      {editingPopId === pop.id ? (
-                        <>
-                          <button
-                            onClick={handleSaveEdit}
-                            disabled={isLoading}
-                            className='text-green-600 hover:text-green-800 text-sm'
-                          >
-                            保存
-                          </button>
-                          <button
-                            onClick={handleCancelEdit}
-                            className='text-gray-500 hover:text-gray-700 text-sm'
-                          >
-                            キャンセル
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <button
-                            onClick={() => handleStartEdit(pop)}
-                            disabled={editingPopId !== null}
-                            className='text-blue-600 hover:text-blue-800 text-sm disabled:opacity-50'
-                          >
-                            編集
-                          </button>
-                          <button
-                            onClick={() => handleDeletePop(pop.id)}
-                            disabled={editingPopId !== null}
-                            className='text-destructive hover:text-destructive/80 text-sm disabled:opacity-50'
-                          >
-                            削除
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-
-                  <h3 className='font-semibold text-sm mb-1'>
-                    {pop.release.fullTitle}
-                  </h3>
-
-                  <p className='text-xs text-gray-600 mb-2'>
-                    {pop.release.label} • {pop.release.country} •{" "}
-                    {pop.release.releaseYear}
-                  </p>
-
-                  {/* コメント表示・編集 */}
-                  {editingPopId === pop.id ? (
-                    <div className='mb-2'>
-                      <label className='block text-xs font-medium mb-1'>
-                        コメント
-                      </label>
-                      <textarea
-                        value={editComment}
-                        onChange={(e) => setEditComment(e.target.value)}
-                        placeholder='このレコードについてのコメント...
-（改行可能）'
-                        rows={2}
-                        maxLength={200}
-                        className='w-full px-2 py-1 border border-border rounded text-xs'
-                      />
-                      <p className='text-xs text-gray-500 mt-1'>
-                        {editComment.length}/200文字
-                      </p>
-                    </div>
-                  ) : (
-                    pop.comment && (
-                      <div className='text-xs bg-muted p-2 rounded mb-2'>
-                        {pop.comment.split("\n").map((line, index) => (
-                          <div key={index}>
-                            {line}
-                            {index < pop.comment.split("\n").length - 1 && (
-                              <br />
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )
-                  )}
-
-                  {/* バッジ表示・編集 */}
-                  {editingPopId === pop.id ? (
-                    <div className='mb-2'>
-                      <label className='block text-xs font-medium mb-1'>
-                        バッジ
-                      </label>
-                      <div className='flex flex-wrap gap-1'>
-                        {availableBadges.map((badge) => (
-                          <label
-                            key={badge}
-                            className='flex items-center space-x-1 cursor-pointer'
-                          >
-                            <input
-                              type='checkbox'
-                              checked={editBadges.includes(badge)}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setEditBadges((prev) => [...prev, badge]);
-                                } else {
-                                  setEditBadges((prev) =>
-                                    prev.filter((b) => b !== badge)
-                                  );
-                                }
-                              }}
-                              className='text-xs'
-                            />
-                            <span className='px-2 py-1 bg-primary/10 text-primary rounded text-xs'>
-                              {badge}
-                            </span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    pop.badges.length > 0 && (
-                      <div className='flex flex-wrap gap-1'>
-                        {pop.badges.map((badge) => (
-                          <span
-                            key={badge.type}
-                            className='px-2 py-1 bg-primary/20 text-primary text-xs rounded'
-                          >
-                            {badge.displayName}
-                          </span>
-                        ))}
-                      </div>
-                    )
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
+          <Card>
+            <CardHeader>
+              <div className='flex justify-between items-center'>
+                <CardTitle>作成済みポップ ({pops.length}個)</CardTitle>
+                {selectedPopIds.length > 0 && (
+                  <Button
+                    onClick={handleGeneratePrint}
+                    disabled={isLoading}
+                    variant='secondary'
+                  >
+                    選択したポップを印刷 ({selectedPopIds.length}個)
+                  </Button>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+                {pops.map((pop) => (
+                  <PopCard
+                    key={pop.id}
+                    pop={pop}
+                    isSelected={selectedPopIds.includes(pop.id)}
+                    isEditing={editingPopId === pop.id}
+                    isNewlyCreated={newlyCreatedPopIds.includes(pop.id)}
+                    onToggleSelection={togglePopSelection}
+                    onStartEdit={handleStartEdit}
+                    onCancelEdit={handleCancelEdit}
+                    onSaveEdit={handleSaveEdit}
+                    onDelete={handleDeletePop}
+                    editComment={editComment}
+                    editBadges={editBadges}
+                    editCondition={editCondition}
+                    editPrice={editPrice}
+                    onEditCommentChange={setEditComment}
+                    onEditBadgesChange={setEditBadges}
+                    onEditConditionChange={setEditCondition}
+                    onEditPriceChange={setEditPrice}
+                    isLoading={isLoading}
+                    availableBadges={availableBadges}
+                  />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         )}
       </div>
 
@@ -507,6 +348,14 @@ export default function PopMakerPage() {
           printData={printData}
         />
       )}
+
+      {/* ポップ作成モーダル */}
+      <CreatePopModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSubmit={handleCreatePopFromModal}
+        isLoading={isLoading}
+      />
     </div>
   );
 }

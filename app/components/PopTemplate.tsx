@@ -58,7 +58,21 @@ export default function PopTemplate({
     const padding = canvasWidth * 0.05; // 5%のパディング
     const contentWidth = canvasWidth - padding * 2;
 
-    let currentY = padding + baseFontSize;
+    // 15mmの折りたたみ線の位置を計算（ピクセル）
+    const foldLineY = 15 * (canvasHeight / 105); // 15mmをピクセルに変換
+
+    // 折りたたみ線を描画
+    ctx.strokeStyle = "#999999";
+    ctx.lineWidth = 1;
+    ctx.setLineDash([5, 5]);
+    ctx.beginPath();
+    ctx.moveTo(padding, foldLineY);
+    ctx.lineTo(canvasWidth - padding, foldLineY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // 折りたたみ線より下のコンテンツ開始位置
+    let currentY = foldLineY + padding + baseFontSize;
 
     // 1. バッジを右上に描画
     if (pop.badges.length > 0) {
@@ -71,43 +85,66 @@ export default function PopTemplate({
       );
     }
 
-    // 2. アーティスト名（太字・大きめ）
-    ctx.font = `bold ${baseFontSize * 1.2}px Arial, sans-serif`;
-    ctx.fillStyle = "#000000";
+    // 2. アーティスト名（項目名付き）
+    ctx.font = `${baseFontSize * 0.7}px Arial, sans-serif`;
+    ctx.fillStyle = "#666666";
     ctx.textAlign = "left";
+    ctx.fillText("ARTIST", padding, currentY);
+    currentY += baseFontSize * 0.8;
+
+    ctx.font = `bold ${baseFontSize * 1.1}px Arial, sans-serif`;
+    ctx.fillStyle = "#000000";
     ctx.fillText(
       truncateText(ctx, pop.release.artistName, contentWidth),
       padding,
       currentY
     );
-    currentY += baseFontSize * 1.5;
+    currentY += baseFontSize * 1.3;
 
-    // 3. タイトル（太字）
+    // 3. タイトル（項目名付き）
+    ctx.font = `${baseFontSize * 0.7}px Arial, sans-serif`;
+    ctx.fillStyle = "#666666";
+    ctx.fillText("TITLE", padding, currentY);
+    currentY += baseFontSize * 0.8;
+
     ctx.font = `bold ${baseFontSize}px Arial, sans-serif`;
+    ctx.fillStyle = "#000000";
     const titleLines = wrapText(ctx, pop.release.title, contentWidth);
     titleLines.forEach((line) => {
       ctx.fillText(line, padding, currentY);
-      currentY += baseFontSize * 1.2;
+      currentY += baseFontSize * 1.1;
     });
     currentY += baseFontSize * 0.5;
 
-    // 4. レーベル
+    // 4. レーベル（項目名付き）
     if (pop.release.label) {
+      ctx.font = `${baseFontSize * 0.7}px Arial, sans-serif`;
+      ctx.fillStyle = "#666666";
+      ctx.fillText("LABEL", padding, currentY);
+      currentY += baseFontSize * 0.8;
+
       ctx.font = `${baseFontSize * 0.9}px Arial, sans-serif`;
       ctx.fillStyle = "#222222";
       ctx.fillText(
-        `Label: ${truncateText(ctx, pop.release.label, contentWidth)}`,
+        truncateText(ctx, pop.release.label, contentWidth),
         padding,
         currentY
       );
       currentY += baseFontSize * 1.1;
     }
 
-    // 5. 国・リリース年
+    // 5. 国・リリース年（項目名付き）
     if (pop.release.country || pop.release.releaseYear) {
+      ctx.font = `${baseFontSize * 0.7}px Arial, sans-serif`;
+      ctx.fillStyle = "#666666";
+      ctx.fillText("INFO", padding, currentY);
+      currentY += baseFontSize * 0.8;
+
       const locationInfo = [pop.release.country, pop.release.releaseYear]
         .filter(Boolean)
         .join(" • ");
+      ctx.font = `${baseFontSize * 0.9}px Arial, sans-serif`;
+      ctx.fillStyle = "#222222";
       ctx.fillText(
         truncateText(ctx, locationInfo, contentWidth),
         padding,
@@ -116,8 +153,13 @@ export default function PopTemplate({
       currentY += baseFontSize * 1.1;
     }
 
-    // 6. ジャンル・スタイル
+    // 6. ジャンル・スタイル（項目名付き）
     if (pop.release.genreStyleString) {
+      ctx.font = `${baseFontSize * 0.7}px Arial, sans-serif`;
+      ctx.fillStyle = "#666666";
+      ctx.fillText("GENRE", padding, currentY);
+      currentY += baseFontSize * 0.8;
+
       ctx.font = `${baseFontSize * 0.8}px Arial, sans-serif`;
       ctx.fillStyle = "#333333";
       const genreLines = wrapText(
@@ -132,9 +174,38 @@ export default function PopTemplate({
       currentY += baseFontSize * 0.5;
     }
 
-    // 7. コメント（下部に配置）
+    // 7. コンディション（項目名付き）
+    ctx.font = `${baseFontSize * 0.7}px Arial, sans-serif`;
+    ctx.fillStyle = "#666666";
+    ctx.fillText("CONDITION", padding, currentY);
+    currentY += baseFontSize * 0.8;
+
+    ctx.font = `${baseFontSize * 0.9}px Arial, sans-serif`;
+    ctx.fillStyle = "#222222";
+    ctx.fillText(pop.condition, padding, currentY);
+    currentY += baseFontSize * 1.1;
+
+    // 8. 価格（項目名付き）
+    ctx.font = `${baseFontSize * 0.7}px Arial, sans-serif`;
+    ctx.fillStyle = "#666666";
+    ctx.fillText("PRICE", padding, currentY);
+    currentY += baseFontSize * 0.8;
+
+    ctx.font = `${baseFontSize * 0.9}px Arial, sans-serif`;
+    ctx.fillStyle = "#222222";
+    const priceText =
+      pop.price === 0 ? "FREE" : `¥${pop.price.toLocaleString()}`;
+    ctx.fillText(priceText, padding, currentY);
+    currentY += baseFontSize * 1.1;
+
+    // 8. コメント（項目名付き、下部に配置）
     if (pop.comment) {
-      const commentStartY = canvasHeight - padding - baseFontSize * 3;
+      const commentStartY = canvasHeight - padding - baseFontSize * 4;
+      ctx.font = `${baseFontSize * 0.7}px Arial, sans-serif`;
+      ctx.fillStyle = "#666666";
+      ctx.fillText("COMMENT", padding, commentStartY);
+
+      const commentLabelY = commentStartY + baseFontSize * 0.8;
       ctx.font = `${baseFontSize * 0.9}px Arial, sans-serif`;
       ctx.fillStyle = "#222222";
 
@@ -145,13 +216,13 @@ export default function PopTemplate({
       ctx.fillStyle = "#f5f5f5";
       ctx.fillRect(
         padding,
-        commentStartY - baseFontSize * 0.5,
+        commentLabelY - baseFontSize * 0.3,
         contentWidth,
-        commentHeight + baseFontSize
+        commentHeight + baseFontSize * 0.6
       );
 
       ctx.fillStyle = "#222222";
-      let commentY = commentStartY;
+      let commentY = commentLabelY;
       commentLines.forEach((line) => {
         if (line.trim() !== "") {
           ctx.fillText(line, padding + baseFontSize * 0.3, commentY);

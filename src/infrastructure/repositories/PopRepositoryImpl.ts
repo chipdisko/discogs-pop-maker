@@ -5,6 +5,8 @@ import {
   Release,
   Comment,
   Badge,
+  Condition,
+  Price,
   PopDimensions,
 } from "../../domain";
 
@@ -23,6 +25,8 @@ interface PopStorageData {
   };
   comment: string;
   badges: string[]; // BadgeTypeの配列
+  condition: string; // ConditionType
+  price: number; // 価格
   dimensions: {
     width: number;
     height: number;
@@ -203,6 +207,8 @@ export class PopRepositoryImpl implements PopRepository {
       },
       comment: pop.getComment().getValue(),
       badges: pop.getBadges().map((badge) => badge.getValue()),
+      condition: pop.getCondition().getValue(),
+      price: pop.getPrice().getValue(),
       dimensions: {
         width: dimensions.getWidth(),
         height: dimensions.getHeight(),
@@ -232,6 +238,8 @@ export class PopRepositoryImpl implements PopRepository {
     const id = PopId.fromString(data.id);
     const comment = new Comment(data.comment);
     const badges = data.badges.map((badgeType) => Badge.fromString(badgeType));
+    const condition = Condition.fromString(data.condition || "New");
+    const price = Price.create(data.price || 0);
     const dimensions = new PopDimensions(
       data.dimensions.width,
       data.dimensions.height
@@ -245,6 +253,8 @@ export class PopRepositoryImpl implements PopRepository {
       release,
       comment,
       badges,
+      condition,
+      price,
       dimensions,
       createdAt,
       updatedAt

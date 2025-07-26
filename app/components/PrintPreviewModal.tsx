@@ -28,6 +28,19 @@ export default function PrintPreviewModal({
     []
   );
 
+  // DPI変更時にキャンバスをクリア
+  const handleDpiChange = useCallback(
+    (newDpi: number) => {
+      console.log("🔄 PrintPreviewModal: DPI changed", {
+        from: dpi,
+        to: newDpi,
+      });
+      setDpi(newDpi);
+      setCanvases([]); // キャンバスをクリアして再生成を促す
+    },
+    [dpi]
+  );
+
   const downloadCurrentPage = () => {
     const canvas = canvases[currentPage];
     if (!canvas) return;
@@ -74,7 +87,7 @@ export default function PrintPreviewModal({
               <label className='text-sm font-medium text-gray-800'>DPI:</label>
               <select
                 value={dpi}
-                onChange={(e) => setDpi(Number(e.target.value))}
+                onChange={(e) => handleDpiChange(Number(e.target.value))}
                 className='px-2 py-1 border border-border rounded text-sm text-gray-800'
               >
                 <option value={150}>150 (プレビュー)</option>
@@ -189,7 +202,7 @@ export default function PrintPreviewModal({
 
                 <div className='flex justify-between items-center'>
                   <span className='font-medium'>ポップサイズ:</span>
-                  <span className='text-gray-600'>100×74mm</span>
+                  <span className='text-gray-600'>A7 (105×74mm)</span>
                 </div>
 
                 <div className='flex justify-between items-center'>

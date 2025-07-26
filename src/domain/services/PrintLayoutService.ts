@@ -28,10 +28,10 @@ export interface A4Dimensions {
 export class PrintLayoutService {
   private static readonly A4_WIDTH = 210; // mm
   private static readonly A4_HEIGHT = 297; // mm
-  private static readonly POPS_PER_PAGE = 8; // 2x4配置
+  private static readonly POPS_PER_PAGE = 8; // 2x4配置（A7サイズ用）
   private static readonly COLUMNS = 2;
   private static readonly ROWS = 4;
-  private static readonly MARGIN = 5; // mm
+  private static readonly MARGIN = 5; // mm（A7サイズ用にマージンを調整）
 
   /**
    * PopリストからA4レイアウトを生成

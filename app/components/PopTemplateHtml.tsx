@@ -186,21 +186,37 @@ function PopHtmlContent({ pop, scaleFactor }: PopHtmlContentProps) {
     ACID: "#f59e0b",
   };
 
+  // 15mmの折りたたみ線の位置を計算（ピクセル）
+  const foldLineY = 15 * (scaleFactor * 3.7795); // 15mmをピクセルに変換
+
   return (
     <div
-      className='w-full h-full relative text-black leading-tight'
+      className='w-full h-full relative text-black leading-tight bg-white'
       style={{ lineHeight: 1.2 }}
     >
+      {/* 折りたたみ線（15mmの位置） */}
+      <div
+        className='absolute left-0 right-0 border-t-2 border-dashed border-gray-400'
+        style={{
+          top: `${foldLineY}px`,
+          zIndex: 10,
+        }}
+      />
+
       {/* バッジ */}
       {pop.badges.length > 0 && (
         <div
           className='absolute top-0 right-0 flex flex-row-reverse'
-          style={{ gap: `${4 * scaleFactor}px` }}
+          style={{
+            gap: `${4 * scaleFactor}px`,
+            marginTop: `${8 * scaleFactor}px`,
+            marginRight: `${8 * scaleFactor}px`,
+          }}
         >
           {pop.badges.map((badge, index) => (
             <span
               key={index}
-              className='font-bold text-white'
+              className='font-bold text-white shadow-sm'
               style={{
                 padding: `${4 * scaleFactor}px ${8 * scaleFactor}px`,
                 borderRadius: `${4 * scaleFactor}px`,
@@ -214,71 +230,155 @@ function PopHtmlContent({ pop, scaleFactor }: PopHtmlContentProps) {
         </div>
       )}
 
-      {/* アーティスト名 */}
+      {/* 折りたたみ線より下のコンテンツエリア */}
       <div
-        className='font-bold mb-2'
+        className='absolute left-0 right-0'
         style={{
-          fontSize: `${20 * scaleFactor}px`,
-          marginTop: pop.badges.length > 0 ? `${24 * scaleFactor}px` : 0,
+          top: `${foldLineY + 8 * scaleFactor}px`,
+          bottom: pop.comment
+            ? `${60 * scaleFactor}px`
+            : `${8 * scaleFactor}px`,
+          padding: `${8 * scaleFactor}px`,
         }}
       >
-        {pop.release.artistName}
+        {/* アーティスト名 */}
+        <div className='mb-3'>
+          <div
+            className='text-gray-600 font-semibold uppercase tracking-wide'
+            style={{ fontSize: `${10 * scaleFactor}px` }}
+          >
+            Artist
+          </div>
+          <div
+            className='font-bold text-gray-900'
+            style={{ fontSize: `${18 * scaleFactor}px` }}
+          >
+            {pop.release.artistName}
+          </div>
+        </div>
+
+        {/* タイトル */}
+        <div className='mb-3'>
+          <div
+            className='text-gray-600 font-semibold uppercase tracking-wide'
+            style={{ fontSize: `${10 * scaleFactor}px` }}
+          >
+            Title
+          </div>
+          <div
+            className='font-bold text-gray-900'
+            style={{ fontSize: `${16 * scaleFactor}px`, lineHeight: 1.3 }}
+          >
+            {pop.release.title}
+          </div>
+        </div>
+
+        {/* レーベル */}
+        {pop.release.label && (
+          <div className='mb-2'>
+            <div
+              className='text-gray-600 font-semibold uppercase tracking-wide'
+              style={{ fontSize: `${10 * scaleFactor}px` }}
+            >
+              Label
+            </div>
+            <div
+              className='text-gray-800'
+              style={{ fontSize: `${14 * scaleFactor}px` }}
+            >
+              {pop.release.label}
+            </div>
+          </div>
+        )}
+
+        {/* 国・リリース年 */}
+        {(pop.release.country || pop.release.releaseYear) && (
+          <div className='mb-2'>
+            <div
+              className='text-gray-600 font-semibold uppercase tracking-wide'
+              style={{ fontSize: `${10 * scaleFactor}px` }}
+            >
+              Info
+            </div>
+            <div
+              className='text-gray-800'
+              style={{ fontSize: `${14 * scaleFactor}px` }}
+            >
+              {[pop.release.country, pop.release.releaseYear]
+                .filter(Boolean)
+                .join(" • ")}
+            </div>
+          </div>
+        )}
+
+        {/* ジャンル・スタイル */}
+        {pop.release.genreStyleString && (
+          <div className='mb-2'>
+            <div
+              className='text-gray-600 font-semibold uppercase tracking-wide'
+              style={{ fontSize: `${10 * scaleFactor}px` }}
+            >
+              Genre
+            </div>
+            <div
+              className='text-gray-700'
+              style={{ fontSize: `${13 * scaleFactor}px` }}
+            >
+              {pop.release.genreStyleString}
+            </div>
+          </div>
+        )}
+
+        {/* コンディション */}
+        <div className='mb-2'>
+          <div
+            className='text-gray-600 font-semibold uppercase tracking-wide'
+            style={{ fontSize: `${10 * scaleFactor}px` }}
+          >
+            Condition
+          </div>
+          <div
+            className='text-gray-800 font-semibold'
+            style={{ fontSize: `${14 * scaleFactor}px` }}
+          >
+            {pop.condition}
+          </div>
+        </div>
+
+        {/* 価格 */}
+        <div className='mb-2'>
+          <div
+            className='text-gray-600 font-semibold uppercase tracking-wide'
+            style={{ fontSize: `${10 * scaleFactor}px` }}
+          >
+            Price
+          </div>
+          <div
+            className='text-gray-800 font-semibold'
+            style={{ fontSize: `${14 * scaleFactor}px` }}
+          >
+            {pop.price === 0 ? "FREE" : `¥${pop.price.toLocaleString()}`}
+          </div>
+        </div>
       </div>
-
-      {/* タイトル */}
-      <div
-        className='font-bold mb-2'
-        style={{
-          fontSize: `${16 * scaleFactor}px`,
-          lineHeight: 1.3,
-        }}
-      >
-        {pop.release.title}
-      </div>
-
-      {/* レーベル */}
-      {pop.release.label && (
-        <div
-          className='text-gray-800 mb-1'
-          style={{ fontSize: `${14 * scaleFactor}px` }}
-        >
-          Label: {pop.release.label}
-        </div>
-      )}
-
-      {/* 国・リリース年 */}
-      {(pop.release.country || pop.release.releaseYear) && (
-        <div
-          className='text-gray-800 mb-1'
-          style={{ fontSize: `${14 * scaleFactor}px` }}
-        >
-          {[pop.release.country, pop.release.releaseYear]
-            .filter(Boolean)
-            .join(" • ")}
-        </div>
-      )}
-
-      {/* ジャンル・スタイル */}
-      {pop.release.genreStyleString && (
-        <div
-          className='text-gray-700 mb-2'
-          style={{ fontSize: `${13 * scaleFactor}px` }}
-        >
-          {pop.release.genreStyleString}
-        </div>
-      )}
 
       {/* コメント */}
       {pop.comment && (
         <div
-          className='absolute bottom-0 left-0 right-0 text-gray-800 bg-gray-50 rounded'
+          className='absolute bottom-0 left-0 right-0 text-gray-800 bg-gray-50 border-t border-gray-200'
           style={{
             fontSize: `${12 * scaleFactor}px`,
-            padding: `${6 * scaleFactor}px`,
-            lineHeight: 1.2,
+            padding: `${8 * scaleFactor}px`,
+            lineHeight: 1.3,
             whiteSpace: "pre-line",
           }}
         >
+          <div
+            className='text-gray-600 font-semibold uppercase tracking-wide mb-1'
+            style={{ fontSize: `${10 * scaleFactor}px` }}
+          >
+            Comment
+          </div>
           {pop.comment}
         </div>
       )}
