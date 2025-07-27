@@ -26,5 +26,4 @@ export {
   type A4Page,
   type PopLayoutPosition,
   type A4Dimensions,
-  type CutLine,
 } from "./services/PrintLayoutService";

@@ -39,6 +39,9 @@ export class PopApplicationService {
   ): Promise<PopResponse | ErrorResponse> {
     try {
       // 1. Discogs URLを検証・解析
+      if (!request.discogsUrl) {
+        throw new Error("Discogs URLは必須です");
+      }
       const discogsUrl = new DiscogsUrl(request.discogsUrl);
 
       // 2. Discogsからリリース情報を取得
@@ -65,10 +68,65 @@ export class PopApplicationService {
       // 7. Popを作成
       const pop = Pop.create(release, comment, badges, condition, price);
 
-      // 6. 保存
+      // 8. 保存
       await this.popRepository.save(pop);
 
-      // 7. レスポンス形式に変換
+      // 9. レスポンス形式に変換
+      return this.toPopResponse(pop);
+    } catch (error) {
+      return {
+        message:
+          error instanceof Error ? error.message : "不明なエラーが発生しました",
+        code: "CREATE_POP_ERROR",
+        details: error instanceof Error ? error.stack : undefined,
+      };
+    }
+  }
+
+  /**
+   * 手動入力データからポップを作成
+   */
+  async createPopFromManualData(
+    request: CreatePopRequest
+  ): Promise<PopResponse | ErrorResponse> {
+    try {
+      // 1. リリース情報を作成
+      const release = Release.create({
+        discogsId: request.discogsUrl || `manual_${Date.now()}`,
+        title: request.title || "",
+        artistName: request.artistName || "",
+        label: request.label || "",
+        country: request.country || "",
+        releaseDate: request.releaseDate || "",
+        genres: request.genres || [],
+        styles: request.styles || [],
+      });
+
+      // 2. コメントを作成
+      const comment = request.comment
+        ? new Comment(request.comment)
+        : Comment.empty();
+
+      // 3. バッジを作成
+      const badges = request.badges
+        ? request.badges.map((b) => Badge.fromString(b))
+        : [];
+
+      // 4. コンディションを作成
+      const condition = request.condition
+        ? Condition.fromString(request.condition)
+        : Condition.create("New");
+
+      // 5. 価格を作成
+      const price = request.price ? Price.create(request.price) : undefined;
+
+      // 6. Popを作成
+      const pop = Pop.create(release, comment, badges, condition, price);
+
+      // 7. 保存
+      await this.popRepository.save(pop);
+
+      // 8. レスポンス形式に変換
       return this.toPopResponse(pop);
     } catch (error) {
       return {

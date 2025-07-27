@@ -5,7 +5,6 @@ import {
   A4Layout,
   A4Page,
   PopLayoutPosition,
-  CutLine,
 } from "../../domain";
 
 import {
@@ -15,11 +14,9 @@ import {
   A4PageResponse,
   PopLayoutPositionResponse,
   A4DimensionsResponse,
-  CutLineResponse,
   CanvasDataResponse,
   CanvasElementResponse,
   PopElementData,
-  CutLineElementData,
 } from "../dtos/PrintDtos";
 
 import { ErrorResponse } from "../dtos/PopDtos";
@@ -159,13 +156,6 @@ export class PrintApplicationService {
       elements.push(popElement);
     }
 
-    // 切り取り線要素を追加
-    const cutLines = this.printLayoutService.generateCutLines(page);
-    for (const cutLine of cutLines) {
-      const cutLineElement = this.createCutLineElement(cutLine, dpi);
-      elements.push(cutLineElement);
-    }
-
     return {
       pageNumber: page.pageNumber,
       width,
@@ -208,39 +198,6 @@ export class PrintApplicationService {
   }
 
   /**
-   * 切り取り線要素を作成
-   */
-  private createCutLineElement(
-    cutLine: CutLine,
-    dpi: number
-  ): CanvasElementResponse {
-    const mmToPixel = (mm: number) => Math.round(mm * (dpi / 25.4));
-
-    const elementData: CutLineElementData = {
-      direction: cutLine.type,
-      strokeWidth: 1,
-      strokeColor: "#cccccc",
-      strokeDashArray: [5, 5],
-    };
-
-    return {
-      type: "cutLine",
-      id: `cutline-${Date.now()}-${Math.random()}`,
-      x: mmToPixel(cutLine.x || cutLine.x1 || 0),
-      y: mmToPixel(cutLine.y || cutLine.y1 || 0),
-      width:
-        cutLine.type === "horizontal"
-          ? mmToPixel((cutLine.x2 || 0) - (cutLine.x1 || 0))
-          : 1,
-      height:
-        cutLine.type === "vertical"
-          ? mmToPixel((cutLine.y2 || 0) - (cutLine.y1 || 0))
-          : 1,
-      data: elementData,
-    };
-  }
-
-  /**
    * A4LayoutをResponseDTOに変換
    */
   private toA4LayoutResponse(layout: A4Layout): A4LayoutResponse {
@@ -254,13 +211,11 @@ export class PrintApplicationService {
    * A4PageをResponseDTOに変換
    */
   private toA4PageResponse(page: A4Page): A4PageResponse {
-    const cutLines = this.printLayoutService.generateCutLines(page);
-
     return {
       pageNumber: page.pageNumber,
       pops: page.pops.map((pop) => this.toPopLayoutPositionResponse(pop)),
       dimensions: this.toA4DimensionsResponse(page.dimensions),
-      cutLines: cutLines.map((line) => this.toCutLineResponse(line)),
+      cutLines: [], // 切り取り線は削除
     };
   }
 
@@ -313,37 +268,6 @@ export class PrintApplicationService {
       printPixels: {
         width: Math.round(dimensions.width * 11.811),
         height: Math.round(dimensions.height * 11.811),
-      },
-    };
-  }
-
-  /**
-   * CutLineをResponseDTOに変換
-   */
-  private toCutLineResponse(cutLine: CutLine): CutLineResponse {
-    return {
-      type: cutLine.type,
-      x: cutLine.x,
-      y: cutLine.y,
-      x1: cutLine.x1,
-      y1: cutLine.y1,
-      x2: cutLine.x2,
-      y2: cutLine.y2,
-      cssPixels: {
-        x: cutLine.x ? Math.round(cutLine.x * 3.7795) : undefined,
-        y: cutLine.y ? Math.round(cutLine.y * 3.7795) : undefined,
-        x1: cutLine.x1 ? Math.round(cutLine.x1 * 3.7795) : undefined,
-        y1: cutLine.y1 ? Math.round(cutLine.y1 * 3.7795) : undefined,
-        x2: cutLine.x2 ? Math.round(cutLine.x2 * 3.7795) : undefined,
-        y2: cutLine.y2 ? Math.round(cutLine.y2 * 3.7795) : undefined,
-      },
-      printPixels: {
-        x: cutLine.x ? Math.round(cutLine.x * 11.811) : undefined,
-        y: cutLine.y ? Math.round(cutLine.y * 11.811) : undefined,
-        x1: cutLine.x1 ? Math.round(cutLine.x1 * 11.811) : undefined,
-        y1: cutLine.y1 ? Math.round(cutLine.y1 * 11.811) : undefined,
-        x2: cutLine.x2 ? Math.round(cutLine.x2 * 11.811) : undefined,
-        y2: cutLine.y2 ? Math.round(cutLine.y2 * 11.811) : undefined,
       },
     };
   }

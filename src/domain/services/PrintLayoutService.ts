@@ -72,10 +72,6 @@ export class PrintLayoutService {
     const popWidth = popDimensions.getWidth();
     const popHeight = popDimensions.getHeight();
 
-    // レイアウト計算（マージン0で敷き詰め）
-    const availableWidth = PrintLayoutService.A4_WIDTH;
-    const availableHeight = PrintLayoutService.A4_HEIGHT;
-
     // マージン0で敷き詰める場合のスペーシング
     const spacingX = 0; // 横の間隔を0に
     const spacingY = 0; // 縦の間隔を0に
@@ -113,45 +109,4 @@ export class PrintLayoutService {
   calculateRequiredPages(popCount: number): number {
     return Math.ceil(popCount / PrintLayoutService.POPS_PER_PAGE);
   }
-
-  /**
-   * 切り取り線の位置を計算
-   */
-  generateCutLines(page: A4Page): CutLine[] {
-    const lines: CutLine[] = [];
-
-    // 縦の切り取り線
-    for (let col = 1; col < PrintLayoutService.COLUMNS; col++) {
-      const x = page.pops[col]?.x - 5; // ポップの左端から5mm左
-      lines.push({
-        type: "vertical",
-        x,
-        y1: PrintLayoutService.MARGIN,
-        y2: PrintLayoutService.A4_HEIGHT - PrintLayoutService.MARGIN,
-      });
-    }
-
-    // 横の切り取り線
-    for (let row = 1; row < PrintLayoutService.ROWS; row++) {
-      const y = page.pops[row * PrintLayoutService.COLUMNS]?.y - 5; // ポップの上端から5mm上
-      lines.push({
-        type: "horizontal",
-        x1: PrintLayoutService.MARGIN,
-        x2: PrintLayoutService.A4_WIDTH - PrintLayoutService.MARGIN,
-        y,
-      });
-    }
-
-    return lines;
-  }
-}
-
-export interface CutLine {
-  type: "vertical" | "horizontal";
-  x?: number;
-  y?: number;
-  x1?: number;
-  y1?: number;
-  x2?: number;
-  y2?: number;
 }

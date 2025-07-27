@@ -25,7 +25,7 @@ export interface A4PageResponse {
   pageNumber: number;
   pops: PopLayoutPositionResponse[];
   dimensions: A4DimensionsResponse;
-  cutLines: CutLineResponse[];
+  cutLines: never[]; // 空配列を返す（後方互換性のため）
 }
 
 export interface PopLayoutPositionResponse {
@@ -61,32 +61,6 @@ export interface A4DimensionsResponse {
   };
 }
 
-export interface CutLineResponse {
-  type: "vertical" | "horizontal";
-  x?: number;
-  y?: number;
-  x1?: number;
-  y1?: number;
-  x2?: number;
-  y2?: number;
-  cssPixels?: {
-    x?: number;
-    y?: number;
-    x1?: number;
-    y1?: number;
-    x2?: number;
-    y2?: number;
-  };
-  printPixels?: {
-    x?: number;
-    y?: number;
-    x1?: number;
-    y1?: number;
-    x2?: number;
-    y2?: number;
-  };
-}
-
 // ========== Canvas用データ ==========
 
 export interface CanvasDataResponse {
@@ -98,17 +72,13 @@ export interface CanvasDataResponse {
 }
 
 export interface CanvasElementResponse {
-  type: "pop" | "cutLine" | "text" | "badge";
+  type: "pop" | "text" | "badge";
   id: string;
   x: number;
   y: number;
   width?: number;
   height?: number;
-  data:
-    | PopElementData
-    | CutLineElementData
-    | TextElementData
-    | BadgeElementData;
+  data: PopElementData | TextElementData | BadgeElementData;
 }
 
 // 要素固有のデータ型
@@ -117,13 +87,6 @@ export interface PopElementData {
   release: ReleaseResponse;
   comment: string;
   badges: BadgeResponse[];
-}
-
-export interface CutLineElementData {
-  direction: "vertical" | "horizontal";
-  strokeWidth: number;
-  strokeColor: string;
-  strokeDashArray?: number[];
 }
 
 export interface TextElementData {

@@ -1,9 +1,5 @@
 import React, { useRef, useEffect } from "react";
-import type {
-  A4PageResponse,
-  PopResponse,
-  CutLineResponse,
-} from "../../src/application";
+import type { A4PageResponse, PopResponse } from "../../src/application";
 import { drawPopTemplateContent } from "./PopTemplate";
 
 interface A4CanvasProps {
@@ -81,58 +77,24 @@ export default function A4Canvas({
 
       ctx.restore();
     });
-
-    // 切り取り線を描画
-    page.cutLines.forEach((cutLine) => {
-      drawCutLine(ctx, cutLine, dpi);
-    });
-  };
-
-  const drawCutLine = (
-    ctx: CanvasRenderingContext2D,
-    cutLine: CutLineResponse,
-    dpi: number
-  ) => {
-    const mmToPixel = (mm: number) => Math.round(mm * (dpi / 25.4));
-
-    // 切り取り線をより薄く、細く調整
-    ctx.strokeStyle = "#f0f0f0"; // より薄いグレー
-    ctx.lineWidth = 0.5; // より細い線
-    ctx.setLineDash([3, 3]); // より短い破線
-
-    ctx.beginPath();
-
-    if (cutLine.type === "horizontal") {
-      const y = mmToPixel(cutLine.y || 0);
-      const x1 = mmToPixel(cutLine.x1 || 0);
-      const x2 = mmToPixel(cutLine.x2 || 0);
-      ctx.moveTo(x1, y);
-      ctx.lineTo(x2, y);
-    } else if (cutLine.type === "vertical") {
-      const x = mmToPixel(cutLine.x || 0);
-      const y1 = mmToPixel(cutLine.y1 || 0);
-      const y2 = mmToPixel(cutLine.y2 || 0);
-      ctx.moveTo(x, y1);
-      ctx.lineTo(x, y2);
-    }
-
-    ctx.stroke();
-    ctx.setLineDash([]); // 破線をリセット
   };
 
   return (
-    <div className='flex justify-center'>
-      <canvas
-        ref={canvasRef}
-        style={{
-          width: pageData.dimensions.printPixels.width * scale,
-          height: pageData.dimensions.printPixels.height * scale,
-          border: "1px solid #ddd",
-          backgroundColor: "#fff",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-        }}
-        className='max-w-full'
-      />
+    <div className='flex justify-center w-full'>
+      <div className='relative w-full max-w-4xl'>
+        <canvas
+          ref={canvasRef}
+          style={{
+            border: "1px solid #ddd",
+            backgroundColor: "#fff",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            maxWidth: "100%",
+            height: "auto",
+            aspectRatio: `${pageData.dimensions.width} / ${pageData.dimensions.height}`,
+          }}
+          className='w-full h-auto'
+        />
+      </div>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
+import { X } from "lucide-react";
 import A4Canvas from "./A4Canvas";
 import type { PrintDataResponse } from "../../src/application";
 
@@ -78,46 +79,53 @@ export default function PrintPreviewModal({
 
   return (
     <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4'>
-      <div className='bg-white rounded-lg max-w-7xl max-h-[95vh] w-full flex flex-col'>
+      <div className='bg-white rounded-lg max-w-7xl max-h-[95vh] w-full flex flex-col relative @container'>
         {/* ヘッダー */}
-        <div className='flex justify-between items-center p-6 border-b'>
-          <div>
-            <h2 className='text-2xl font-bold text-gray-900'>印刷プレビュー</h2>
-            <p className='text-gray-700'>
-              {printData.totalPops}個のポップ • {printData.totalPages}ページ
-            </p>
-          </div>
-
-          <div className='flex items-center space-x-4'>
-            {/* DPI設定 */}
-            <div className='flex items-center space-x-2'>
-              <label className='text-sm font-medium text-gray-800'>DPI:</label>
-              <select
-                value={dpi}
-                onChange={(e) => handleDpiChange(Number(e.target.value))}
-                className='px-2 py-1 border border-border rounded text-sm text-gray-800'
-              >
-                <option value={150}>150 (プレビュー)</option>
-                <option value={300}>300 (高品質)</option>
-                <option value={600}>600 (超高品質)</option>
-              </select>
+        <div className=''>
+          <div className='flex flex-col @[500px]:flex-row justify-between items-start @[500px]:items-center p-6 border-b gap-4 @[500px]:gap-0'>
+            <div>
+              <h2 className='text-2xl font-bold text-gray-900'>
+                印刷プレビュー
+              </h2>
+              <p className='text-gray-700'>
+                {printData.totalPops}個のポップ • {printData.totalPages}ページ
+              </p>
             </div>
 
+            <div className='flex flex-col @[500px]:flex-row items-start @[500px]:items-center gap-4 @[500px]:gap-4'>
+              {/* DPI設定 */}
+              <div className='flex items-center space-x-2'>
+                <label className='text-sm font-medium text-gray-800'>
+                  DPI:
+                </label>
+                <select
+                  value={dpi}
+                  onChange={(e) => handleDpiChange(Number(e.target.value))}
+                  className='px-2 py-1 border border-border rounded text-sm text-gray-800'
+                >
+                  <option value={150}>150 (プレビュー)</option>
+                  <option value={300}>300 (高品質)</option>
+                  <option value={600}>600 (超高品質)</option>
+                </select>
+              </div>
+            </div>
+
+            {/* 閉じるボタン（絶対位置で右上に固定） */}
             <button
               onClick={onClose}
-              className='text-gray-500 hover:text-gray-800 text-xl'
+              className='absolute top-1 right-1 text-gray-500 hover:text-gray-800 z-10 p-1 rounded-md hover:bg-gray-100 transition-colors'
             >
-              ×
+              <X size={20} />
             </button>
           </div>
         </div>
 
         {/* コンテンツエリア */}
-        <div className='flex-1 flex overflow-hidden'>
+        <div className='flex-1 flex flex-col @[1000px]:flex-row overflow-hidden'>
           {/* メインプレビュー */}
           <div className='flex-1 flex flex-col'>
             {/* ページナビゲーション */}
-            {printData.totalPages > 1 && (
+            {printData.totalPages > 0 && (
               <div className='flex justify-center items-center py-4 border-b space-x-4'>
                 <button
                   onClick={() =>
@@ -171,7 +179,7 @@ export default function PrintPreviewModal({
           </div>
 
           {/* サイドバー */}
-          <div className='w-96 border-l p-6 bg-gray-50 overflow-y-auto'>
+          <div className='w-full lg:w-96 border-t lg:border-l lg:border-t-0 p-6 bg-gray-50 overflow-y-auto'>
             {/* アクション */}
             <div className='space-y-3 mb-6'>
               <h3 className='font-semibold text-gray-900'>ダウンロード</h3>

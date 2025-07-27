@@ -38,16 +38,13 @@ export default function PopMakerPage() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [printData, setPrintData] = useState<PrintDataResponse | null>(null);
 
-  // 編集関連
-  const [editingPopId, setEditingPopId] = useState<string | null>(null);
-  const [editComment, setEditComment] = useState("");
-  const [editBadges, setEditBadges] = useState<string[]>([]);
-  const [editCondition, setEditCondition] = useState<ConditionType>("New");
-  const [editPrice, setEditPrice] = useState<string>("");
+  // 編集関連（インライン編集は削除、モーダル編集に変更）
   const [newlyCreatedPopIds, setNewlyCreatedPopIds] = useState<string[]>([]);
 
-  // Form state (モーダルで管理するため削除)
+  // モーダル状態
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingPop, setEditingPop] = useState<PopResponse | null>(null);
 
   // 初期化時に既存のポップを読み込み
   useEffect(() => {
@@ -92,14 +89,29 @@ export default function PopMakerPage() {
 
     try {
       const request: CreatePopRequest = {
-        discogsUrl: formData.discogsUrl.trim(),
+        // Discogs URL（オプション）
+        discogsUrl: formData.discogsUrl?.trim() || undefined,
+
+        // リリース情報
+        title: formData.title.trim() || undefined,
+        artistName: formData.artistName.trim() || undefined,
+        label: formData.label.trim() || undefined,
+        country: formData.country.trim() || undefined,
+        releaseDate: formData.releaseDate.trim() || undefined,
+        genres: formData.genres.length > 0 ? formData.genres : undefined,
+        styles: formData.styles.length > 0 ? formData.styles : undefined,
+
+        // ユーザー入力
         comment: formData.comment.trim() || undefined,
         badges: formData.badges.length > 0 ? formData.badges : undefined,
         condition: formData.condition,
         price: formData.price > 0 ? formData.price : undefined,
       };
 
-      const result = await popService.createPopFromDiscogsUrl(request);
+      // Discogs URLがある場合はDiscogsから取得、ない場合は手動データから作成
+      const result = request.discogsUrl
+        ? await popService.createPopFromDiscogsUrl(request)
+        : await popService.createPopFromManualData(request);
 
       if ("message" in result) {
         // エラーレスポンス
@@ -164,40 +176,26 @@ export default function PopMakerPage() {
    * ポップの編集を開始
    */
   const handleStartEdit = (pop: PopResponse) => {
-    setEditingPopId(pop.id);
-    setEditComment(pop.comment);
-    setEditBadges(pop.badges.map((badge) => badge.type));
-    setEditCondition(pop.condition);
-    setEditPrice(pop.price.toString());
+    setEditingPop(pop);
+    setIsEditModalOpen(true);
   };
 
   /**
-   * 編集をキャンセル
+   * 編集モーダルからポップ更新
    */
-  const handleCancelEdit = () => {
-    setEditingPopId(null);
-    setEditComment("");
-    setEditBadges([]);
-    setEditCondition("New");
-    setEditPrice("");
-  };
-
-  /**
-   * 編集を保存
-   */
-  const handleSaveEdit = async () => {
-    if (!editingPopId) return;
+  const handleUpdatePopFromModal = async (formData: CreatePopFormData) => {
+    if (!editingPop) return;
 
     setIsLoading(true);
     setError(null);
 
     try {
       const result = await popService.updatePop({
-        id: editingPopId,
-        comment: editComment.trim() || undefined,
-        badges: editBadges.length > 0 ? (editBadges as BadgeType[]) : undefined,
-        condition: editCondition,
-        price: editPrice ? parseInt(editPrice) : undefined,
+        id: editingPop.id,
+        comment: formData.comment.trim() || undefined,
+        badges: formData.badges.length > 0 ? formData.badges : undefined,
+        condition: formData.condition,
+        price: formData.price > 0 ? formData.price : undefined,
       });
 
       if ("message" in result) {
@@ -205,11 +203,15 @@ export default function PopMakerPage() {
       } else {
         // ローカル状態を更新
         setPops((prev) =>
-          prev.map((pop) => (pop.id === editingPopId ? result : pop))
+          prev.map((pop) => (pop.id === editingPop.id ? result : pop))
         );
 
-        // 編集状態をリセット
-        handleCancelEdit();
+        // 編集モーダルを閉じる
+        setIsEditModalOpen(false);
+        setEditingPop(null);
+
+        // 成功メッセージ（オプション）
+        console.log("ポップが正常に更新されました:", result.release.fullTitle);
       }
     } catch {
       setError("ポップの更新に失敗しました");
@@ -249,8 +251,6 @@ export default function PopMakerPage() {
       setIsLoading(false);
     }
   };
-
-  const availableBadges = ["RECOMMEND", "MUST", "RAVE", "ACID"];
 
   return (
     <div className='min-h-screen bg-background p-6'>
@@ -326,23 +326,11 @@ export default function PopMakerPage() {
                     key={pop.id}
                     pop={pop}
                     isSelected={selectedPopIds.includes(pop.id)}
-                    isEditing={editingPopId === pop.id}
                     isNewlyCreated={newlyCreatedPopIds.includes(pop.id)}
                     onToggleSelection={togglePopSelection}
                     onStartEdit={handleStartEdit}
-                    onCancelEdit={handleCancelEdit}
-                    onSaveEdit={handleSaveEdit}
                     onDelete={handleDeletePop}
-                    editComment={editComment}
-                    editBadges={editBadges}
-                    editCondition={editCondition}
-                    editPrice={editPrice}
-                    onEditCommentChange={setEditComment}
-                    onEditBadgesChange={setEditBadges}
-                    onEditConditionChange={setEditCondition}
-                    onEditPriceChange={setEditPrice}
                     isLoading={isLoading}
-                    availableBadges={availableBadges}
                   />
                 ))}
               </div>
@@ -369,6 +357,36 @@ export default function PopMakerPage() {
         onClose={() => setIsCreateModalOpen(false)}
         onSubmit={handleCreatePopFromModal}
         isLoading={isLoading}
+      />
+
+      {/* ポップ編集モーダル */}
+      <CreatePopModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingPop(null);
+        }}
+        onSubmit={handleUpdatePopFromModal}
+        isLoading={isLoading}
+        isEditMode={true}
+        initialData={
+          editingPop
+            ? {
+                discogsUrl: "",
+                title: editingPop.release.title,
+                artistName: editingPop.release.artistName,
+                label: editingPop.release.label,
+                country: editingPop.release.country,
+                releaseDate: editingPop.release.releaseDate,
+                genres: editingPop.release.genres,
+                styles: editingPop.release.styles,
+                comment: editingPop.comment,
+                badges: editingPop.badges.map((badge) => badge.type),
+                condition: editingPop.condition,
+                price: editingPop.price,
+              }
+            : undefined
+        }
       />
     </div>
   );

@@ -3,7 +3,19 @@ import { BadgeType, ConditionType } from "../../domain";
 // ========== リクエストDTO ==========
 
 export interface CreatePopRequest {
-  discogsUrl: string;
+  // Discogs URL（オプション）
+  discogsUrl?: string;
+
+  // リリース情報（手動入力またはDiscogsデータ）
+  title?: string;
+  artistName?: string;
+  label?: string;
+  country?: string;
+  releaseDate?: string;
+  genres?: string[];
+  styles?: string[];
+
+  // ユーザー入力
   comment?: string;
   badges?: BadgeType[];
   condition?: ConditionType;
