@@ -37,3 +37,23 @@ export interface DiscogsApiResponse {
 export interface DiscogsApiErrorResponse {
   error: string;
 }
+
+// 価格提案APIの型定義
+export interface PriceSuggestion {
+  condition: string;
+  price: number;
+  currency: string;
+}
+
+export interface PriceSuggestionsResponse {
+  success: boolean;
+  data: PriceSuggestion[];
+  error?: string;
+}
+
+export interface DiscogsPriceSuggestionsData {
+  [condition: string]: {
+    price: number;
+    currency: string;
+  };
+}

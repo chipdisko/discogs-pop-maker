@@ -384,6 +384,8 @@ export default function PopMakerPage() {
                 badges: editingPop.badges.map((badge) => badge.type),
                 condition: editingPop.condition,
                 price: editingPop.price,
+                priceSuggestions: undefined, // 編集時は価格提案を再取得
+                discogsReleaseId: editingPop.release.discogsId,
               }
             : undefined
         }

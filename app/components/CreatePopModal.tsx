@@ -15,7 +15,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import type { BadgeType, ConditionType } from "../../src/domain";
 import type { ReleaseResponse } from "../../src/application";
-import type { DiscogsReleaseData } from "../../src/infrastructure/external/DiscogsApiTypes";
+import type {
+  DiscogsReleaseData,
+  PriceSuggestion,
+  DiscogsPriceSuggestionsData,
+} from "../../src/infrastructure/external/DiscogsApiTypes";
 
 interface CreatePopModalProps {
   isOpen: boolean;
@@ -45,6 +49,10 @@ export interface CreatePopFormData {
   badges: BadgeType[];
   condition: ConditionType;
   price: number;
+
+  // 価格提案データ
+  priceSuggestions?: DiscogsPriceSuggestionsData;
+  discogsReleaseId?: string;
 }
 
 const availableBadges: {
@@ -98,6 +106,8 @@ export default function CreatePopModal({
   const [currentStep, setCurrentStep] = useState<1 | 2>(1);
   const [discogsData, setDiscogsData] = useState<ReleaseResponse | null>(null);
   const [isFetchingDiscogs, setIsFetchingDiscogs] = useState(false);
+  const [isFetchingPriceSuggestions, setIsFetchingPriceSuggestions] =
+    useState(false);
 
   const [formData, setFormData] = useState<CreatePopFormData>({
     discogsUrl: "",
@@ -112,6 +122,8 @@ export default function CreatePopModal({
     badges: [],
     condition: "New",
     price: 0,
+    priceSuggestions: undefined,
+    discogsReleaseId: undefined,
   });
 
   // 編集モードの場合、初期データを設定
@@ -139,6 +151,62 @@ export default function CreatePopModal({
   const handlePriceChange = (value: string) => {
     const numValue = parseInt(value) || 0;
     setFormData((prev) => ({ ...prev, price: numValue }));
+  };
+
+  // 価格提案を取得
+  const fetchPriceSuggestions = async (releaseId: string) => {
+    setIsFetchingPriceSuggestions(true);
+    try {
+      const response = await fetch("/api/discogs/price-suggestions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ releaseId }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.warn("価格提案取得エラー:", errorData.error);
+
+        // エラーの詳細をログに出力
+        if (errorData.details) {
+          console.warn("エラー詳細:", errorData.details);
+        }
+
+        // エラーは静かに処理（価格提案は必須ではない）
+        return;
+      }
+
+      const result = await response.json();
+
+      if (!result.success || !result.data) {
+        console.warn("無効な価格提案レスポンス形式");
+        return;
+      }
+
+      // 価格提案データを変換
+      const priceSuggestions: DiscogsPriceSuggestionsData = {};
+      result.data.forEach((suggestion: PriceSuggestion) => {
+        priceSuggestions[suggestion.condition] = {
+          price: suggestion.price,
+          currency: suggestion.currency,
+        };
+      });
+
+      // フォームデータに価格提案を設定
+      setFormData((prev) => ({
+        ...prev,
+        priceSuggestions,
+      }));
+
+      console.log("価格提案を取得しました:", priceSuggestions);
+    } catch (error) {
+      console.error("価格提案取得エラー:", error);
+      // エラーは静かに処理（価格提案は必須ではない）
+    } finally {
+      setIsFetchingPriceSuggestions(false);
+    }
   };
 
   // Discogsデータを取得
@@ -197,7 +265,13 @@ export default function CreatePopModal({
         releaseDate: discogsResponse.releaseDate,
         genres: discogsResponse.genres,
         styles: discogsResponse.styles,
+        discogsReleaseId: discogsResponse.discogsId,
       }));
+
+      // 価格提案も同時に取得
+      if (discogsResponse.discogsId) {
+        await fetchPriceSuggestions(discogsResponse.discogsId);
+      }
 
       setCurrentStep(2);
     } catch (error) {
@@ -260,10 +334,13 @@ export default function CreatePopModal({
       badges: [],
       condition: "New",
       price: 0,
+      priceSuggestions: undefined,
+      discogsReleaseId: undefined,
     });
     setCurrentStep(1);
     setDiscogsData(null);
     setIsFetchingDiscogs(false);
+    setIsFetchingPriceSuggestions(false);
   };
 
   const handleClose = () => {
@@ -511,15 +588,71 @@ export default function CreatePopModal({
             {/* 価格 */}
             <div className='space-y-2'>
               <Label htmlFor='price'>価格</Label>
-              <Input
-                id='price'
-                type='number'
-                value={formData.price || ""}
-                onChange={(e) => handlePriceChange(e.target.value)}
-                placeholder='価格を入力（例: 1500）'
-                min='0'
-                disabled={isLoading}
-              />
+              <div className='flex gap-2'>
+                <Input
+                  id='price'
+                  type='number'
+                  value={formData.price || ""}
+                  onChange={(e) => handlePriceChange(e.target.value)}
+                  placeholder='価格を入力（例: 1500）'
+                  min='0'
+                  disabled={isLoading}
+                  className='flex-1'
+                />
+                {formData.discogsReleaseId && (
+                  <Button
+                    type='button'
+                    variant='outline'
+                    onClick={() =>
+                      fetchPriceSuggestions(formData.discogsReleaseId!)
+                    }
+                    disabled={isLoading || isFetchingPriceSuggestions}
+                    className='whitespace-nowrap'
+                    title='Discogsの市場価格を取得します（売り手プロフィール設定が必要）'
+                  >
+                    {isFetchingPriceSuggestions ? "取得中..." : "価格提案"}
+                  </Button>
+                )}
+              </div>
+
+              {/* 価格提案表示 */}
+              {formData.priceSuggestions &&
+                Object.keys(formData.priceSuggestions).length > 0 && (
+                  <div className='space-y-2'>
+                    <p className='text-xs text-muted-foreground'>
+                      Discogs価格提案:
+                    </p>
+                    <div className='grid grid-cols-2 gap-2'>
+                      {Object.entries(formData.priceSuggestions).map(
+                        ([condition, data]) => (
+                          <div
+                            key={condition}
+                            className={`text-xs p-2 rounded border cursor-pointer transition-colors ${
+                              formData.condition === condition
+                                ? "bg-primary/10 border-primary text-primary"
+                                : "bg-muted border-border hover:bg-muted/80"
+                            }`}
+                            onClick={() => {
+                              setFormData((prev) => ({
+                                ...prev,
+                                price: Math.floor(data.price), // 価格のみを更新（コンディションは変更しない）
+                              }));
+                            }}
+                          >
+                            <div className='font-medium'>{condition}</div>
+                            <div className='text-muted-foreground'>
+                              ¥{Math.floor(data.price).toLocaleString()}
+                            </div>
+                          </div>
+                        )
+                      )}
+                    </div>
+                    <p className='text-xs text-muted-foreground'>
+                      価格提案をクリックすると価格が自動入力されます
+                    </p>
+                  </div>
+                )}
+
               <p className='text-xs text-muted-foreground'>
                 0円の場合は「FREE」と表示されます
               </p>
