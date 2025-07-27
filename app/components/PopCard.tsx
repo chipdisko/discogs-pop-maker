@@ -1,6 +1,5 @@
 import React from "react";
 import type { PopResponse } from "../../src/application";
-import type { ConditionType } from "../../src/domain";
 
 interface PopCardProps {
   pop: PopResponse;

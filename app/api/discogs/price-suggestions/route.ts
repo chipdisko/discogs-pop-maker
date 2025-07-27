@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Create marketplace instance
-    const marketplace = (dis as Record<string, any>).marketplace();
+    const marketplace = dis.marketplace();
 
     try {
       console.log(

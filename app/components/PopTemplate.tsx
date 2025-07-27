@@ -95,7 +95,6 @@ export const drawPopTemplateContent = (
   // 4-6. LABEL、INFO、CONDITIONを横並びに配置
   const labelWidth = contentWidth * 0.5;
   const infoWidth = contentWidth * 0.4;
-  const conditionWidth = contentWidth * 0.1;
 
   // LABEL
   ctx.font = `${baseFontSize * 0.7}px Arial, sans-serif`;

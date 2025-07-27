@@ -19,5 +19,11 @@ declare module "disconnect" {
         callback: (err: unknown, label: unknown) => void
       ) => void;
     };
+    marketplace(): {
+      getPriceSuggestions: (
+        releaseId: string,
+        callback: (err: unknown, suggestions: unknown) => void
+      ) => void;
+    };
   }
 }

@@ -7,7 +7,6 @@ import type {
   CreatePopRequest,
   PrintDataResponse,
 } from "../../src/application";
-import type { BadgeType, ConditionType } from "../../src/domain";
 import PrintPreviewModal from "../components/PrintPreviewModal";
 import CreatePopModal, {
   type CreatePopFormData,
