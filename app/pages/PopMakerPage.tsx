@@ -173,6 +173,20 @@ export default function PopMakerPage() {
   };
 
   /**
+   * 全てのポップを選択
+   */
+  const selectAllPops = () => {
+    setSelectedPopIds(pops.map((pop) => pop.id));
+  };
+
+  /**
+   * 全てのポップの選択を解除
+   */
+  const deselectAllPops = () => {
+    setSelectedPopIds([]);
+  };
+
+  /**
    * ポップの編集を開始
    */
   const handleStartEdit = (pop: PopResponse) => {
@@ -316,7 +330,29 @@ export default function PopMakerPage() {
           <Card>
             <CardHeader>
               <div className='flex justify-between items-center'>
-                <CardTitle>作成済みポップ ({pops.length}個)</CardTitle>
+                <div className='flex items-center gap-4'>
+                  <CardTitle>作成済みポップ ({pops.length}個)</CardTitle>
+                  <div className='flex gap-2'>
+                    <Button
+                      onClick={selectAllPops}
+                      disabled={isLoading}
+                      variant='outline'
+                      size='sm'
+                    >
+                      全て選択
+                    </Button>
+                    {selectedPopIds.length > 0 && (
+                      <Button
+                        onClick={deselectAllPops}
+                        disabled={isLoading}
+                        variant='outline'
+                        size='sm'
+                      >
+                        選択解除
+                      </Button>
+                    )}
+                  </div>
+                </div>
                 {selectedPopIds.length > 0 && (
                   <Button
                     onClick={handleGeneratePrint}
