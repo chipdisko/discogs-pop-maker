@@ -24,6 +24,15 @@ export interface CreatePopRequest {
 
 export interface UpdatePopRequest {
   id: string;
+  // リリース情報の更新
+  title?: string;
+  artistName?: string;
+  label?: string;
+  country?: string;
+  releaseDate?: string;
+  genres?: string[];
+  styles?: string[];
+  // ユーザー入力の更新
   comment?: string;
   badges?: BadgeType[];
   condition?: ConditionType;

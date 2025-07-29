@@ -158,7 +158,9 @@ export class PopApplicationService {
 
       // 2. コメントを更新
       if (request.comment !== undefined) {
-        const comment = new Comment(request.comment);
+        const comment = request.comment
+          ? new Comment(request.comment)
+          : Comment.empty();
         pop.updateComment(comment);
       }
 
@@ -176,11 +178,36 @@ export class PopApplicationService {
 
       // 5. 価格を更新
       if (request.price !== undefined) {
-        const price = Price.create(request.price);
+        const price =
+          request.price > 0 ? Price.create(request.price) : Price.empty();
         pop.updatePrice(price);
       }
 
-      // 6. 保存
+      // 6. リリース情報を更新
+      if (
+        request.title !== undefined ||
+        request.artistName !== undefined ||
+        request.label !== undefined ||
+        request.country !== undefined ||
+        request.releaseDate !== undefined ||
+        request.genres !== undefined ||
+        request.styles !== undefined
+      ) {
+        const currentRelease = pop.getRelease();
+        const updatedRelease = Release.create({
+          discogsId: currentRelease.getDiscogsId(),
+          title: request.title ?? currentRelease.getTitle(),
+          artistName: request.artistName ?? currentRelease.getArtistName(),
+          label: request.label ?? currentRelease.getLabel(),
+          country: request.country ?? currentRelease.getCountry(),
+          releaseDate: request.releaseDate ?? currentRelease.getReleaseDate(),
+          genres: request.genres ?? currentRelease.getGenres(),
+          styles: request.styles ?? currentRelease.getStyles(),
+        });
+        pop.updateRelease(updatedRelease);
+      }
+
+      // 7. 保存
       await this.popRepository.save(pop);
 
       // 5. レスポンス形式に変換

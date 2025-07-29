@@ -189,6 +189,12 @@ export class Pop {
     this.updatedAt = new Date();
   }
 
+  // リリース情報を更新
+  updateRelease(release: Release): void {
+    this.release = release;
+    this.updatedAt = new Date();
+  }
+
   // 特定のバッジを持っているかチェック
   hasBadge(badge: Badge): boolean {
     return this.badges.some((b) => b.equals(badge));

@@ -321,23 +321,29 @@ export default function CreatePopModal({
   };
 
   const resetForm = () => {
-    setFormData({
-      discogsUrl: "",
-      title: "",
-      artistName: "",
-      label: "",
-      country: "",
-      releaseDate: "",
-      genres: [],
-      styles: [],
-      comment: "",
-      badges: [],
-      condition: "New",
-      price: 0,
-      priceSuggestions: undefined,
-      discogsReleaseId: undefined,
-    });
-    setCurrentStep(1);
+    // 編集モードの場合は初期データを保持
+    if (isEditMode && initialData) {
+      setFormData(initialData);
+      setCurrentStep(2);
+    } else {
+      setFormData({
+        discogsUrl: "",
+        title: "",
+        artistName: "",
+        label: "",
+        country: "",
+        releaseDate: "",
+        genres: [],
+        styles: [],
+        comment: "",
+        badges: [],
+        condition: "New",
+        price: 0,
+        priceSuggestions: undefined,
+        discogsReleaseId: undefined,
+      });
+      setCurrentStep(1);
+    }
     setDiscogsData(null);
     setIsFetchingDiscogs(false);
     setIsFetchingPriceSuggestions(false);

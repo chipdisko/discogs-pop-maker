@@ -191,10 +191,19 @@ export default function PopMakerPage() {
     try {
       const result = await popService.updatePop({
         id: editingPop.id,
-        comment: formData.comment.trim() || undefined,
-        badges: formData.badges.length > 0 ? formData.badges : undefined,
+        // リリース情報の更新
+        title: formData.title.trim(),
+        artistName: formData.artistName.trim(),
+        label: formData.label.trim(),
+        country: formData.country.trim(),
+        releaseDate: formData.releaseDate.trim(),
+        genres: formData.genres,
+        styles: formData.styles,
+        // ユーザー入力の更新
+        comment: formData.comment.trim(),
+        badges: formData.badges,
         condition: formData.condition,
-        price: formData.price > 0 ? formData.price : undefined,
+        price: formData.price,
       });
 
       if ("message" in result) {
