@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import PopCard from "../components/PopCard";
 import { ThemeToggle } from "../components/ThemeToggle";
+import { Input } from "@/components/ui/input";
 
 // 一時的なクリアボタン（テスト用）
 const clearLocalStorage = () => {

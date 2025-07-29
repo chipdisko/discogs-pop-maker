@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -26,16 +26,12 @@ interface CreatePopModalProps {
   onClose: () => void;
   onSubmit: (data: CreatePopFormData) => void;
   isLoading: boolean;
-  // 編集モード用のプロパティ
   isEditMode?: boolean;
   initialData?: CreatePopFormData;
 }
 
 export interface CreatePopFormData {
-  // Step 1: URL入力
   discogsUrl?: string;
-
-  // Step 2: リリース情報（Discogsデータ + ユーザー編集）
   title: string;
   artistName: string;
   label: string;
@@ -43,17 +39,31 @@ export interface CreatePopFormData {
   releaseDate: string;
   genres: string[];
   styles: string[];
-
-  // Step 2: ユーザー入力
   comment: string;
   badges: BadgeType[];
   condition: ConditionType;
   price: number;
-
-  // 価格提案データ
   priceSuggestions?: DiscogsPriceSuggestionsData;
   discogsReleaseId?: string;
 }
+
+// 定数定義
+const DEFAULT_FORM_DATA: CreatePopFormData = {
+  discogsUrl: "",
+  title: "",
+  artistName: "",
+  label: "",
+  country: "",
+  releaseDate: "",
+  genres: [],
+  styles: [],
+  comment: "",
+  badges: [],
+  condition: "New",
+  price: 0,
+  priceSuggestions: undefined,
+  discogsReleaseId: undefined,
+};
 
 const availableBadges: {
   value: BadgeType;
@@ -103,42 +113,60 @@ export default function CreatePopModal({
   isEditMode = false,
   initialData,
 }: CreatePopModalProps) {
+  // 状態管理
   const [currentStep, setCurrentStep] = useState<1 | 2>(1);
+  const [formData, setFormData] =
+    useState<CreatePopFormData>(DEFAULT_FORM_DATA);
   const [discogsData, setDiscogsData] = useState<ReleaseResponse | null>(null);
   const [isFetchingDiscogs, setIsFetchingDiscogs] = useState(false);
   const [isFetchingPriceSuggestions, setIsFetchingPriceSuggestions] =
     useState(false);
 
-  const [formData, setFormData] = useState<CreatePopFormData>({
-    discogsUrl: "",
-    title: "",
-    artistName: "",
-    label: "",
-    country: "",
-    releaseDate: "",
-    genres: [],
-    styles: [],
-    comment: "",
-    badges: [],
-    condition: "New",
-    price: 0,
-    priceSuggestions: undefined,
-    discogsReleaseId: undefined,
-  });
+  // 一時的な入力状態
+  const [tempGenres, setTempGenres] = useState<string>("");
+  const [tempStyles, setTempStyles] = useState<string>("");
+  const [isGenresFocused, setIsGenresFocused] = useState(false);
+  const [isStylesFocused, setIsStylesFocused] = useState(false);
 
-  // 編集モードの場合、初期データを設定
+  // フォームを完全にリセットする関数
+  const resetForm = useCallback(() => {
+    setFormData(DEFAULT_FORM_DATA);
+    setCurrentStep(1);
+    setDiscogsData(null);
+    setIsFetchingDiscogs(false);
+    setIsFetchingPriceSuggestions(false);
+    setTempGenres("");
+    setTempStyles("");
+    setIsGenresFocused(false);
+    setIsStylesFocused(false);
+  }, []);
+
+  // 編集モード用の初期化
+  const initializeEditMode = useCallback((data: CreatePopFormData) => {
+    setFormData(data);
+    setCurrentStep(2);
+    setTempGenres(data.genres.join(", "));
+    setTempStyles(data.styles.join(", "));
+  }, []);
+
+  // モーダルの開閉状態に応じてフォームを初期化
   useEffect(() => {
-    if (isEditMode && initialData) {
-      setFormData(initialData);
-      setCurrentStep(2); // 編集モードは直接Step 2から開始
+    if (isOpen) {
+      if (isEditMode && initialData) {
+        initializeEditMode(initialData);
+      } else {
+        resetForm();
+      }
     }
-  }, [isEditMode, initialData]);
+  }, [isOpen, isEditMode, initialData, resetForm, initializeEditMode]);
 
+  // フォーム送信処理
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(formData);
   };
 
+  // バッジ選択処理
   const handleBadgeChange = (badge: BadgeType, checked: boolean) => {
     setFormData((prev) => ({
       ...prev,
@@ -148,44 +176,33 @@ export default function CreatePopModal({
     }));
   };
 
+  // 価格変更処理
   const handlePriceChange = (value: string) => {
     const numValue = parseInt(value) || 0;
     setFormData((prev) => ({ ...prev, price: numValue }));
   };
 
-  // 価格提案を取得
+  // 価格提案取得
   const fetchPriceSuggestions = async (releaseId: string) => {
     setIsFetchingPriceSuggestions(true);
     try {
       const response = await fetch("/api/discogs/price-suggestions", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ releaseId }),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        console.warn("価格提案取得エラー:", errorData.error);
-
-        // エラーの詳細をログに出力
-        if (errorData.details) {
-          console.warn("エラー詳細:", errorData.details);
-        }
-
-        // エラーは静かに処理（価格提案は必須ではない）
+        console.warn("価格提案取得エラー");
         return;
       }
 
       const result = await response.json();
-
       if (!result.success || !result.data) {
         console.warn("無効な価格提案レスポンス形式");
         return;
       }
 
-      // 価格提案データを変換
       const priceSuggestions: DiscogsPriceSuggestionsData = {};
       result.data.forEach((suggestion: PriceSuggestion) => {
         priceSuggestions[suggestion.condition] = {
@@ -194,30 +211,21 @@ export default function CreatePopModal({
         };
       });
 
-      // フォームデータに価格提案を設定
-      setFormData((prev) => ({
-        ...prev,
-        priceSuggestions,
-      }));
-
-      console.log("価格提案を取得しました:", priceSuggestions);
+      setFormData((prev) => ({ ...prev, priceSuggestions }));
     } catch (error) {
       console.error("価格提案取得エラー:", error);
-      // エラーは静かに処理（価格提案は必須ではない）
     } finally {
       setIsFetchingPriceSuggestions(false);
     }
   };
 
-  // Discogsデータを取得
+  // Discogsデータ取得
   const fetchDiscogsData = async (url: string) => {
     setIsFetchingDiscogs(true);
     try {
       const response = await fetch("/api/discogs", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url }),
       });
 
@@ -227,15 +235,18 @@ export default function CreatePopModal({
       }
 
       const result = await response.json();
-
       if (!result.success || !result.data) {
         throw new Error("無効なレスポンス形式");
       }
 
-      // DiscogsデータをReleaseResponse形式に変換
       const releaseData = result.data;
+      const discogsId = releaseData.id?.toString();
+      if (!discogsId || discogsId.trim() === "") {
+        throw new Error("有効なDiscogs IDが取得できませんでした");
+      }
+
       const discogsResponse: ReleaseResponse = {
-        discogsId: releaseData.id?.toString() || "",
+        discogsId,
         title: releaseData.title || "",
         artistName: extractArtistName(releaseData),
         label: extractLabel(releaseData),
@@ -254,8 +265,6 @@ export default function CreatePopModal({
       };
 
       setDiscogsData(discogsResponse);
-
-      // フォームデータにDiscogsデータを設定
       setFormData((prev) => ({
         ...prev,
         title: discogsResponse.title,
@@ -268,7 +277,9 @@ export default function CreatePopModal({
         discogsReleaseId: discogsResponse.discogsId,
       }));
 
-      // 価格提案も同時に取得
+      setTempGenres(discogsResponse.genres.join(", "));
+      setTempStyles(discogsResponse.styles.join(", "));
+
       if (discogsResponse.discogsId) {
         await fetchPriceSuggestions(discogsResponse.discogsId);
       }
@@ -286,7 +297,7 @@ export default function CreatePopModal({
     }
   };
 
-  // アーティスト名を抽出
+  // ユーティリティ関数
   const extractArtistName = (data: DiscogsReleaseData): string => {
     if (
       data.artists &&
@@ -298,7 +309,6 @@ export default function CreatePopModal({
     return "Unknown Artist";
   };
 
-  // レーベル情報を抽出
   const extractLabel = (data: DiscogsReleaseData): string => {
     if (data.labels && Array.isArray(data.labels) && data.labels.length > 0) {
       return data.labels.map((label) => label.name).join(", ");
@@ -306,52 +316,70 @@ export default function CreatePopModal({
     return "";
   };
 
-  // リリース日を抽出
   const extractReleaseDate = (data: DiscogsReleaseData): string => {
     if (data.released) return data.released;
     if (data.year) return data.year.toString();
     return "";
   };
 
-  // リリース年を抽出
   const extractReleaseYear = (data: DiscogsReleaseData): string => {
     if (data.year) return data.year.toString();
     if (data.released) return data.released.split("-")[0];
     return "";
   };
 
-  const resetForm = () => {
-    // 編集モードの場合は初期データを保持
-    if (isEditMode && initialData) {
-      setFormData(initialData);
-      setCurrentStep(2);
-    } else {
-      setFormData({
-        discogsUrl: "",
-        title: "",
-        artistName: "",
-        label: "",
-        country: "",
-        releaseDate: "",
-        genres: [],
-        styles: [],
-        comment: "",
-        badges: [],
-        condition: "New",
-        price: 0,
-        priceSuggestions: undefined,
-        discogsReleaseId: undefined,
-      });
-      setCurrentStep(1);
-    }
-    setDiscogsData(null);
-    setIsFetchingDiscogs(false);
-    setIsFetchingPriceSuggestions(false);
-  };
-
+  // モーダルを閉じる処理
   const handleClose = () => {
     resetForm();
     onClose();
+  };
+
+  // ジャンル入力処理
+  const handleGenresChange = (value: string) => {
+    setTempGenres(value);
+    setFormData((prev) => ({
+      ...prev,
+      genres: value.split(",").map((g) => g.trim()),
+    }));
+  };
+
+  const handleGenresFocus = () => {
+    setIsGenresFocused(true);
+    setTempGenres(formData.genres.join(", "));
+  };
+
+  const handleGenresBlur = () => {
+    setIsGenresFocused(false);
+    const cleanedGenres = tempGenres
+      .split(",")
+      .map((g) => g.trim())
+      .filter((g) => g.length > 0);
+    setFormData((prev) => ({ ...prev, genres: cleanedGenres }));
+    setTempGenres(cleanedGenres.join(", "));
+  };
+
+  // スタイル入力処理
+  const handleStylesChange = (value: string) => {
+    setTempStyles(value);
+    setFormData((prev) => ({
+      ...prev,
+      styles: value.split(",").map((s) => s.trim()),
+    }));
+  };
+
+  const handleStylesFocus = () => {
+    setIsStylesFocused(true);
+    setTempStyles(formData.styles.join(", "));
+  };
+
+  const handleStylesBlur = () => {
+    setIsStylesFocused(false);
+    const cleanedStyles = tempStyles
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+    setFormData((prev) => ({ ...prev, styles: cleanedStyles }));
+    setTempStyles(cleanedStyles.join(", "));
   };
 
   return (
@@ -372,7 +400,6 @@ export default function CreatePopModal({
 
         {currentStep === 1 && !isEditMode ? (
           <div className='space-y-6'>
-            {/* Step 1: URL入力 */}
             <div className='space-y-4'>
               <div className='space-y-2'>
                 <Label htmlFor='discogsUrl'>Discogs URL</Label>
@@ -388,6 +415,7 @@ export default function CreatePopModal({
                   }
                   placeholder='https://www.discogs.com/release/...'
                   disabled={isFetchingDiscogs}
+                  autoComplete='off'
                 />
                 <p className='text-xs text-muted-foreground'>
                   Discogs URLを入力すると、自動的にリリース情報を取得します
@@ -406,20 +434,7 @@ export default function CreatePopModal({
                 <Button
                   type='button'
                   variant='outline'
-                  onClick={() => {
-                    // 手動入力用に空のフォームデータを設定
-                    setFormData((prev) => ({
-                      ...prev,
-                      title: "",
-                      artistName: "",
-                      label: "",
-                      country: "",
-                      releaseDate: "",
-                      genres: [],
-                      styles: [],
-                    }));
-                    setCurrentStep(2);
-                  }}
+                  onClick={() => setCurrentStep(2)}
                   disabled={isFetchingDiscogs}
                   className='flex-1'
                 >
@@ -430,7 +445,6 @@ export default function CreatePopModal({
           </div>
         ) : (
           <form onSubmit={handleSubmit} className='space-y-6'>
-            {/* Step 2: リリース情報編集 */}
             <div className='space-y-4'>
               <div className='space-y-2'>
                 <Label htmlFor='artistName'>アーティスト名 *</Label>
@@ -446,6 +460,7 @@ export default function CreatePopModal({
                   placeholder='アーティスト名'
                   required
                   disabled={isLoading}
+                  autoComplete='off'
                 />
               </div>
               <div className='space-y-2'>
@@ -462,6 +477,7 @@ export default function CreatePopModal({
                   placeholder='アルバムタイトル'
                   required
                   disabled={isLoading}
+                  autoComplete='off'
                 />
               </div>
 
@@ -479,6 +495,7 @@ export default function CreatePopModal({
                     }
                     placeholder='レーベル名'
                     disabled={isLoading}
+                    autoComplete='off'
                   />
                 </div>
 
@@ -495,6 +512,7 @@ export default function CreatePopModal({
                     }
                     placeholder='リリース国'
                     disabled={isLoading}
+                    autoComplete='country-name'
                   />
                 </div>
               </div>
@@ -513,6 +531,7 @@ export default function CreatePopModal({
                     }
                     placeholder='2024'
                     disabled={isLoading}
+                    autoComplete='off'
                   />
                 </div>
 
@@ -520,18 +539,15 @@ export default function CreatePopModal({
                   <Label htmlFor='genres'>ジャンル</Label>
                   <Input
                     id='genres'
-                    value={formData.genres.join(", ")}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        genres: e.target.value
-                          .split(",")
-                          .map((g) => g.trim())
-                          .filter((g) => g),
-                      }))
+                    value={
+                      isGenresFocused ? tempGenres : formData.genres.join(", ")
                     }
+                    onChange={(e) => handleGenresChange(e.target.value)}
+                    onFocus={handleGenresFocus}
+                    onBlur={handleGenresBlur}
                     placeholder='Rock, Pop, Electronic'
                     disabled={isLoading}
+                    autoComplete='off'
                   />
                 </div>
               </div>
@@ -540,23 +556,19 @@ export default function CreatePopModal({
                 <Label htmlFor='styles'>スタイル</Label>
                 <Input
                   id='styles'
-                  value={formData.styles.join(", ")}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      styles: e.target.value
-                        .split(",")
-                        .map((s) => s.trim())
-                        .filter((s) => s),
-                    }))
+                  value={
+                    isStylesFocused ? tempStyles : formData.styles.join(", ")
                   }
+                  onChange={(e) => handleStylesChange(e.target.value)}
+                  onFocus={handleStylesFocus}
+                  onBlur={handleStylesBlur}
                   placeholder='Alternative, Indie, Synth-pop'
                   disabled={isLoading}
+                  autoComplete='off'
                 />
               </div>
             </div>
 
-            {/* コンディション */}
             <div className='space-y-3'>
               <Label>レコードコンディション</Label>
               <RadioGroup
@@ -591,7 +603,6 @@ export default function CreatePopModal({
               </RadioGroup>
             </div>
 
-            {/* 価格 */}
             <div className='space-y-2'>
               <Label htmlFor='price'>価格</Label>
               <div className='flex gap-2'>
@@ -604,6 +615,7 @@ export default function CreatePopModal({
                   min='0'
                   disabled={isLoading}
                   className='flex-1'
+                  autoComplete='off'
                 />
                 {formData.discogsReleaseId && (
                   <Button
@@ -621,7 +633,6 @@ export default function CreatePopModal({
                 )}
               </div>
 
-              {/* 価格提案表示 */}
               {formData.priceSuggestions &&
                 Object.keys(formData.priceSuggestions).length > 0 && (
                   <div className='space-y-2'>
@@ -641,7 +652,7 @@ export default function CreatePopModal({
                             onClick={() => {
                               setFormData((prev) => ({
                                 ...prev,
-                                price: Math.floor(data.price), // 価格のみを更新（コンディションは変更しない）
+                                price: Math.floor(data.price),
                               }));
                             }}
                           >
@@ -664,7 +675,6 @@ export default function CreatePopModal({
               </p>
             </div>
 
-            {/* バッジ */}
             <div className='space-y-3'>
               <Label>バッジ（複数選択可）</Label>
               <div className='grid grid-cols-2 gap-3'>
@@ -692,7 +702,6 @@ export default function CreatePopModal({
               </div>
             </div>
 
-            {/* コメント */}
             <div className='space-y-2'>
               <Label htmlFor='comment'>コメント</Label>
               <Textarea
@@ -705,6 +714,7 @@ export default function CreatePopModal({
                 rows={3}
                 maxLength={200}
                 disabled={isLoading}
+                autoComplete='off'
               />
               <p className='text-xs text-muted-foreground'>
                 {formData.comment.length}/200文字

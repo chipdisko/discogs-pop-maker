@@ -44,34 +44,96 @@ export class PopApplicationService {
       }
       const discogsUrl = new DiscogsUrl(request.discogsUrl);
 
-      // 2. Discogsからリリース情報を取得
-      const release = await this.discogsRepository.getReleaseByUrl(discogsUrl);
+      // 2. Discogsからリリース情報を取得（Discogs Release IDを取得するため）
+      let discogsRelease: Release;
+      let discogsId: string;
 
-      // 3. コメントを作成
+      try {
+        discogsRelease = await this.discogsRepository.getReleaseByUrl(
+          discogsUrl
+        );
+        discogsId = discogsRelease.getDiscogsId();
+      } catch (discogsError) {
+        // Discogsデータの取得に失敗した場合、手動入力データとして処理
+        console.warn("Discogsデータの取得に失敗しました:", discogsError);
+
+        // 手動入力データからリリース情報を作成
+        const release = Release.create({
+          discogsId: `manual_${Date.now()}`, // 手動入力用のID
+          title: request.title || "",
+          artistName: request.artistName || "",
+          label: request.label || "",
+          country: request.country || "",
+          releaseDate: request.releaseDate || "",
+          genres: request.genres || [],
+          styles: request.styles || [],
+        });
+
+        // コメントを作成
+        const comment = request.comment
+          ? new Comment(request.comment)
+          : Comment.empty();
+
+        // バッジを作成
+        const badges = request.badges
+          ? request.badges.map((b) => Badge.fromString(b))
+          : [];
+
+        // コンディションを作成
+        const condition = request.condition
+          ? Condition.fromString(request.condition)
+          : Condition.create("New");
+
+        // 価格を作成
+        const price = request.price ? Price.create(request.price) : undefined;
+
+        // Popを作成
+        const pop = Pop.create(release, comment, badges, condition, price);
+
+        // 保存
+        await this.popRepository.save(pop);
+
+        // レスポンス形式に変換
+        return this.toPopResponse(pop);
+      }
+
+      // 3. ユーザーが編集したデータを優先してリリース情報を作成
+      const release = Release.create({
+        discogsId: discogsId, // 有効なDiscogs Release ID
+        title: request.title || discogsRelease.getTitle(),
+        artistName: request.artistName || discogsRelease.getArtistName(),
+        label: request.label || discogsRelease.getLabel(),
+        country: request.country || discogsRelease.getCountry(),
+        releaseDate: request.releaseDate || discogsRelease.getReleaseDate(),
+        genres: request.genres || discogsRelease.getGenres(),
+        styles: request.styles || discogsRelease.getStyles(),
+      });
+
+      // 4. コメントを作成
       const comment = request.comment
         ? new Comment(request.comment)
         : Comment.empty();
 
-      // 4. バッジを作成
+      // 5. バッジを作成
       const badges = request.badges
         ? request.badges.map((b) => Badge.fromString(b))
         : [];
 
-      // 5. コンディションを作成
+      // 6. コンディションを作成
       const condition = request.condition
         ? Condition.fromString(request.condition)
         : Condition.create("New");
 
-      // 6. 価格を作成
+      // 7. 価格を作成
       const price = request.price ? Price.create(request.price) : undefined;
 
-      // 7. Popを作成
+      // 8. Popを作成
       const pop = Pop.create(release, comment, badges, condition, price);
 
-      // 8. 保存
+      // 9. 保存
       await this.popRepository.save(pop);
 
-      // 9. レスポンス形式に変換
+      // 10. レスポンス形式に変換
       return this.toPopResponse(pop);
     } catch (error) {
       return {

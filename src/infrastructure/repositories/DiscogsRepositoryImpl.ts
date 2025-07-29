@@ -75,8 +75,11 @@ export class DiscogsRepositoryImpl implements DiscogsRepository {
     // タイトルを取得
     const title = data.title || "";
 
-    // Discogs IDを取得
-    const discogsId = data.id?.toString() || "";
+    // Discogs IDを取得（有効性を検証）
+    const discogsId = data.id?.toString();
+    if (!discogsId || discogsId.trim() === "") {
+      throw new Error("有効なDiscogs IDが取得できませんでした");
+    }
 
     // レーベル情報を抽出
     const label = this.extractLabel(data);
