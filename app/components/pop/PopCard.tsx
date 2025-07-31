@@ -1,5 +1,5 @@
 import React from "react";
-import type { PopResponse } from "../../src/application";
+import type { PopResponse } from "@/src/application";
 
 interface PopCardProps {
   pop: PopResponse;

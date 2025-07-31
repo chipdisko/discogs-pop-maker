@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { X } from "lucide-react";
-import A4Canvas from "./A4Canvas";
-import type { PrintDataResponse } from "../../src/application";
+import A4Canvas from "../print/A4Canvas";
+import type { PrintDataResponse } from "@/src/application";
 
 interface PrintPreviewModalProps {
   isOpen: boolean;

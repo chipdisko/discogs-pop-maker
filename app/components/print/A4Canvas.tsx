@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from "react";
-import type { A4PageResponse } from "../../src/application";
-import { drawPopTemplateContent } from "./PopTemplate";
+import type { A4PageResponse } from "@/src/application";
+import { drawPopTemplateContent } from "../pop/PopTemplate";
 
 interface A4CanvasProps {
   pageData: A4PageResponse;

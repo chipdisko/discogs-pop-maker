@@ -13,13 +13,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import type { BadgeType, ConditionType } from "../../src/domain";
-import type { ReleaseResponse } from "../../src/application";
+import type { BadgeType, ConditionType } from "@/src/domain";
+import type { ReleaseResponse } from "@/src/application";
 import type {
   DiscogsReleaseData,
   PriceSuggestion,
   DiscogsPriceSuggestionsData,
-} from "../../src/infrastructure/external/DiscogsApiTypes";
+} from "@/src/infrastructure/external/DiscogsApiTypes";
 
 interface CreatePopModalProps {
   isOpen: boolean;

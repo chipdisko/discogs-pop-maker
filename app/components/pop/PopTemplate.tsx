@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from "react";
-import type { PopResponse } from "../../src/application";
+import type { PopResponse } from "@/src/application";
 
 interface PopTemplateProps {
   pop: PopResponse;
