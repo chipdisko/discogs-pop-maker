@@ -9,6 +9,7 @@ interface PopGridProps {
   onToggleSelection: (popId: string) => void;
   onStartEdit: (pop: PopResponse) => void;
   onDelete: (popId: string) => void;
+  onOpenVisualEditor: (pop: PopResponse) => void;
 }
 
 export default function PopGrid({
@@ -19,6 +20,7 @@ export default function PopGrid({
   onToggleSelection,
   onStartEdit,
   onDelete,
+  onOpenVisualEditor,
 }: PopGridProps) {
   return (
     <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
@@ -31,6 +33,7 @@ export default function PopGrid({
           onToggleSelection={onToggleSelection}
           onStartEdit={onStartEdit}
           onDelete={onDelete}
+          onOpenVisualEditor={onOpenVisualEditor}
           isLoading={isLoading}
         />
       ))}

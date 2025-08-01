@@ -14,6 +14,7 @@ interface PopListSectionProps {
   onToggleSelection: (popId: string) => void;
   onStartEdit: (pop: PopResponse) => void;
   onDelete: (popId: string) => void;
+  onOpenVisualEditor: (pop: PopResponse) => void;
 }
 
 export default function PopListSection({
@@ -27,6 +28,7 @@ export default function PopListSection({
   onToggleSelection,
   onStartEdit,
   onDelete,
+  onOpenVisualEditor,
 }: PopListSectionProps) {
   if (pops.length === 0) return null;
 
@@ -51,6 +53,7 @@ export default function PopListSection({
           onToggleSelection={onToggleSelection}
           onStartEdit={onStartEdit}
           onDelete={onDelete}
+          onOpenVisualEditor={onOpenVisualEditor}
         />
       </CardContent>
     </Card>

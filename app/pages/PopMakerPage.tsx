@@ -2,11 +2,14 @@
 
 import PrintPreviewModal from "../components/modal/PrintPreviewModal";
 import CreatePopModal from "../components/modal/CreatePopModal";
+import VisualEditorModal from "../components/modal/VisualEditorModal";
 import Header from "../components/layout/Header";
 import ErrorDisplay from "../components/layout/ErrorDisplay";
 import CreatePopSection from "../components/pop/CreatePopSection";
 import PopListSection from "../components/pop/PopListSection";
 import { usePopMaker } from "../hooks/usePopMaker";
+import { useState } from "react";
+import type { PopResponse } from "@/src/application";
 
 // 一時的なクリアボタン（テスト用）
 const clearLocalStorage = () => {
@@ -45,6 +48,15 @@ export default function PopMakerPage() {
     handleGeneratePrint,
   } = usePopMaker();
 
+  // ビジュアルエディタ用の状態
+  const [isVisualEditorOpen, setIsVisualEditorOpen] = useState(false);
+  const [visualEditorPop, setVisualEditorPop] = useState<PopResponse | null>(null);
+
+  const handleOpenVisualEditor = (pop: PopResponse) => {
+    setVisualEditorPop(pop);
+    setIsVisualEditorOpen(true);
+  };
+
   return (
     <div className='min-h-screen bg-background p-6'>
       <div className='max-w-6xl mx-auto space-y-8'>
@@ -69,6 +81,7 @@ export default function PopMakerPage() {
           onToggleSelection={togglePopSelection}
           onStartEdit={handleStartEdit}
           onDelete={handleDeletePop}
+          onOpenVisualEditor={handleOpenVisualEditor}
         />
       </div>
 
@@ -123,6 +136,18 @@ export default function PopMakerPage() {
             : undefined
         }
       />
+
+      {/* ビジュアルエディタモーダル */}
+      {visualEditorPop && (
+        <VisualEditorModal
+          isOpen={isVisualEditorOpen}
+          onClose={() => {
+            setIsVisualEditorOpen(false);
+            setVisualEditorPop(null);
+          }}
+          pop={visualEditorPop}
+        />
+      )}
     </div>
   );
 }
