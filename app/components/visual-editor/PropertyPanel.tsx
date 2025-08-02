@@ -2,6 +2,7 @@
 
 import React from 'react';
 import type { TemplateElement } from './types';
+import { getLabelText } from './utils/labelUtils';
 
 interface PropertyPanelProps {
   selectedElement: TemplateElement | undefined;
@@ -270,6 +271,91 @@ export default function PropertyPanel({
             </div>
           </div>
         )}
+
+        {/* データ名ラベル設定 */}
+        <div>
+          <h4 className="text-sm font-medium mb-2">データ名ラベル</h4>
+          <div className="space-y-2">
+            <label className="flex items-center">
+              <input
+                type="checkbox"
+                checked={selectedElement.label?.show || false}
+                onChange={(e) =>
+                  onUpdateElement(selectedElement.id, {
+                    label: {
+                      ...selectedElement.label,
+                      show: e.target.checked,
+                    },
+                  })
+                }
+                className="mr-2"
+              />
+              <span className="text-sm">ラベルを表示</span>
+            </label>
+            
+            {selectedElement.label?.show && (
+              <div className="pl-6 space-y-2">
+                <div>
+                  <label className="text-xs text-gray-600 dark:text-gray-400">
+                    表示テキスト
+                  </label>
+                  <input
+                    type="text"
+                    value={selectedElement.label?.text || ''}
+                    placeholder={getLabelText(selectedElement.dataBinding)}
+                    onChange={(e) =>
+                      onUpdateElement(selectedElement.id, {
+                        label: {
+                          ...selectedElement.label,
+                          text: e.target.value,
+                        },
+                      })
+                    }
+                    className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-600 dark:text-gray-400">
+                    フォントサイズ (px)
+                  </label>
+                  <input
+                    type="number"
+                    value={selectedElement.label?.fontSize || 12}
+                    onChange={(e) =>
+                      onUpdateElement(selectedElement.id, {
+                        label: {
+                          ...selectedElement.label,
+                          fontSize: parseInt(e.target.value),
+                        },
+                      })
+                    }
+                    min="8"
+                    max="24"
+                    className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-600 dark:text-gray-400">
+                    文字色
+                  </label>
+                  <input
+                    type="color"
+                    value={selectedElement.label?.color || '#666666'}
+                    onChange={(e) =>
+                      onUpdateElement(selectedElement.id, {
+                        label: {
+                          ...selectedElement.label,
+                          color: e.target.value,
+                        },
+                      })
+                    }
+                    className="w-full h-8 border rounded cursor-pointer"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import React, { useMemo } from 'react';
-import type { PopResponse } from '@/src/application';
-import type { TemplateElement } from './types';
-import { calculateAutoFitStyle } from './utils/textUtils';
-import { getSampleValue, getSampleBadges } from './utils/sampleData';
-import QRCodeRenderer from './QRCodeRenderer';
-import BadgeRenderer from './BadgeRenderer';
+import React, { useMemo } from "react";
+import type { PopResponse } from "@/src/application";
+import type { TemplateElement } from "./types";
+import { calculateAutoFitStyle } from "./utils/textUtils";
+import { getSampleValue, getSampleBadges } from "./utils/sampleData";
+import QRCodeRenderer from "./QRCodeRenderer";
+import BadgeRenderer from "./BadgeRenderer";
 
 interface ElementRendererProps {
   element: TemplateElement;
@@ -30,91 +30,104 @@ export default function ElementRenderer({
     if (useSampleData) {
       return getSampleValue(element.dataBinding, element.customText);
     }
-    
+
     switch (element.dataBinding) {
-      case 'artist':
+      case "artist":
         return pop.release.artistName;
-      case 'title':
+      case "title":
         return pop.release.title;
-      case 'label':
-        return pop.release.label || '不明';
-      case 'countryYear':
-        return [pop.release.country || '不明', pop.release.releaseYear || '不明']
+      case "label":
+        return pop.release.label || "不明";
+      case "countryYear":
+        return [
+          pop.release.country || "不明",
+          pop.release.releaseYear || "不明",
+        ]
           .filter(Boolean)
-          .join(' • ');
-      case 'condition':
+          .join(" • ");
+      case "condition":
         return pop.condition;
-      case 'genre':
-        return pop.release.genreStyleString || '';
-      case 'price':
-        return pop.price === 0 ? 'FREE' : `¥${pop.price.toLocaleString()}`;
-      case 'comment':
-        return pop.comment || '';
-      case 'custom':
-        return element.customText || '';
-      case 'discogsUrl':
-        return `https://www.discogs.com/release/${pop.release.discogsId}` || '';
+      case "genre":
+        return pop.release.genreStyleString || "";
+      case "price":
+        return pop.price === 0 ? "FREE" : `¥${pop.price.toLocaleString()}`;
+      case "comment":
+        return pop.comment || "";
+      case "custom":
+        return element.customText || "";
+      case "discogsUrl":
+        return `https://www.discogs.com/release/${pop.release.discogsId}` || "";
       default:
-        return '';
+        return "";
     }
   }, [element.dataBinding, element.customText, pop, useSampleData]);
 
   // 自動調整スタイルの計算
   const autoFitStyle = useMemo(() => {
-    if (element.type !== 'text' || !dataValue) return {};
-    
+    if (element.type !== "text" || !dataValue) return {};
+
     // 実際の寸法をピクセルに変換（仮の値、実際はmm→pxの変換が必要）
     const containerWidth = element.size.width * 3.7795275591; // mm to px
     const containerHeight = element.size.height * 3.7795275591;
-    
-    return calculateAutoFitStyle(element, dataValue, containerWidth, containerHeight);
+
+    return calculateAutoFitStyle(
+      element,
+      dataValue,
+      containerWidth,
+      containerHeight
+    );
   }, [element, dataValue]);
 
   // スタイルの適用
   const style: React.CSSProperties = useMemo(() => {
     const baseStyle: React.CSSProperties = {
-      width: '100%',
-      height: '100%',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontSize: `${(autoFitStyle.fontSize || element.style?.fontSize || 12) * zoom}px`,
-      fontFamily: element.style?.fontFamily || 'Arial, sans-serif',
-      color: element.style?.color || '#000000',
-      backgroundColor: element.style?.backgroundColor || 'transparent',
-      borderRadius: element.style?.borderRadius ? `${element.style.borderRadius}px` : '0',
+      width: "100%",
+      height: "100%",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: `${
+        (autoFitStyle.fontSize || element.style?.fontSize || 12) * zoom
+      }px`,
+      fontFamily: element.style?.fontFamily || "Arial, sans-serif",
+      color: element.style?.color || "#000000",
+      backgroundColor: element.style?.backgroundColor || "transparent",
+      borderRadius: element.style?.borderRadius
+        ? `${element.style.borderRadius}px`
+        : "0",
       opacity: element.style?.opacity || 1,
-      overflow: 'visible',
+      overflow: "visible",
     };
 
     // 変換の適用
     const transforms: string[] = [];
-    
+
     // 裏面要素の180度回転（プレビューモード時のみ）
     if (isBackSide && element.autoRotate && showBackSidePreview) {
-      transforms.push('rotateZ(180deg)');
+      transforms.push("rotateZ(180deg)");
     }
 
     // テキストの圧縮（自動調整またはマニュアル設定）
     const scaleX = autoFitStyle.scaleX || element.style?.scaleX || 1;
     const scaleY = autoFitStyle.scaleY || element.style?.scaleY || 1;
-    
+
     if (scaleX !== 1 || scaleY !== 1) {
       transforms.push(`scale(${scaleX}, ${scaleY})`);
     }
-    
+
     if (transforms.length > 0) {
-      baseStyle.transform = transforms.join(' ');
-      
+      baseStyle.transform = transforms.join(" ");
+
       // transform-originの決定ロジック
-      let transformOrigin = 'center center';
-      
-      if (element.type === 'text') {
+      let transformOrigin = "center center";
+
+      if (element.type === "text") {
         // 裏面要素でZ軸回転がある場合は中央基準、それ以外は左基準
-        const hasZRotation = isBackSide && element.autoRotate && showBackSidePreview;
-        transformOrigin = hasZRotation ? 'center center' : 'left center';
+        const hasZRotation =
+          isBackSide && element.autoRotate && showBackSidePreview;
+        transformOrigin = hasZRotation ? "center center" : "left top";
       }
-      
+
       baseStyle.transformOrigin = transformOrigin;
     }
 
@@ -129,48 +142,59 @@ export default function ElementRenderer({
 
   // 要素タイプに応じたレンダリング
   const renderContent = () => {
-
     switch (element.type) {
-      case 'text':
-        const singleLineBindings = ['artist', 'title', 'label', 'countryYear', 'condition', 'genre', 'price'];
+      case "text":
+        const singleLineBindings = [
+          "artist",
+          "title",
+          "label",
+          "countryYear",
+          "condition",
+          "genre",
+          "price",
+        ];
         const isSingleLine = singleLineBindings.includes(element.dataBinding);
-        
+
         return (
-          <div 
-            className="w-full h-full flex items-center px-1"
+          <div
+            className='w-full h-full flex items-start px-1'
             style={{
-              textAlign: 'left',
-              wordBreak: isSingleLine ? 'keep-all' : 'break-word',
-              whiteSpace: isSingleLine ? 'nowrap' : 'normal',
+              textAlign: "left",
+              wordBreak: isSingleLine ? "keep-all" : "break-word",
+              whiteSpace: isSingleLine ? "nowrap" : "normal",
               lineHeight: 1.2,
             }}
           >
-            {element.dataBinding === 'comment' ? (
+            {element.dataBinding === "comment" ? (
               // コメントは3行固定
-              <div 
-                className="w-full"
+              <div
+                className='w-full'
                 style={{
-                  display: '-webkit-box',
+                  display: "-webkit-box",
                   WebkitLineClamp: 3,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden',
-                  textAlign: 'left',
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                  textAlign: "left",
                   lineHeight: 1.2,
                 }}
               >
                 {dataValue}
               </div>
             ) : (
-              <span style={{ 
-                textAlign: 'left',
-                display: 'block',
-                width: '100%',
-              }}>{dataValue}</span>
+              <span
+                style={{
+                  textAlign: "left",
+                  display: "block",
+                  width: "100%",
+                }}
+              >
+                {dataValue}
+              </span>
             )}
           </div>
         );
 
-      case 'badge':
+      case "badge":
         // バッジのレンダリング
         return (
           <BadgeRenderer
@@ -178,12 +202,12 @@ export default function ElementRenderer({
             useSampleData={useSampleData}
             style={{
               fontSize: `${(element.style?.fontSize || 12) * zoom}px`,
-              fontFamily: element.style?.fontFamily || 'Arial, sans-serif',
+              fontFamily: element.style?.fontFamily || "Arial, sans-serif",
             }}
           />
         );
 
-      case 'qrcode':
+      case "qrcode":
         // QRコードのレンダリング
         return (
           <QRCodeRenderer
@@ -201,9 +225,5 @@ export default function ElementRenderer({
     }
   };
 
-  return (
-    <div style={style}>
-      {renderContent()}
-    </div>
-  );
+  return <div style={style}>{renderContent()}</div>;
 }

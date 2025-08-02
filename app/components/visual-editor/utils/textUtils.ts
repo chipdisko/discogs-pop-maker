@@ -39,33 +39,11 @@ export function measureText(
   const lines: string[] = [];
   
   if (singleLine) {
-    // 1行表示強制モード（アーティスト名、タイトルなど）
-    lines.push(text);
-  } else if (maxLines === 3) {
-    // コメント専用の3行固定処理
-    const result = wrapTextToLines(ctx, text, maxWidth, 3);
-    lines.push(...result.lines);
+    // 1行表示強制モード（改行コードは無視）
+    lines.push(text.replace(/\n/g, ' '));
   } else {
-    // 通常のテキスト処理（改行あり）
-    const words = text.split(' ');
-    let currentLine = words[0] || '';
-    
-    for (let i = 1; i < words.length; i++) {
-      const word = words[i];
-      const testLine = `${currentLine} ${word}`;
-      const metrics = ctx.measureText(testLine);
-      
-      if (metrics.width <= maxWidth) {
-        currentLine = testLine;
-      } else {
-        lines.push(currentLine);
-        currentLine = word;
-      }
-    }
-    
-    if (currentLine) {
-      lines.push(currentLine);
-    }
+    // 複数行テキスト（改行コードで分割）
+    lines.push(...text.split('\n').filter(line => line.length > 0));
   }
 
   const actualWidth = Math.max(...lines.map(line => ctx.measureText(line).width));
@@ -167,7 +145,6 @@ export function calculateAutoFitStyle(
 
   const fontSize = element.style?.fontSize || 12;
   const fontFamily = element.style?.fontFamily || 'Arial, sans-serif';
-  const maxLines = element.dataBinding === 'comment' ? 3 : undefined;
   
   // アーティスト名、タイトル、レーベルなどは1行表示を強制
   const singleLineBindings = ['artist', 'title', 'label', 'countryYear', 'condition', 'genre', 'price'];
@@ -179,7 +156,7 @@ export function calculateAutoFitStyle(
     fontFamily,
     containerWidth,
     containerHeight,
-    maxLines,
+    undefined,
     singleLine
   );
 

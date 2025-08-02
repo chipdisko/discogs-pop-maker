@@ -7,7 +7,7 @@ export const SAMPLE_POP_DATA: PopResponse = {
   price: 2800,
   condition: "VG+",
   comment:
-    "ジャズの名盤として知られる傑作アルバム。マイルス・デイヴィスの代表作の一つで、モード・ジャズの金字塔。",
+    "ジャズの名盤として知られる傑作アルバム。\nマイルス・デイヴィスの代表作の一つで、モード・ジャズの金字塔。\nめちゃおすすめ",
   badges: [
     { type: "RECOMMEND" as BadgeType, displayName: "おすすめ" },
     { type: "MUST" as BadgeType, displayName: "マスト" },
@@ -15,7 +15,7 @@ export const SAMPLE_POP_DATA: PopResponse = {
   release: {
     discogsId: "sample-release-001",
     artistName: "Miles Davis Master Piece of Cakes The King of Bebop",
-    title: "Kind of Blue That Tastes Like Cake For Breakfast",
+    title: "Kind of Blue That Tastes Like Cake",
     label: "Columbia",
     country: "US",
     releaseDate: "1959-08-17",

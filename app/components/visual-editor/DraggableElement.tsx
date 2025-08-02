@@ -1,11 +1,12 @@
-'use client';
+"use client";
 
-import React, { useRef, useCallback, useEffect, useState } from 'react';
-import { useDrag, ConnectDragSource } from 'react-dnd';
-import type { PopResponse } from '@/src/application';
-import type { TemplateElement, DropResult } from './types';
-import ElementRenderer from './ElementRenderer';
-import ResizeHandler from './ResizeHandler';
+import React, { useRef, useCallback, useEffect, useState } from "react";
+import { useDrag, ConnectDragSource } from "react-dnd";
+import type { PopResponse } from "@/src/application";
+import type { TemplateElement, DropResult } from "./types";
+import ElementRenderer from "./ElementRenderer";
+import ResizeHandler from "./ResizeHandler";
+import { getLabelText } from "./utils/labelUtils";
 
 interface DraggableElementProps {
   element: TemplateElement;
@@ -15,7 +16,11 @@ interface DraggableElementProps {
   mmToPx: (mm: number) => number;
   pxToMm: (px: number) => number;
   onMove: (elementId: string, deltaX: number, deltaY: number) => void;
-  onResize: (elementId: string, newSize: { width: number; height: number }, newPosition?: { x: number; y: number }) => void;
+  onResize: (
+    elementId: string,
+    newSize: { width: number; height: number },
+    newPosition?: { x: number; y: number }
+  ) => void;
   onSelect: () => void;
   pop: PopResponse;
   isPanningMode?: boolean;
@@ -35,63 +40,69 @@ export default function DraggableElement({
   isPanningMode = false,
 }: DraggableElementProps) {
   const [isDragging, setIsDragging] = useState(false);
-  
+
   // ドラッグ設定
-  const [{ opacity }, drag] = useDrag(() => ({
-    type: 'element',
-    canDrag: () => !isPanningMode,
-    item: () => {
-      setIsDragging(true);
-      return { 
-        id: element.id, 
-        type: 'existing' as const,
-        position: { 
-          x: element.position.x, 
-          y: element.position.y 
+  const [{ opacity }, drag] = useDrag(
+    () => ({
+      type: "element",
+      canDrag: () => !isPanningMode,
+      item: () => {
+        setIsDragging(true);
+        return {
+          id: element.id,
+          type: "existing" as const,
+          position: {
+            x: element.position.x,
+            y: element.position.y,
+          },
+        };
+      },
+      end: (item, monitor) => {
+        setIsDragging(false);
+
+        // ドロップターゲットからの結果を確認
+        const dropResult = monitor.getDropResult() as DropResult | null;
+        if (dropResult && dropResult.delta) {
+          onMove(element.id, dropResult.delta.x, dropResult.delta.y);
+          return;
         }
-      };
-    },
-    end: (item, monitor) => {
-      setIsDragging(false);
-      
-      // ドロップターゲットからの結果を確認
-      const dropResult = monitor.getDropResult() as DropResult | null;
-      if (dropResult && dropResult.delta) {
-        onMove(element.id, dropResult.delta.x, dropResult.delta.y);
-        return;
-      }
-      
-      // フォールバック: react-dndの標準方法
-      const delta = monitor.getDifferenceFromInitialOffset();
-      if (delta && (Math.abs(delta.x) > 1 || Math.abs(delta.y) > 1)) {
-        onMove(element.id, delta.x, delta.y);
-      }
-    },
-    collect: (monitor) => ({
-      opacity: monitor.isDragging() ? 0.5 : 1,
+
+        // フォールバック: react-dndの標準方法
+        const delta = monitor.getDifferenceFromInitialOffset();
+        if (delta && (Math.abs(delta.x) > 1 || Math.abs(delta.y) > 1)) {
+          onMove(element.id, delta.x, delta.y);
+        }
+      },
+      collect: (monitor) => ({
+        opacity: monitor.isDragging() ? 0.5 : 1,
+      }),
     }),
-  }), [element.id, element.position.x, element.position.y, onMove, isPanningMode]);
+    [element.id, element.position.x, element.position.y, onMove, isPanningMode]
+  );
 
   // 要素の位置とサイズ
   const style: React.CSSProperties = {
-    position: 'absolute',
+    position: "absolute",
     left: mmToPx(element.position.x),
     top: mmToPx(element.position.y),
     width: mmToPx(element.size.width),
     height: mmToPx(element.size.height),
     opacity,
-    cursor: isPanningMode ? 'grab' : (isDragging ? 'grabbing' : 'grab'),
-    overflow: 'visible',  // テキストが圧縮されても見えるように
+    cursor: isPanningMode ? "grab" : isDragging ? "grabbing" : "grab",
+    overflow: "visible", // テキストが圧縮されても見えるように
+    zIndex: isSelected ? 1000 : isDragging ? 999 : 1, // 選択中は最前面、ドラッグ中は準最前面
   };
-  
 
   // クリックハンドラー
-  const handleClick = useCallback((e: React.MouseEvent) => {
-    if (!isDragging) {
-      e.stopPropagation();
-      onSelect();
-    }
-  }, [onSelect, isDragging]);
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (!isDragging) {
+        e.stopPropagation();
+        onSelect();
+      }
+    },
+    [onSelect, isDragging]
+  );
 
   // リサイズハンドル
   const renderResizeHandles = () => {
@@ -107,11 +118,39 @@ export default function DraggableElement({
     );
   };
 
+  // データ名ラベル
+  const renderLabel = () => {
+    if (!element.label?.show) return null;
+
+    const labelText = getLabelText(element.dataBinding, element.label?.text);
+    const fontSize = (element.label?.fontSize || 12) * zoom;
+    const color = element.label?.color || "#666666";
+
+    return (
+      <div
+        className='absolute pointer-events-none leading-none'
+        style={{
+          top: -fontSize - 2,
+          left: 0,
+          fontSize: `${fontSize}px`,
+          color,
+          fontFamily: "Arial, sans-serif",
+          padding: "1px 4px",
+          borderRadius: "2px",
+          whiteSpace: "nowrap",
+          zIndex: 1001,
+        }}
+      >
+        {labelText}
+      </div>
+    );
+  };
+
   return drag(
     <div
       style={style}
       onClick={handleClick}
-      className={`group ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
+      className={`group ${isSelected ? "ring-2 ring-blue-500" : ""}`}
     >
       {/* 要素の内容 */}
       <ElementRenderer
@@ -122,13 +161,16 @@ export default function DraggableElement({
         useSampleData={true}
         zoom={zoom}
       />
-      
+
+      {/* データ名ラベル */}
+      {renderLabel()}
+
       {/* リサイズハンドル */}
       {renderResizeHandles()}
-      
+
       {/* 選択時の枠線 */}
       {isSelected && !isDragging && (
-        <div className="absolute inset-0 border-2 border-blue-500 pointer-events-none" />
+        <div className='absolute inset-0 border-2 border-blue-500 pointer-events-none' />
       )}
     </div>
   ) as React.ReactElement;

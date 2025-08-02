@@ -18,6 +18,13 @@ export interface TemplateElement {
   autoRotate?: boolean; // 裏面エリアで自動180度回転（デフォルトtrue）
   // カスタムテキスト用
   customText?: string; // dataBindingが'custom'の場合の任意テキスト
+  // データ名ラベル設定
+  label?: {
+    show: boolean; // ラベル表示するかどうか
+    text?: string; // カスタムラベルテキスト（未設定時はデフォルト）
+    fontSize?: number; // ラベルフォントサイズ（デフォルト12px）
+    color?: string; // ラベル文字色（デフォルト#666666）
+  };
   // QRコード要素専用
   qrSettings?: {
     errorCorrectionLevel: 'L' | 'M' | 'Q' | 'H';
