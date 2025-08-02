@@ -5,7 +5,7 @@ import type { TemplateElement } from './types';
 
 interface ResizeHandlerProps {
   element: TemplateElement;
-  onResize: (elementId: string, newSize: { width: number; height: number }) => void;
+  onResize: (elementId: string, newSize: { width: number; height: number }, newPosition?: { x: number; y: number }) => void;
   mmToPx: (mm: number) => number;
   pxToMm: (px: number) => number;
 }
@@ -30,6 +30,8 @@ export default function ResizeHandler({
     const startY = e.clientY;
     const startWidth = element.size.width;
     const startHeight = element.size.height;
+    const startPosX = element.position.x;
+    const startPosY = element.position.y;
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
       const deltaX = pxToMm(moveEvent.clientX - startX);
@@ -37,19 +39,28 @@ export default function ResizeHandler({
       
       let newWidth = startWidth;
       let newHeight = startHeight;
+      let newPosX = startPosX;
+      let newPosY = startPosY;
 
       switch (handle) {
         case 'top-left':
           newWidth = Math.max(5, startWidth - deltaX);
           newHeight = Math.max(3, startHeight - deltaY);
+          // 左上をドラッグした場合、位置も変更（ただし最小サイズ制約を考慮）
+          newPosX = startPosX + (startWidth - newWidth);
+          newPosY = startPosY + (startHeight - newHeight);
           break;
         case 'top-right':
           newWidth = Math.max(5, startWidth + deltaX);
           newHeight = Math.max(3, startHeight - deltaY);
+          // 上をドラッグした場合、Y位置を変更（最小サイズ制約を考慮）
+          newPosY = startPosY + (startHeight - newHeight);
           break;
         case 'bottom-left':
           newWidth = Math.max(5, startWidth - deltaX);
           newHeight = Math.max(3, startHeight + deltaY);
+          // 左をドラッグした場合、X位置を変更（最小サイズ制約を考慮）
+          newPosX = startPosX + (startWidth - newWidth);
           break;
         case 'bottom-right':
           newWidth = Math.max(5, startWidth + deltaX);
@@ -57,12 +68,16 @@ export default function ResizeHandler({
           break;
         case 'left':
           newWidth = Math.max(5, startWidth - deltaX);
+          // 左をドラッグした場合、X位置を変更（最小サイズ制約を考慮）
+          newPosX = startPosX + (startWidth - newWidth);
           break;
         case 'right':
           newWidth = Math.max(5, startWidth + deltaX);
           break;
         case 'top':
           newHeight = Math.max(3, startHeight - deltaY);
+          // 上をドラッグした場合、Y位置を変更（最小サイズ制約を考慮）
+          newPosY = startPosY + (startHeight - newHeight);
           break;
         case 'bottom':
           newHeight = Math.max(3, startHeight + deltaY);
@@ -76,7 +91,12 @@ export default function ResizeHandler({
         newHeight = size;
       }
 
-      onResize(element.id, { width: newWidth, height: newHeight });
+      // 位置が変更された場合は、新しい位置も渡す
+      if (newPosX !== startPosX || newPosY !== startPosY) {
+        onResize(element.id, { width: newWidth, height: newHeight }, { x: newPosX, y: newPosY });
+      } else {
+        onResize(element.id, { width: newWidth, height: newHeight });
+      }
     };
 
     const handleMouseUp = () => {

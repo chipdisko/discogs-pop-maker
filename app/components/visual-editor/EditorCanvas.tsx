@@ -154,8 +154,17 @@ export default function EditorCanvas({
   }, []);
 
   // Element resize handler
-  const handleElementResize = useCallback((elementId: string, newSize: { width: number; height: number }) => {
-    onUpdateElement(elementId, { size: newSize });
+  const handleElementResize = useCallback((elementId: string, newSize: { width: number; height: number }, newPosition?: { x: number; y: number }) => {
+    if (newPosition) {
+      // 位置とサイズの両方を更新
+      onUpdateElement(elementId, { 
+        size: newSize,
+        position: newPosition
+      });
+    } else {
+      // サイズのみ更新
+      onUpdateElement(elementId, { size: newSize });
+    }
   }, [onUpdateElement]);
 
   // Element move handler

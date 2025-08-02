@@ -15,7 +15,7 @@ interface DraggableElementProps {
   mmToPx: (mm: number) => number;
   pxToMm: (px: number) => number;
   onMove: (elementId: string, deltaX: number, deltaY: number) => void;
-  onResize: (elementId: string, newSize: { width: number; height: number }) => void;
+  onResize: (elementId: string, newSize: { width: number; height: number }, newPosition?: { x: number; y: number }) => void;
   onSelect: () => void;
   pop: PopResponse;
   isPanningMode?: boolean;
