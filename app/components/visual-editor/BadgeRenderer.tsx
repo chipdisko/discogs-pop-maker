@@ -15,8 +15,6 @@ const BADGE_COLORS: Record<string, { bg: string; text: string }> = {
   MUST: { bg: '#ef4444', text: '#ffffff' },
   RAVE: { bg: '#8b5cf6', text: '#ffffff' },
   ACID: { bg: '#f59e0b', text: '#ffffff' },
-  RARE: { bg: '#f59e0b', text: '#ffffff' },
-  NEW: { bg: '#10b981', text: '#ffffff' },
 };
 
 export default function BadgeRenderer({ pop, style, useSampleData = false }: BadgeRendererProps) {

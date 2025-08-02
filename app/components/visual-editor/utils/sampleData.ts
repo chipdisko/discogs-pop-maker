@@ -8,8 +8,8 @@ export const SAMPLE_POP_DATA: PopResponse = {
   condition: 'VG+',
   comment: 'ジャズの名盤として知られる傑作アルバム。マイルス・デイヴィスの代表作の一つで、モード・ジャズの金字塔。',
   badges: [
-    { type: 'RARE' as BadgeType, displayName: 'レア' },
-    { type: 'NEW' as BadgeType, displayName: '新着' }
+    { type: 'RECOMMEND' as BadgeType, displayName: 'おすすめ' },
+    { type: 'MUST' as BadgeType, displayName: 'マスト' }
   ],
   release: {
     discogsId: 'sample-release-001',
