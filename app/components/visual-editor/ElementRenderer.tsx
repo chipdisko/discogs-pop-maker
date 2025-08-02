@@ -92,7 +92,7 @@ export default function ElementRenderer({
     
     // 裏面要素の180度回転（プレビューモード時のみ）
     if (isBackSide && element.autoRotate && showBackSidePreview) {
-      transforms.push('rotateX(180deg)');
+      transforms.push('rotateZ(180deg)');
     }
 
     // テキストの圧縮（自動調整またはマニュアル設定）
@@ -105,8 +105,17 @@ export default function ElementRenderer({
     
     if (transforms.length > 0) {
       baseStyle.transform = transforms.join(' ');
-      // テキスト要素は左寄せなので、圧縮も左基準にする
-      baseStyle.transformOrigin = element.type === 'text' ? 'left center' : 'center center';
+      
+      // transform-originの決定ロジック
+      let transformOrigin = 'center center';
+      
+      if (element.type === 'text') {
+        // 裏面要素でZ軸回転がある場合は中央基準、それ以外は左基準
+        const hasZRotation = isBackSide && element.autoRotate && showBackSidePreview;
+        transformOrigin = hasZRotation ? 'center center' : 'left center';
+      }
+      
+      baseStyle.transformOrigin = transformOrigin;
     }
 
     // 影の適用

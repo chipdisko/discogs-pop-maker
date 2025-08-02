@@ -1,8 +1,4 @@
-import type {
-  PopResponse,
-  BadgeResponse,
-  ReleaseResponse,
-} from "@/src/application";
+import type { PopResponse } from "@/src/application";
 import type { BadgeType } from "@/src/domain";
 
 // エディタープレビュー用のサンプルデータ

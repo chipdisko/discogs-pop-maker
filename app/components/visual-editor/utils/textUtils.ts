@@ -92,17 +92,6 @@ export function measureText(
     }
   }
 
-  // デバッグ用（後で削除）
-  if (singleLine && needsCompression) {
-    console.log('Text compression:', {
-      text: text.substring(0, 20) + '...',
-      fontSize,
-      containerSize: { width: maxWidth, height: maxHeight },
-      actualSize: { width: actualWidth, height: actualHeight },
-      scale: { x: compressedScaleX, y: compressedScaleY }
-    });
-  }
-  
   return {
     actualWidth,
     actualHeight,
