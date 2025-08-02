@@ -81,6 +81,7 @@ export default function DraggableElement({
     height: mmToPx(element.size.height),
     opacity,
     cursor: isPanningMode ? 'grab' : (isDragging ? 'grabbing' : 'grab'),
+    overflow: 'visible',  // テキストが圧縮されても見えるように
   };
   
 

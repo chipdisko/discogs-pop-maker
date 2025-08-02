@@ -84,7 +84,7 @@ export default function ElementRenderer({
       backgroundColor: element.style?.backgroundColor || 'transparent',
       borderRadius: element.style?.borderRadius ? `${element.style.borderRadius}px` : '0',
       opacity: element.style?.opacity || 1,
-      overflow: 'hidden',
+      overflow: 'visible',
     };
 
     // 変換の適用
@@ -105,7 +105,8 @@ export default function ElementRenderer({
     
     if (transforms.length > 0) {
       baseStyle.transform = transforms.join(' ');
-      baseStyle.transformOrigin = 'center center';
+      // テキスト要素は左寄せなので、圧縮も左基準にする
+      baseStyle.transformOrigin = element.type === 'text' ? 'left center' : 'center center';
     }
 
     // 影の適用
@@ -122,12 +123,16 @@ export default function ElementRenderer({
 
     switch (element.type) {
       case 'text':
+        const singleLineBindings = ['artist', 'title', 'label', 'countryYear', 'condition', 'genre', 'price'];
+        const isSingleLine = singleLineBindings.includes(element.dataBinding);
+        
         return (
           <div 
             className="w-full h-full flex items-center px-1"
             style={{
               textAlign: 'left',
-              wordBreak: 'break-word',
+              wordBreak: isSingleLine ? 'keep-all' : 'break-word',
+              whiteSpace: isSingleLine ? 'nowrap' : 'normal',
               lineHeight: 1.2,
             }}
           >
@@ -147,7 +152,11 @@ export default function ElementRenderer({
                 {dataValue}
               </div>
             ) : (
-              <span style={{ textAlign: 'left' }}>{dataValue}</span>
+              <span style={{ 
+                textAlign: 'left',
+                display: 'block',
+                width: '100%',
+              }}>{dataValue}</span>
             )}
           </div>
         );

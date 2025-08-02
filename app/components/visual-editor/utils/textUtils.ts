@@ -16,7 +16,8 @@ export function measureText(
   fontFamily: string,
   maxWidth: number,
   maxHeight: number,
-  maxLines?: number
+  maxLines?: number,
+  singleLine?: boolean  // 1行表示を強制するオプション
 ): TextMeasurement {
   // 測定用のキャンバスを作成
   const canvas = document.createElement('canvas');
@@ -35,15 +36,18 @@ export function measureText(
   ctx.font = `${fontSize}px ${fontFamily}`;
   
   const lineHeight = fontSize * 1.2;
-  const words = text.split(' ');
   const lines: string[] = [];
   
-  if (maxLines === 3) {
+  if (singleLine) {
+    // 1行表示強制モード（アーティスト名、タイトルなど）
+    lines.push(text);
+  } else if (maxLines === 3) {
     // コメント専用の3行固定処理
     const result = wrapTextToLines(ctx, text, maxWidth, 3);
     lines.push(...result.lines);
   } else {
-    // 通常のテキスト処理
+    // 通常のテキスト処理（改行あり）
+    const words = text.split(' ');
     let currentLine = words[0] || '';
     
     for (let i = 1; i < words.length; i++) {
@@ -65,7 +69,8 @@ export function measureText(
   }
 
   const actualWidth = Math.max(...lines.map(line => ctx.measureText(line).width));
-  const actualHeight = lines.length * lineHeight;
+  // フォントサイズから実際の文字の高さを推定（lineHeightは行間込みなので、文字自体の高さを考慮）
+  const actualHeight = singleLine ? fontSize : lines.length * lineHeight;
 
   let compressedScaleX = 1;
   let compressedScaleY = 1;
@@ -78,12 +83,26 @@ export function measureText(
     needsCompression = true;
   }
 
-  // 高さの圧縮が必要かチェック（3行固定の場合は高さ圧縮なし）
-  if (maxLines !== 3 && actualHeight > maxHeight) {
-    compressedScaleY = Math.max(0.5, maxHeight / actualHeight); // 最小50%
-    needsCompression = true;
+  // 高さの圧縮が必要かチェック
+  if (actualHeight > maxHeight) {
+    // コメント（3行固定）の場合は高さ圧縮なし、それ以外は圧縮を許可
+    if (maxLines !== 3) {
+      compressedScaleY = Math.max(0.5, maxHeight / actualHeight); // 最小50%
+      needsCompression = true;
+    }
   }
 
+  // デバッグ用（後で削除）
+  if (singleLine && needsCompression) {
+    console.log('Text compression:', {
+      text: text.substring(0, 20) + '...',
+      fontSize,
+      containerSize: { width: maxWidth, height: maxHeight },
+      actualSize: { width: actualWidth, height: actualHeight },
+      scale: { x: compressedScaleX, y: compressedScaleY }
+    });
+  }
+  
   return {
     actualWidth,
     actualHeight,
@@ -160,6 +179,10 @@ export function calculateAutoFitStyle(
   const fontSize = element.style?.fontSize || 12;
   const fontFamily = element.style?.fontFamily || 'Arial, sans-serif';
   const maxLines = element.dataBinding === 'comment' ? 3 : undefined;
+  
+  // アーティスト名、タイトル、レーベルなどは1行表示を強制
+  const singleLineBindings = ['artist', 'title', 'label', 'countryYear', 'condition', 'genre', 'price'];
+  const singleLine = singleLineBindings.includes(element.dataBinding);
 
   const measurement = measureText(
     text,
@@ -167,7 +190,8 @@ export function calculateAutoFitStyle(
     fontFamily,
     containerWidth,
     containerHeight,
-    maxLines
+    maxLines,
+    singleLine
   );
 
   if (!measurement.needsCompression) {
