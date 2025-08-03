@@ -198,46 +198,12 @@ export default function PropertyPanel({
             {selectedElement.dataBinding === 'comment' && (
               <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded">
                 <p className="text-xs text-yellow-800 dark:text-yellow-200">
-                  コメントは3行固定で表示されます。
-                  長いテキストは自動的に圧縮されます。
+                  改行に対応しています。
+                  長い行は横方向、高さが足りない場合は縦方向に圧縮されます。
                 </p>
               </div>
             )}
 
-            {/* オーバーフロー設定 */}
-            <div>
-              <h4 className="text-sm font-medium mb-2">オーバーフロー処理</h4>
-              <div className="space-y-2">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={selectedElement.style?.autoFit || false}
-                    onChange={(e) => handleStyleChange('autoFit', e.target.checked)}
-                    className="mr-2"
-                  />
-                  <span className="text-sm">自動調整を有効にする</span>
-                </label>
-                {selectedElement.style?.autoFit && (
-                  <div className="pl-6 space-y-2">
-                    <div>
-                      <label className="text-xs text-gray-600 dark:text-gray-400">
-                        最小フォントサイズ (px)
-                      </label>
-                      <input
-                        type="number"
-                        value={selectedElement.style?.minFontSize || 8}
-                        onChange={(e) =>
-                          handleStyleChange('minFontSize', parseInt(e.target.value))
-                        }
-                        min="6"
-                        max="24"
-                        className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600"
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
           </>
         )}
 

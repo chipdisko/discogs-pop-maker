@@ -166,16 +166,15 @@ export default function ElementRenderer({
             }}
           >
             {element.dataBinding === "comment" ? (
-              // コメントは3行固定
+              // コメントは改行を保持、各行は折り返さない
               <div
                 className='w-full'
                 style={{
-                  display: "-webkit-box",
-                  WebkitLineClamp: 3,
-                  WebkitBoxOrient: "vertical",
-                  overflow: "hidden",
                   textAlign: "left",
                   lineHeight: 1.2,
+                  whiteSpace: "pre", // 改行を保持し、空白を維持、自動折り返しなし
+                  wordBreak: "keep-all",
+                  overflow: "visible",
                 }}
               >
                 {dataValue}

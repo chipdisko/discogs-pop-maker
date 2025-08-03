@@ -43,10 +43,14 @@ export function measureText(
     lines.push(text.replace(/\n/g, ' '));
   } else {
     // 複数行テキスト（改行コードで分割）
-    lines.push(...text.split('\n').filter(line => line.length > 0));
+    const splitLines = text.split('\n');
+    // 空行も保持する（コメントの場合、空行も意図的な可能性がある）
+    lines.push(...splitLines.length > 0 ? splitLines : ['']);
   }
 
-  const actualWidth = Math.max(...lines.map(line => ctx.measureText(line).width));
+  // 各行の幅を測定し、最も長い行の幅を取得
+  const lineWidths = lines.map(line => ctx.measureText(line).width);
+  const actualWidth = lineWidths.length > 0 ? Math.max(...lineWidths) : 0;
   // フォントサイズから実際の文字の高さを推定（lineHeightは行間込みなので、文字自体の高さを考慮）
   const actualHeight = singleLine ? fontSize : lines.length * lineHeight;
 
@@ -63,11 +67,8 @@ export function measureText(
 
   // 高さの圧縮が必要かチェック
   if (actualHeight > maxHeight) {
-    // コメント（3行固定）の場合は高さ圧縮なし、それ以外は圧縮を許可
-    if (maxLines !== 3) {
-      compressedScaleY = Math.max(0.5, maxHeight / actualHeight); // 最小50%
-      needsCompression = true;
-    }
+    compressedScaleY = Math.max(0.5, maxHeight / actualHeight); // 最小50%
+    needsCompression = true;
   }
 
   return {
@@ -139,9 +140,7 @@ export function calculateAutoFitStyle(
   containerWidth: number,
   containerHeight: number
 ): Partial<ElementStyle> {
-  if (!element.style?.autoFit) {
-    return {};
-  }
+  // 全てのテキスト要素に自動調整を適用
 
   const fontSize = element.style?.fontSize || 12;
   const fontFamily = element.style?.fontFamily || 'Arial, sans-serif';
