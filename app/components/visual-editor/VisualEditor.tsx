@@ -4,13 +4,23 @@ import React, { useState, useCallback, useRef, useEffect } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import type { PopResponse } from "@/src/application";
-import type { VisualTemplate, TemplateElement, EditorState } from "./types";
+import type {
+  VisualTemplate,
+  TemplateElement,
+  EditorState,
+  BackgroundFrame,
+} from "./types";
 import { POP_DIMENSIONS, DEFAULT_TEMPLATE_SETTINGS } from "./types";
 import EditorCanvas from "./EditorCanvas";
 import ElementPalette from "./ElementPalette";
+import BackgroundFramePalette from "./BackgroundFramePalette";
 import PropertyPanel from "./PropertyPanel";
+import BackgroundFramePropertyPanel from "./BackgroundFramePropertyPanel";
 import Toolbar from "./Toolbar";
-import { createDefaultTemplate } from "./utils/templateUtils";
+import {
+  createDefaultTemplate,
+  createBackgroundFrame,
+} from "./utils/templateUtils";
 import {
   autoSaveCurrentTemplate,
   getAutoSavedTemplate,
@@ -34,7 +44,15 @@ export default function VisualEditor({
   const [template, setTemplate] = useState<VisualTemplate>(() => {
     // 初期化時に自動保存されたテンプレートを確認
     const autoSaved = getAutoSavedTemplate();
-    return initialTemplate || autoSaved || createDefaultTemplate();
+    const baseTemplate =
+      initialTemplate || autoSaved || createDefaultTemplate();
+
+    // 既存のテンプレートにbackgroundFramesがない場合は追加
+    if (!baseTemplate.backgroundFrames) {
+      baseTemplate.backgroundFrames = [];
+    }
+
+    return baseTemplate;
   });
 
   const [showAutoSaveNotification, setShowAutoSaveNotification] =
@@ -42,10 +60,12 @@ export default function VisualEditor({
 
   const [editorState, setEditorState] = useState<EditorState>({
     selectedElementId: null,
+    selectedBackgroundFrameId: null,
     isDragging: false,
     zoom: 1,
     panOffset: { x: 0, y: 0 },
     showBackSidePreview: false,
+    editMode: "elements", // デフォルトは表示エリア編集モード
   });
 
   const [currentSample, setCurrentSample] = useState<1 | 2 | 3>(1);
@@ -146,11 +166,87 @@ export default function VisualEditor({
     setSampleData(sample);
     setCurrentSample(sample);
     // テンプレートを強制的に再レンダリングするために、stateを更新
-    setTemplate(prev => ({ ...prev }));
+    setTemplate((prev) => ({ ...prev }));
+  }, []);
+
+  // 編集モード切り替えのハンドラー
+  const handleEditModeChange = useCallback(
+    (mode: "background" | "elements") => {
+      setEditorState((prev) => ({
+        ...prev,
+        editMode: mode,
+        selectedElementId: null,
+        selectedBackgroundFrameId: null,
+      }));
+    },
+    []
+  );
+
+  // 背景枠の追加
+  const handleAddBackgroundFrame = useCallback(
+    (frame: BackgroundFrame) => {
+      const newTemplate = {
+        ...template,
+        backgroundFrames: [...(template.backgroundFrames || []), frame],
+      };
+      setTemplate(newTemplate);
+      onTemplateChange?.(newTemplate);
+      setEditorState((prev) => ({
+        ...prev,
+        selectedBackgroundFrameId: frame.id,
+      }));
+    },
+    [template, onTemplateChange]
+  );
+
+  // 背景枠の更新
+  const handleUpdateBackgroundFrame = useCallback(
+    (frameId: string, updates: Partial<BackgroundFrame>) => {
+      const newTemplate = {
+        ...template,
+        backgroundFrames: (template.backgroundFrames || []).map((frame) =>
+          frame.id === frameId ? { ...frame, ...updates } : frame
+        ),
+      };
+      setTemplate(newTemplate);
+      onTemplateChange?.(newTemplate);
+    },
+    [template, onTemplateChange]
+  );
+
+  // 背景枠の削除
+  const handleDeleteBackgroundFrame = useCallback(
+    (frameId: string) => {
+      const newTemplate = {
+        ...template,
+        backgroundFrames: (template.backgroundFrames || []).filter(
+          (frame) => frame.id !== frameId
+        ),
+      };
+      setTemplate(newTemplate);
+      onTemplateChange?.(newTemplate);
+      setEditorState((prev) => ({
+        ...prev,
+        selectedBackgroundFrameId:
+          prev.selectedBackgroundFrameId === frameId
+            ? null
+            : prev.selectedBackgroundFrameId,
+      }));
+    },
+    [template, onTemplateChange]
+  );
+
+  // 背景枠の選択
+  const handleSelectBackgroundFrame = useCallback((frameId: string | null) => {
+    setEditorState((prev) => ({ ...prev, selectedBackgroundFrameId: frameId }));
   }, []);
 
   const selectedElement = template.elements.find(
     (el) => el.id === editorState.selectedElementId
+  );
+
+  const selectedBackgroundFrame = template.backgroundFrames?.find(
+    (frame) => frame.id === editorState.selectedBackgroundFrameId
   );
 
   // 自動保存
@@ -172,28 +268,57 @@ export default function VisualEditor({
     const handleKeyDown = (e: KeyboardEvent) => {
       // 入力フィールドにフォーカスがある場合はキーボードショートカットを無効化
       const target = e.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
         return;
       }
-      
-      if (e.key === "Delete" && editorState.selectedElementId) {
-        handleDeleteElement(editorState.selectedElementId);
+
+      if (e.key === "Delete") {
+        if (
+          editorState.editMode === "elements" &&
+          editorState.selectedElementId
+        ) {
+          handleDeleteElement(editorState.selectedElementId);
+        } else if (
+          editorState.editMode === "background" &&
+          editorState.selectedBackgroundFrameId
+        ) {
+          handleDeleteBackgroundFrame(editorState.selectedBackgroundFrameId);
+        }
       }
       if (e.key === "Escape") {
-        handleSelectElement(null);
+        if (editorState.editMode === "elements") {
+          handleSelectElement(null);
+        } else if (editorState.editMode === "background") {
+          handleSelectBackgroundFrame(null);
+        }
       }
     };
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [editorState.selectedElementId, handleDeleteElement, handleSelectElement]);
+  }, [
+    editorState.selectedElementId,
+    editorState.selectedBackgroundFrameId,
+    editorState.editMode,
+    handleDeleteElement,
+    handleDeleteBackgroundFrame,
+    handleSelectElement,
+    handleSelectBackgroundFrame,
+  ]);
 
   return (
     <DndProvider backend={HTML5Backend}>
       <div className='flex bg-gray-50 dark:bg-gray-900 h-full'>
-        {/* 左サイドバー: 要素パレット */}
+        {/* 左サイドバー: 要素パレット/背景枠パレット */}
         <div className='w-64 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'>
-          <ElementPalette onAddElement={handleAddElement} />
+          <div>
+            <p>編集モード: {editorState.editMode}</p>
+          </div>
+          {editorState.editMode === "elements" ? (
+            <ElementPalette onAddElement={handleAddElement} />
+          ) : (
+            <BackgroundFramePalette onAddFrame={handleAddBackgroundFrame} />
+          )}
         </div>
 
         {/* メインエリア */}
@@ -208,6 +333,8 @@ export default function VisualEditor({
             onReset={handleResetTemplate}
             currentSample={currentSample}
             onSampleChange={handleSampleChange}
+            editMode={editorState.editMode}
+            onEditModeChange={handleEditModeChange}
           />
 
           {/* キャンバスエリア */}
@@ -223,6 +350,10 @@ export default function VisualEditor({
               onUpdateElement={handleUpdateElement}
               onSelectElement={handleSelectElement}
               onDeleteElement={handleDeleteElement}
+              onAddBackgroundFrame={handleAddBackgroundFrame}
+              onUpdateBackgroundFrame={handleUpdateBackgroundFrame}
+              onSelectBackgroundFrame={handleSelectBackgroundFrame}
+              onDeleteBackgroundFrame={handleDeleteBackgroundFrame}
               sampleKey={`sample-${currentSample}`}
             />
           </div>
@@ -230,11 +361,19 @@ export default function VisualEditor({
 
         {/* 右サイドバー: プロパティパネル */}
         <div className='w-80 border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'>
-          <PropertyPanel
-            selectedElement={selectedElement}
-            onUpdateElement={handleUpdateElement}
-            onDeleteElement={handleDeleteElement}
-          />
+          {editorState.editMode === "elements" ? (
+            <PropertyPanel
+              selectedElement={selectedElement}
+              onUpdateElement={handleUpdateElement}
+              onDeleteElement={handleDeleteElement}
+            />
+          ) : (
+            <BackgroundFramePropertyPanel
+              selectedFrame={selectedBackgroundFrame}
+              onUpdateFrame={handleUpdateBackgroundFrame}
+              onDeleteFrame={handleDeleteBackgroundFrame}
+            />
+          )}
         </div>
 
         {/* 自動保存通知 */}

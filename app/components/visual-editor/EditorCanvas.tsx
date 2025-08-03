@@ -3,10 +3,11 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { useDrop } from 'react-dnd';
 import type { PopResponse } from '@/src/application';
-import type { VisualTemplate, TemplateElement, EditorState, DragItem } from './types';
+import type { VisualTemplate, TemplateElement, EditorState, DragItem, BackgroundFrame } from './types';
 import { POP_DIMENSIONS } from './types';
-import { createElement, isInBackSide } from './utils/templateUtils';
+import { createElement, isInBackSide, createBackgroundFrame } from './utils/templateUtils';
 import DraggableElement from './DraggableElement';
+import DraggableBackgroundFrame from './DraggableBackgroundFrame';
 
 interface EditorCanvasProps {
   pop: PopResponse;
@@ -16,6 +17,10 @@ interface EditorCanvasProps {
   onUpdateElement: (elementId: string, updates: Partial<TemplateElement>) => void;
   onSelectElement: (elementId: string | null) => void;
   onDeleteElement: (elementId: string) => void;
+  onAddBackgroundFrame?: (frame: BackgroundFrame) => void;
+  onUpdateBackgroundFrame?: (frameId: string, updates: Partial<BackgroundFrame>) => void;
+  onSelectBackgroundFrame?: (frameId: string | null) => void;
+  onDeleteBackgroundFrame?: (frameId: string) => void;
   sampleKey?: string;
 }
 
@@ -27,6 +32,10 @@ export default function EditorCanvas({
   onUpdateElement,
   onSelectElement,
   onDeleteElement,
+  onAddBackgroundFrame,
+  onUpdateBackgroundFrame,
+  onSelectBackgroundFrame,
+  onDeleteBackgroundFrame,
   sampleKey,
 }: EditorCanvasProps) {
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -57,8 +66,7 @@ export default function EditorCanvas({
   const [{ isOver, canDrop }, drop] = useDrop(() => ({
     accept: 'element',
     drop: (item: DragItem, monitor) => {
-      if (item.type === 'new' && item.elementType && item.dataBinding) {
-        // 新しい要素の配置
+      if (item.type === 'new') {
         const offset = monitor.getClientOffset();
         const canvasRect = canvasRef.current?.getBoundingClientRect();
         
@@ -66,15 +74,25 @@ export default function EditorCanvas({
           const x = pxToMm(offset.x - canvasRect.left);
           const y = pxToMm(offset.y - canvasRect.top);
           
-          // QRコードは表面エリアのみ配置可能
-          if (item.elementType === 'qrcode' && isInBackSide(y)) {
-            alert('QRコードは表面エリアにのみ配置できます');
-            return;
+          // 背景枠の配置
+          if (item.frameType && editorState.editMode === 'background') {
+            const newFrame = createBackgroundFrame(item.frameType, { x, y });
+            onAddBackgroundFrame?.(newFrame);
+            return { success: true };
           }
           
-          const newElement = createElement(item.elementType, item.dataBinding, { x, y });
-          onAddElement(newElement);
-          return { success: true };
+          // 表示エリア要素の配置
+          if (item.elementType && item.dataBinding && editorState.editMode === 'elements') {
+            // QRコードは表面エリアのみ配置可能
+            if (item.elementType === 'qrcode' && isInBackSide(y)) {
+              alert('QRコードは表面エリアにのみ配置できます');
+              return;
+            }
+            
+            const newElement = createElement(item.elementType, item.dataBinding, { x, y });
+            onAddElement(newElement);
+            return { success: true };
+          }
         }
       } else if (item.type === 'existing' && item.id) {
         // 既存要素の移動処理 - ベストプラクティスに従い差分を計算して返す
@@ -90,14 +108,19 @@ export default function EditorCanvas({
       isOver: monitor.isOver(),
       canDrop: monitor.canDrop(),
     }),
-  }), [pxToMm, onAddElement, isInBackSide]);
+  }), [pxToMm, onAddElement, onAddBackgroundFrame, isInBackSide, editorState.editMode]);
 
   // Canvas click handler
   const handleCanvasClick = useCallback((e: React.MouseEvent) => {
     if (e.target === e.currentTarget && !isPanning) {
-      onSelectElement(null);
+      // 編集モードに応じて適切な選択解除を実行
+      if (editorState.editMode === 'elements') {
+        onSelectElement(null);
+      } else if (editorState.editMode === 'background') {
+        onSelectBackgroundFrame?.(null);
+      }
     }
-  }, [onSelectElement, isPanning]);
+  }, [onSelectElement, onSelectBackgroundFrame, isPanning, editorState.editMode]);
 
   // Pan handlers
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -209,6 +232,66 @@ export default function EditorCanvas({
     });
   }, [template, pxToMm, onUpdateElement, isInBackSide]);
 
+  // Background frame move handler
+  const handleBackgroundFrameMove = useCallback((frameId: string, deltaX: number, deltaY: number) => {
+    const frame = template.backgroundFrames?.find(f => f.id === frameId);
+    if (!frame) return;
+
+    const deltaMmX = pxToMm(deltaX);
+    const deltaMmY = pxToMm(deltaY);
+
+    let newX = frame.position.x + deltaMmX;
+    let newY = frame.position.y + deltaMmY;
+
+    // グリッドスナップ
+    if (template.settings.snapToGrid) {
+      const gridSize = template.settings.gridSize;
+      newX = Math.round(newX / gridSize) * gridSize;
+      newY = Math.round(newY / gridSize) * gridSize;
+    }
+
+    // 境界チェック
+    newX = Math.max(0, Math.min(newX, POP_DIMENSIONS.WIDTH - frame.size.width));
+    newY = Math.max(0, Math.min(newY, POP_DIMENSIONS.HEIGHT - frame.size.height));
+
+    // 裏面/表面の自動判定
+    const isBackSide = isInBackSide(newY + frame.size.height / 2);
+
+    const updates: Partial<BackgroundFrame> = {
+      position: { x: newX, y: newY },
+      isBackSide,
+      autoRotate: isBackSide,
+    };
+
+    // 直線の場合は始点・終点も移動
+    if (frame.type === 'line' && frame.lineStart && frame.lineEnd) {
+      updates.lineStart = {
+        x: frame.lineStart.x + deltaMmX,
+        y: frame.lineStart.y + deltaMmY,
+      };
+      updates.lineEnd = {
+        x: frame.lineEnd.x + deltaMmX,
+        y: frame.lineEnd.y + deltaMmY,
+      };
+    }
+
+    onUpdateBackgroundFrame?.(frameId, updates);
+  }, [template, pxToMm, onUpdateBackgroundFrame, isInBackSide]);
+
+  // Background frame resize handler
+  const handleBackgroundFrameResize = useCallback((frameId: string, newSize: { width: number; height: number }, newPosition?: { x: number; y: number }) => {
+    if (newPosition) {
+      // 位置とサイズの両方を更新
+      onUpdateBackgroundFrame?.(frameId, { 
+        size: newSize,
+        position: newPosition
+      });
+    } else {
+      // サイズのみ更新
+      onUpdateBackgroundFrame?.(frameId, { size: newSize });
+    }
+  }, [onUpdateBackgroundFrame]);
+
   return (
     <div className="flex justify-center items-center h-full">
       <div
@@ -266,8 +349,27 @@ export default function EditorCanvas({
           />
         )}
 
-        {/* 要素の描画 */}
-        {template.elements.map((element) => (
+        {/* 背景枠の描画（両モードで表示、背景枠作成モードでのみ編集可能） */}
+        {template.backgroundFrames?.map((frame) => (
+          <DraggableBackgroundFrame
+            key={frame.id}
+            frame={frame}
+            isSelected={editorState.selectedBackgroundFrameId === frame.id}
+            showBackSidePreview={editorState.showBackSidePreview}
+            zoom={editorState.zoom}
+            mmToPx={mmToPx}
+            pxToMm={pxToMm}
+            onMove={handleBackgroundFrameMove}
+            onResize={handleBackgroundFrameResize}
+            onSelect={() => onSelectBackgroundFrame?.(frame.id)}
+            onUpdateFrame={onUpdateBackgroundFrame}
+            isPanningMode={isSpacePressed}
+            isEditable={editorState.editMode === 'background'}
+          />
+        ))}
+
+        {/* 要素の描画（表示エリア編集モードでのみ表示） */}
+        {editorState.editMode === "elements" && template.elements.map((element) => (
           <DraggableElement
             key={element.id}
             element={element}

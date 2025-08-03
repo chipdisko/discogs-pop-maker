@@ -1,6 +1,7 @@
 export interface VisualTemplate {
   id: string;
   name: string;
+  backgroundFrames: BackgroundFrame[]; // 新規追加
   elements: TemplateElement[];
   settings: TemplateSettings;
 }
@@ -32,6 +33,35 @@ export interface TemplateElement {
     color: string; // 前景色（通常は黒）
     backgroundColor: string; // 背景色（通常は白）
   };
+}
+
+export interface BackgroundFrame {
+  id: string;
+  type: "rectangle" | "circle" | "roundedRectangle" | "line" | "text";
+  position: { x: number; y: number }; // 単位：mm、左上が原点
+  size: { width: number; height: number }; // 単位：mm
+  style: FrameStyle;
+  zIndex: number; // 重なり順序
+  // テキスト用プロパティ
+  text?: string;
+  fontFamily?: string;
+  // 線用プロパティ
+  lineStart?: { x: number; y: number };
+  lineEnd?: { x: number; y: number };
+  // 位置による自動処理
+  isBackSide?: boolean; // 裏面エリア（y < 15mm）に配置されているか
+  autoRotate?: boolean; // 裏面エリアで自動180度回転
+}
+
+export interface FrameStyle {
+  fillColor?: string; // 塗りつぶし色
+  strokeColor?: string; // 枠線色
+  strokeWidth?: number; // 枠線太さ
+  borderRadius?: number; // 角丸半径（角丸四角形用）
+  fontSize?: number; // フォントサイズ（テキスト用）
+  color?: string; // 文字色（テキスト用）
+  opacity?: number; // 透明度
+  lineStyle?: "solid" | "dashed" | "dotted"; // 線のスタイル
 }
 
 export interface ElementStyle {
@@ -75,10 +105,12 @@ export interface TemplateSettings {
 // エディタの状態管理用
 export interface EditorState {
   selectedElementId: string | null;
+  selectedBackgroundFrameId: string | null; // 新規追加
   isDragging: boolean;
   zoom: number; // 50-200%
   panOffset: { x: number; y: number };
   showBackSidePreview: boolean; // 裏面の回転プレビュー表示
+  editMode: "background" | "elements"; // 新規追加
 }
 
 // ドラッグ&ドロップ用
@@ -86,6 +118,7 @@ export interface DragItem {
   id?: string;
   type: 'new' | 'existing';
   elementType?: TemplateElement['type'];
+  frameType?: BackgroundFrame['type']; // 背景枠用
   dataBinding?: string;
   position?: { x: number; y: number };
 }

@@ -1,10 +1,11 @@
-import type { VisualTemplate, TemplateElement } from '../types';
+import type { VisualTemplate, TemplateElement, BackgroundFrame } from '../types';
 import { DEFAULT_ELEMENT_STYLE, DEFAULT_TEMPLATE_SETTINGS, POP_DIMENSIONS } from '../types';
 
 export function createDefaultTemplate(): VisualTemplate {
   return {
     id: `template-${Date.now()}`,
     name: 'デフォルトテンプレート',
+    backgroundFrames: [], // 空の配列で初期化
     settings: DEFAULT_TEMPLATE_SETTINGS,
     elements: [
       // 裏面要素（軒先レコード）
@@ -165,4 +166,58 @@ export function createElement(
   }
 
   return baseElement;
+}
+
+export function createBackgroundFrame(
+  type: BackgroundFrame['type'],
+  position: { x: number; y: number }
+): BackgroundFrame {
+  const id = generateElementId(`frame-${type}`);
+  const isBackSide = isInBackSide(position.y);
+  
+  const baseFrame: BackgroundFrame = {
+    id,
+    type,
+    position,
+    size: { width: 30, height: 20 }, // デフォルトサイズ
+    style: {
+      strokeColor: '#000000',
+      strokeWidth: 1,
+      opacity: 1,
+    },
+    zIndex: 1,
+    isBackSide,
+    autoRotate: isBackSide,
+  };
+
+  // タイプごとの特別な設定
+  switch (type) {
+    case 'rectangle':
+    case 'roundedRectangle':
+      baseFrame.style.fillColor = 'transparent';
+      if (type === 'roundedRectangle') {
+        baseFrame.style.borderRadius = 5;
+      }
+      break;
+    case 'circle':
+      baseFrame.size = { width: 20, height: 20 }; // 正円
+      baseFrame.style.fillColor = 'transparent';
+      break;
+    case 'line':
+      baseFrame.lineStart = { x: position.x, y: position.y };
+      baseFrame.lineEnd = { x: position.x + 30, y: position.y };
+      // 始点と終点から適切なサイズを計算
+      baseFrame.size = { width: 30, height: 1 }; // 最小高さ1mmを確保
+      baseFrame.position = { x: position.x, y: position.y };
+      break;
+    case 'text':
+      baseFrame.text = 'テキスト';
+      baseFrame.fontFamily = 'Arial, sans-serif';
+      baseFrame.style.fontSize = 12;
+      baseFrame.style.color = '#000000';
+      baseFrame.size = { width: 40, height: 8 };
+      break;
+  }
+
+  return baseFrame;
 }
