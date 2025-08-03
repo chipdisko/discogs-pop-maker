@@ -249,8 +249,10 @@ export default function PropertyPanel({
                 onChange={(e) =>
                   onUpdateElement(selectedElement.id, {
                     label: {
-                      ...selectedElement.label,
                       show: e.target.checked,
+                      text: selectedElement.label?.text,
+                      fontSize: selectedElement.label?.fontSize,
+                      color: selectedElement.label?.color,
                     },
                   })
                 }
@@ -272,6 +274,7 @@ export default function PropertyPanel({
                     onChange={(e) =>
                       onUpdateElement(selectedElement.id, {
                         label: {
+                          show: selectedElement.label?.show ?? false,
                           ...selectedElement.label,
                           text: e.target.value,
                         },
@@ -290,6 +293,7 @@ export default function PropertyPanel({
                     onChange={(e) =>
                       onUpdateElement(selectedElement.id, {
                         label: {
+                          show: selectedElement.label?.show ?? false,
                           ...selectedElement.label,
                           fontSize: parseInt(e.target.value),
                         },
@@ -310,6 +314,7 @@ export default function PropertyPanel({
                     onChange={(e) =>
                       onUpdateElement(selectedElement.id, {
                         label: {
+                          show: selectedElement.label?.show ?? false,
                           ...selectedElement.label,
                           color: e.target.value,
                         },
