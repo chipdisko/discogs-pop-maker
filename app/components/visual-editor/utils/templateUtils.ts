@@ -36,7 +36,6 @@ export function createDefaultTemplate(): VisualTemplate {
           fontSize: 18,
           fontFamily: 'Arial, sans-serif',
           color: '#1e293b',
-          autoFit: true,  // 自動調整を有効化
         },
       },
       {
@@ -50,7 +49,6 @@ export function createDefaultTemplate(): VisualTemplate {
           fontSize: 16,
           fontFamily: 'Arial, sans-serif',
           color: '#334155',
-          autoFit: true,  // 自動調整を有効化
         },
       },
       {
@@ -63,7 +61,6 @@ export function createDefaultTemplate(): VisualTemplate {
           ...DEFAULT_ELEMENT_STYLE,
           fontSize: 12,
           color: '#666666',
-          autoFit: true,
         },
       },
       {
@@ -76,7 +73,6 @@ export function createDefaultTemplate(): VisualTemplate {
           ...DEFAULT_ELEMENT_STYLE,
           fontSize: 12,
           color: '#666666',
-          autoFit: true,
         },
       },
       {
@@ -89,7 +85,6 @@ export function createDefaultTemplate(): VisualTemplate {
           ...DEFAULT_ELEMENT_STYLE,
           fontSize: 14,
           color: '#1e293b',
-          autoFit: true,
         },
       },
       {
@@ -102,7 +97,6 @@ export function createDefaultTemplate(): VisualTemplate {
           ...DEFAULT_ELEMENT_STYLE,
           fontSize: 11,
           color: '#333333',
-          autoFit: true,
         },
       },
       {
@@ -116,7 +110,6 @@ export function createDefaultTemplate(): VisualTemplate {
           fontSize: 20,
           fontFamily: 'Arial, sans-serif',
           color: '#1e293b',
-          autoFit: true,
         },
       },
     ],
@@ -156,11 +149,6 @@ export function createElement(
       if (dataBinding === 'custom') {
         baseElement.customText = 'カスタムテキスト';
       }
-      // テキスト要素にはデフォルトでautoFitを有効化
-      baseElement.style = {
-        ...baseElement.style,
-        autoFit: true,
-      };
       break;
     case 'qrcode':
       baseElement.size = { width: 20, height: 20 }; // 正方形

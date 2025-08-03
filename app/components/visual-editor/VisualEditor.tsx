@@ -138,13 +138,6 @@ export default function VisualEditor({
     }
   }, [onTemplateChange]);
 
-  // デザインボタンのハンドラー
-  const handleDesign = useCallback(() => {
-    alert(
-      "デザイン機能は開発中です。プリセットテンプレートや高度なスタイル設定が予定されています。"
-    );
-  }, []);
-
   const selectedElement = template.elements.find(
     (el) => el.id === editorState.selectedElementId
   );
@@ -166,6 +159,12 @@ export default function VisualEditor({
   // キーボードショートカット
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // 入力フィールドにフォーカスがある場合はキーボードショートカットを無効化
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+        return;
+      }
+      
       if (e.key === "Delete" && editorState.selectedElementId) {
         handleDeleteElement(editorState.selectedElementId);
       }
@@ -196,7 +195,6 @@ export default function VisualEditor({
             onTogglePreview={handleTogglePreview}
             onSave={handleSaveTemplate}
             onReset={handleResetTemplate}
-            onDesign={handleDesign}
           />
 
           {/* キャンバスエリア */}

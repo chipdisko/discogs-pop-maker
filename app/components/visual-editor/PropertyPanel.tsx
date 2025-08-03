@@ -198,8 +198,8 @@ export default function PropertyPanel({
             {selectedElement.dataBinding === 'comment' && (
               <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded">
                 <p className="text-xs text-yellow-800 dark:text-yellow-200">
-                  改行に対応しています。
-                  長い行は横方向、高さが足りない場合は縦方向に圧縮されます。
+                  改行に対応しています（\nで改行）。
+                  テキストは自動的にエリアに収まるよう圧縮されます。
                 </p>
               </div>
             )}

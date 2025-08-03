@@ -47,9 +47,8 @@ export interface ElementStyle {
   // テキスト要素の自動調整
   scaleX?: number; // 横方向の圧縮率（0.5〜1.0）
   scaleY?: number; // 縦方向の圧縮率（0.5〜1.0）
-  autoFit?: boolean; // 領域に合わせて自動調整
   minFontSize?: number; // 自動調整時の最小フォントサイズ
-  maxLines?: number; // 最大行数（コメントは3固定）
+  maxLines?: number; // 最大行数
   overflow?: 'clip' | 'scale' | 'shrink' | 'auto'; // オーバーフロー時の処理
 }
 

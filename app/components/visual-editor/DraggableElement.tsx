@@ -137,7 +137,7 @@ export default function DraggableElement({
           fontFamily: "Arial, sans-serif",
           padding: "1px 4px",
           borderRadius: "2px",
-          whiteSpace: "nowrap",
+          whiteSpace: "pre",
           zIndex: 1001,
         }}
       >

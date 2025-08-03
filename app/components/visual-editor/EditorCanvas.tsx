@@ -131,6 +131,12 @@ export default function EditorCanvas({
   // スペースキーのイベントハンドラー
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // 入力フィールドにフォーカスがある場合はパン機能を無効化
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+        return;
+      }
+      
       if (e.code === 'Space' && !e.repeat) {
         setIsSpacePressed(true);
         e.preventDefault();
