@@ -25,7 +25,7 @@ export default function PropertyPanel({
     );
   }
 
-  const handleStyleChange = (key: string, value: any) => {
+  const handleStyleChange = (key: string, value: string | number | boolean) => {
     onUpdateElement(selectedElement.id, {
       style: {
         ...(selectedElement.style || {}),

@@ -62,7 +62,7 @@ export interface ShadowStyle {
 export interface DisplayCondition {
   field: string;
   operator: 'exists' | 'equals' | 'contains' | 'greater' | 'less';
-  value?: any;
+  value?: string | number | boolean;
 }
 
 export interface TemplateSettings {

@@ -56,7 +56,7 @@ export function measureText(
 
   let compressedScaleX = 1;
   let compressedScaleY = 1;
-  let adjustedFontSize = fontSize;
+  const adjustedFontSize = fontSize;
   let needsCompression = false;
 
   // 幅の圧縮が必要かチェック
