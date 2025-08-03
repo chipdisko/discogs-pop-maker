@@ -9,6 +9,8 @@ interface ToolbarProps {
   onTogglePreview: () => void;
   onSave: () => void;
   onReset: () => void;
+  currentSample: 1 | 2 | 3;
+  onSampleChange: (sample: 1 | 2 | 3) => void;
 }
 
 export default function Toolbar({
@@ -18,6 +20,8 @@ export default function Toolbar({
   onTogglePreview,
   onSave,
   onReset,
+  currentSample,
+  onSampleChange,
 }: ToolbarProps) {
   const zoomOptions = [
     { value: 0.5, label: "50%" },
@@ -62,22 +66,47 @@ export default function Toolbar({
         </button>
       </div>
 
-      {/* 右側: ズーム */}
-      <div className='flex items-center space-x-2'>
-        <span className='text-sm text-gray-600 dark:text-gray-400'>
-          ズーム:
-        </span>
-        <select
-          value={zoom}
-          onChange={(e) => onZoomChange(parseFloat(e.target.value))}
-          className='px-2 py-1 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700'
-        >
-          {zoomOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+      {/* 右側: サンプル選択とズーム */}
+      <div className='flex items-center space-x-4'>
+        {/* サンプル選択 */}
+        <div className='flex items-center space-x-2'>
+          <span className='text-sm text-gray-600 dark:text-gray-400'>
+            サンプル:
+          </span>
+          <div className='flex space-x-1'>
+            {[1, 2, 3].map((sample) => (
+              <button
+                key={sample}
+                onClick={() => onSampleChange(sample as 1 | 2 | 3)}
+                className={`px-3 py-1 text-sm rounded transition-colors ${
+                  currentSample === sample
+                    ? "bg-blue-500 text-white"
+                    : "border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                }`}
+              >
+                {sample}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* ズーム */}
+        <div className='flex items-center space-x-2'>
+          <span className='text-sm text-gray-600 dark:text-gray-400'>
+            ズーム:
+          </span>
+          <select
+            value={zoom}
+            onChange={(e) => onZoomChange(parseFloat(e.target.value))}
+            className='px-2 py-1 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700'
+          >
+            {zoomOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
     </div>
   );

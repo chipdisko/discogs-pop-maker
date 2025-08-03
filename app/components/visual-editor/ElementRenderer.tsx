@@ -15,6 +15,7 @@ interface ElementRendererProps {
   showBackSidePreview?: boolean;
   useSampleData?: boolean; // エディター用のサンプルデータを使用するかどうか
   zoom?: number; // ズームレベル
+  sampleKey?: string; // サンプルデータの変更を検知するためのキー
 }
 
 export default function ElementRenderer({
@@ -24,6 +25,7 @@ export default function ElementRenderer({
   showBackSidePreview = false,
   useSampleData = true,
   zoom = 1,
+  sampleKey,
 }: ElementRendererProps) {
   // データバインディングから実際の値またはサンプル値を取得
   const dataValue = useMemo((): string => {
@@ -60,7 +62,7 @@ export default function ElementRenderer({
       default:
         return "";
     }
-  }, [element.dataBinding, element.customText, pop, useSampleData]);
+  }, [element.dataBinding, element.customText, pop, useSampleData, sampleKey]);
 
   // 自動調整スタイルの計算
   const autoFitStyle = useMemo(() => {

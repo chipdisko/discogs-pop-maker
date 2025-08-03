@@ -16,6 +16,7 @@ interface EditorCanvasProps {
   onUpdateElement: (elementId: string, updates: Partial<TemplateElement>) => void;
   onSelectElement: (elementId: string | null) => void;
   onDeleteElement: (elementId: string) => void;
+  sampleKey?: string;
 }
 
 export default function EditorCanvas({
@@ -26,6 +27,7 @@ export default function EditorCanvas({
   onUpdateElement,
   onSelectElement,
   onDeleteElement,
+  sampleKey,
 }: EditorCanvasProps) {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
@@ -279,6 +281,7 @@ export default function EditorCanvas({
             onSelect={() => onSelectElement(element.id)}
             pop={pop}
             isPanningMode={isSpacePressed}
+            sampleKey={sampleKey}
           />
         ))}
       </div>

@@ -18,6 +18,7 @@ import {
   saveTemplate,
   getSavedTemplates,
 } from "./utils/storageUtils";
+import { setSampleData } from "./utils/sampleData";
 
 interface VisualEditorProps {
   pop: PopResponse;
@@ -46,6 +47,8 @@ export default function VisualEditor({
     panOffset: { x: 0, y: 0 },
     showBackSidePreview: false,
   });
+
+  const [currentSample, setCurrentSample] = useState<1 | 2 | 3>(1);
 
   const canvasRef = useRef<HTMLDivElement>(null);
 
@@ -138,6 +141,14 @@ export default function VisualEditor({
     }
   }, [onTemplateChange]);
 
+  // サンプル変更のハンドラー
+  const handleSampleChange = useCallback((sample: 1 | 2 | 3) => {
+    setSampleData(sample);
+    setCurrentSample(sample);
+    // テンプレートを強制的に再レンダリングするために、stateを更新
+    setTemplate(prev => ({ ...prev }));
+  }, []);
+
   const selectedElement = template.elements.find(
     (el) => el.id === editorState.selectedElementId
   );
@@ -195,6 +206,8 @@ export default function VisualEditor({
             onTogglePreview={handleTogglePreview}
             onSave={handleSaveTemplate}
             onReset={handleResetTemplate}
+            currentSample={currentSample}
+            onSampleChange={handleSampleChange}
           />
 
           {/* キャンバスエリア */}
@@ -210,6 +223,7 @@ export default function VisualEditor({
               onUpdateElement={handleUpdateElement}
               onSelectElement={handleSelectElement}
               onDeleteElement={handleDeleteElement}
+              sampleKey={`sample-${currentSample}`}
             />
           </div>
         </div>

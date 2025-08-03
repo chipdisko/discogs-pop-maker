@@ -24,6 +24,7 @@ interface DraggableElementProps {
   onSelect: () => void;
   pop: PopResponse;
   isPanningMode?: boolean;
+  sampleKey?: string;
 }
 
 export default function DraggableElement({
@@ -38,6 +39,7 @@ export default function DraggableElement({
   onSelect,
   pop,
   isPanningMode = false,
+  sampleKey,
 }: DraggableElementProps) {
   const [isDragging, setIsDragging] = useState(false);
 
@@ -160,6 +162,7 @@ export default function DraggableElement({
         showBackSidePreview={showBackSidePreview}
         useSampleData={true}
         zoom={zoom}
+        sampleKey={sampleKey}
       />
 
       {/* データ名ラベル */}
