@@ -145,7 +145,7 @@ export default function ElementRenderer({
       baseStyle.borderBottomLeftRadius = `${element.style.borderBottomLeftRadius}mm`;
     }
 
-    // 変換の適用
+    // 変換の適用（ボーダーに影響しない裏面回転のみ）
     const transforms: string[] = [];
 
     // 裏面要素の180度回転（プレビューモード時のみ）
@@ -153,40 +153,9 @@ export default function ElementRenderer({
       transforms.push("rotateZ(180deg)");
     }
 
-    // テキストの圧縮（自動調整またはマニュアル設定）
-    const scaleX = autoFitStyle.scaleX || element.style?.scaleX || 1;
-    const scaleY = autoFitStyle.scaleY || element.style?.scaleY || 1;
-
-    if (scaleX !== 1 || scaleY !== 1) {
-      transforms.push(`scale(${scaleX}, ${scaleY})`);
-    }
-
     if (transforms.length > 0) {
       baseStyle.transform = transforms.join(" ");
-
-      // transform-originの決定ロジック
-      let transformOrigin = "center center";
-
-      if (element.type === "text") {
-        // 裏面要素でZ軸回転がある場合は中央基準
-        const hasZRotation =
-          isBackSide && element.autoRotate && showBackSidePreview;
-        
-        if (hasZRotation) {
-          transformOrigin = "center center";
-        } else {
-          // テキスト配置設定に基づいてtransform-originを調整
-          const horizontalOrigin = 
-            element.style?.textAlign === "left" ? "left" :
-            element.style?.textAlign === "right" ? "right" : "center";
-          const verticalOrigin = 
-            element.style?.verticalAlign === "top" ? "top" :
-            element.style?.verticalAlign === "bottom" ? "bottom" : "center";
-          transformOrigin = `${horizontalOrigin} ${verticalOrigin}`;
-        }
-      }
-
-      baseStyle.transformOrigin = transformOrigin;
+      baseStyle.transformOrigin = "center center";
     }
 
     // 影の適用
@@ -224,8 +193,29 @@ export default function ElementRenderer({
       style.justifyContent = "center";
     }
 
+    // テキスト要素の場合のみ、長体/平体の圧縮を適用
+    if (element.type === "text") {
+      const scaleX = autoFitStyle.scaleX || element.style?.scaleX || 1;
+      const scaleY = autoFitStyle.scaleY || element.style?.scaleY || 1;
+
+      if (scaleX !== 1 || scaleY !== 1) {
+        const textTransforms: string[] = [];
+        textTransforms.push(`scale(${scaleX}, ${scaleY})`);
+        style.transform = textTransforms.join(" ");
+
+        // テキスト配置設定に基づいてtransform-originを調整
+        const horizontalOrigin = 
+          element.style?.textAlign === "left" ? "left" :
+          element.style?.textAlign === "right" ? "right" : "center";
+        const verticalOrigin = 
+          element.style?.verticalAlign === "top" ? "top" :
+          element.style?.verticalAlign === "bottom" ? "bottom" : "center";
+        style.transformOrigin = `${horizontalOrigin} ${verticalOrigin}`;
+      }
+    }
+
     return style;
-  }, [element.style?.textAlign, element.style?.verticalAlign]);
+  }, [element.style?.textAlign, element.style?.verticalAlign, element.type, autoFitStyle, element.style?.scaleX, element.style?.scaleY]);
 
   // 要素タイプに応じたレンダリング
   const renderContent = () => {
