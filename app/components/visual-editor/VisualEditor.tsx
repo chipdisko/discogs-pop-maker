@@ -145,6 +145,13 @@ export default function VisualEditor({
     }
   }, [template]);
 
+  // テンプレート読み込み
+  const handleLoadTemplate = useCallback((loadedTemplate: VisualTemplate) => {
+    setTemplate(loadedTemplate);
+    onTemplateChange?.(loadedTemplate);
+    clearAutoSave();
+  }, [onTemplateChange]);
+
   // テンプレートリセット
   const handleResetTemplate = useCallback(() => {
     if (confirm("現在の編集内容をリセットしますか？")) {
@@ -348,6 +355,8 @@ export default function VisualEditor({
             onReset={handleResetTemplate}
             currentSample={currentSample}
             onSampleChange={handleSampleChange}
+            template={template}
+            onLoad={handleLoadTemplate}
           />
 
           {/* キャンバスエリア */}

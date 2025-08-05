@@ -137,6 +137,69 @@ export function importTemplate(jsonString: string): VisualTemplate | null {
   }
 }
 
+// ローカルストレージに保存されたテンプレートが存在するかチェック
+export function hasSavedTemplates(): boolean {
+  try {
+    const templates = getSavedTemplates();
+    return templates.length > 0;
+  } catch (error) {
+    console.error('Failed to check saved templates:', error);
+    return false;
+  }
+}
+
+// テンプレートをJSONファイルとしてダウンロード
+export function downloadTemplateAsJSON(template: VisualTemplate): void {
+  try {
+    const jsonString = exportTemplate(template);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${template.name || 'template'}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Failed to download template:', error);
+  }
+}
+
+// ファイルからテンプレートをインポート
+export function importTemplateFromFile(): Promise<VisualTemplate | null> {
+  return new Promise((resolve) => {
+    try {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'application/json';
+      
+      input.onchange = async (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (!file) {
+          resolve(null);
+          return;
+        }
+        
+        try {
+          const text = await file.text();
+          const template = importTemplate(text);
+          resolve(template);
+        } catch (error) {
+          console.error('Failed to read file:', error);
+          resolve(null);
+        }
+      };
+      
+      input.click();
+    } catch (error) {
+      console.error('Failed to create file input:', error);
+      resolve(null);
+    }
+  });
+}
+
 // ストレージ使用量の取得
 export function getStorageUsage(): { used: number; available: number } {
   try {
@@ -151,7 +214,7 @@ export function getStorageUsage(): { used: number; available: number } {
     const available = 5 * 1024 * 1024; // 5MB
     
     return { used, available };
-  } catch (error) {
+  } catch {
     return { used: 0, available: 0 };
   }
 }

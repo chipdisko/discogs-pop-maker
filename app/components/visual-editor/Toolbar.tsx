@@ -1,6 +1,13 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
+import type { VisualTemplate } from "./types";
+import { 
+  hasSavedTemplates, 
+  getSavedTemplates, 
+  downloadTemplateAsJSON, 
+  importTemplateFromFile 
+} from "./utils/storageUtils";
 
 interface ToolbarProps {
   zoom: number;
@@ -9,6 +16,8 @@ interface ToolbarProps {
   onReset: () => void;
   currentSample: 1 | 2 | 3;
   onSampleChange: (sample: 1 | 2 | 3) => void;
+  template: VisualTemplate;
+  onLoad: (template: VisualTemplate) => void;
 }
 
 export default function Toolbar({
@@ -18,7 +27,40 @@ export default function Toolbar({
   onReset,
   currentSample,
   onSampleChange,
+  template,
+  onLoad,
 }: ToolbarProps) {
+  const [showLoadModal, setShowLoadModal] = useState(false);
+  const [hasTemplatesInStorage, setHasTemplatesInStorage] = useState(false);
+
+  // ローカルストレージの状態をチェック
+  useEffect(() => {
+    setHasTemplatesInStorage(hasSavedTemplates());
+  }, []);
+
+  // エクスポート機能
+  const handleExport = () => {
+    downloadTemplateAsJSON(template);
+  };
+
+  // インポート機能  
+  const handleImport = async () => {
+    try {
+      const importedTemplate = await importTemplateFromFile();
+      if (importedTemplate) {
+        onLoad(importedTemplate);
+        alert('テンプレートをインポートしました');
+      }
+    } catch {
+      alert('インポートに失敗しました');
+    }
+  };
+
+  // 読み込み機能
+  const handleLoadTemplate = (savedTemplate: VisualTemplate) => {
+    onLoad(savedTemplate);
+    setShowLoadModal(false);
+  };
   const zoomOptions = [
     { value: 0.5, label: "50%" },
     { value: 0.75, label: "75%" },
@@ -36,6 +78,32 @@ export default function Toolbar({
           className='px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors'
         >
           保存
+        </button>
+
+        <button
+          onClick={() => setShowLoadModal(true)}
+          disabled={!hasTemplatesInStorage}
+          className={`px-4 py-2 border rounded transition-colors ${
+            hasTemplatesInStorage
+              ? 'border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'
+              : 'border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-600 cursor-not-allowed'
+          }`}
+        >
+          読み込み
+        </button>
+
+        <button
+          onClick={handleExport}
+          className='px-4 py-2 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors'
+        >
+          エクスポート
+        </button>
+
+        <button
+          onClick={handleImport}
+          className='px-4 py-2 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors'
+        >
+          インポート
         </button>
 
         <button
@@ -91,6 +159,37 @@ export default function Toolbar({
           </select>
         </div>
       </div>
+
+      {/* 読み込みモーダル */}
+      {showLoadModal && (
+        <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
+          <div className='bg-white dark:bg-gray-800 rounded-lg p-6 w-96 max-h-96 overflow-y-auto'>
+            <div className='flex justify-between items-center mb-4'>
+              <h3 className='text-lg font-semibold'>保存されたテンプレート</h3>
+              <button
+                onClick={() => setShowLoadModal(false)}
+                className='text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+              >
+                ✕
+              </button>
+            </div>
+            <div className='space-y-2'>
+              {getSavedTemplates().map((savedTemplate) => (
+                <div
+                  key={savedTemplate.id}
+                  className='p-3 border border-gray-200 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer'
+                  onClick={() => handleLoadTemplate(savedTemplate)}
+                >
+                  <div className='font-medium'>{savedTemplate.name}</div>
+                  <div className='text-sm text-gray-500 dark:text-gray-400'>
+                    更新: {new Date(savedTemplate.updatedAt).toLocaleString()}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
