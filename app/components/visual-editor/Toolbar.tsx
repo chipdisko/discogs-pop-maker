@@ -11,8 +11,6 @@ interface ToolbarProps {
   onReset: () => void;
   currentSample: 1 | 2 | 3;
   onSampleChange: (sample: 1 | 2 | 3) => void;
-  editMode: "background" | "elements";
-  onEditModeChange: (mode: "background" | "elements") => void;
 }
 
 export default function Toolbar({
@@ -24,8 +22,6 @@ export default function Toolbar({
   onReset,
   currentSample,
   onSampleChange,
-  editMode,
-  onEditModeChange,
 }: ToolbarProps) {
   const zoomOptions = [
     { value: 0.5, label: "50%" },
@@ -54,31 +50,8 @@ export default function Toolbar({
         </button>
       </div>
 
-      {/* 中央: 編集モード切り替えとプレビューオプション */}
+      {/* 中央: プレビューオプション */}
       <div className='flex items-center space-x-4'>
-        {/* 編集モード切り替え */}
-        <div className='flex border border-gray-300 dark:border-gray-600 rounded overflow-hidden'>
-          <button
-            onClick={() => onEditModeChange("background")}
-            className={`px-4 py-2 transition-colors ${
-              editMode === "background"
-                ? "bg-blue-500 text-white"
-                : "bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
-            }`}
-          >
-            背景枠作成
-          </button>
-          <button
-            onClick={() => onEditModeChange("elements")}
-            className={`px-4 py-2 transition-colors ${
-              editMode === "elements"
-                ? "bg-blue-500 text-white"
-                : "bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
-            }`}
-          >
-            表示エリア編集
-          </button>
-        </div>
 
         <button
           onClick={onTogglePreview}

@@ -198,6 +198,7 @@ export default function DraggableBackgroundFrame({
       {/* 背景枠の内容（テキスト編集中でない場合） */}
       {!isEditing && (
         <BackgroundFrameRenderer
+          key={`${frame.id}-${JSON.stringify(frame.cropSettings || {})}`}
           frame={frame}
           isBackSide={frame.isBackSide || false}
           showBackSidePreview={showBackSidePreview}

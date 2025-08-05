@@ -208,6 +208,7 @@ export default function VisualEditor({
           frame.id === frameId ? { ...frame, ...updates } : frame
         ),
       };
+      
       setTemplate(newTemplate);
       onTemplateChange?.(newTemplate);
     },
@@ -311,8 +312,30 @@ export default function VisualEditor({
       <div className='flex bg-gray-50 dark:bg-gray-900 h-full'>
         {/* 左サイドバー: 要素パレット/背景枠パレット */}
         <div className='w-64 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'>
-          <div>
-            <p>編集モード: {editorState.editMode}</p>
+          <div className='p-4 border-b border-gray-200 dark:border-gray-700'>
+            {/* 編集モード切り替え */}
+            <div className='flex gap-2'>
+              <button
+                onClick={() => handleEditModeChange("background")}
+                className={`px-3 py-2 text-sm rounded transition-colors ${
+                  editorState.editMode === "background"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
+                }`}
+              >
+                背景枠
+              </button>
+              <button
+                onClick={() => handleEditModeChange("elements")}
+                className={`px-3 py-2 text-sm rounded transition-colors ${
+                  editorState.editMode === "elements"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
+                }`}
+              >
+                表示エリア
+              </button>
+            </div>
           </div>
           {editorState.editMode === "elements" ? (
             <ElementPalette onAddElement={handleAddElement} />
@@ -333,8 +356,6 @@ export default function VisualEditor({
             onReset={handleResetTemplate}
             currentSample={currentSample}
             onSampleChange={handleSampleChange}
-            editMode={editorState.editMode}
-            onEditModeChange={handleEditModeChange}
           />
 
           {/* キャンバスエリア */}

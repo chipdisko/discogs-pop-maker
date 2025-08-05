@@ -292,6 +292,7 @@ export default function EditorCanvas({
     }
   }, [onUpdateBackgroundFrame]);
 
+
   return (
     <div className="flex justify-center items-center h-full">
       <div

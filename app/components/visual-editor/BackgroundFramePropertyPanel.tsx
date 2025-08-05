@@ -63,6 +63,7 @@ export default function BackgroundFramePropertyPanel({
     });
   };
 
+
   return (
     <div className="h-full overflow-y-auto p-4">
       <div className="space-y-6">
@@ -368,6 +369,7 @@ export default function BackgroundFramePropertyPanel({
             </div>
           </div>
         </div>
+
 
         {/* テキスト設定（テキストのみ） */}
         {selectedFrame.type === 'text' && (

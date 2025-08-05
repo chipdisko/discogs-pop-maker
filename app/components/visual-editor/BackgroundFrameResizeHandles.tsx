@@ -257,6 +257,42 @@ export default function BackgroundFrameResizeHandles({
             newPosition.x = Math.round((centerX - size / 2) * 2) / 2;
             newPosition.y = Math.round((centerY - size / 2) * 2) / 2;
           }
+
+          // 画像の場合は元の縦横比を保つ
+          if (frame.type === 'image' && frame.originalAspectRatio) {
+            const aspectRatio = frame.originalAspectRatio;
+            
+            // ハンドルの種類に応じて基準となる辺を決定
+            if (['e', 'w'].includes(handle)) {
+              // 横方向のリサイズ: 幅に合わせて高さを調整
+              newSize.height = Math.round((newSize.width / aspectRatio) * 2) / 2;
+            } else if (['n', 's'].includes(handle)) {
+              // 縦方向のリサイズ: 高さに合わせて幅を調整
+              newSize.width = Math.round((newSize.height * aspectRatio) * 2) / 2;
+            } else {
+              // 角のハンドル: より大きな変化量に合わせる
+              const widthRatio = newSize.width / startWidth;
+              const heightRatio = newSize.height / startHeight;
+              
+              if (Math.abs(widthRatio - 1) > Math.abs(heightRatio - 1)) {
+                // 幅の変化が大きい場合
+                newSize.height = Math.round((newSize.width / aspectRatio) * 2) / 2;
+              } else {
+                // 高さの変化が大きい場合
+                newSize.width = Math.round((newSize.height * aspectRatio) * 2) / 2;
+              }
+            }
+
+            // 位置調整（左上を基準とする場合は不要だが、他のハンドルの場合は調整が必要）
+            if (['nw', 'n', 'w'].includes(handle)) {
+              if (['nw', 'n'].includes(handle)) {
+                newPosition.y = Math.round((startPosY + startHeight - newSize.height) * 2) / 2;
+              }
+              if (['nw', 'w'].includes(handle)) {
+                newPosition.x = Math.round((startPosX + startWidth - newSize.width) * 2) / 2;
+              }
+            }
+          }
         }
 
         onResize(frame.id, newSize, newPosition);
