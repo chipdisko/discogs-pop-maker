@@ -16,40 +16,40 @@ type ResizeHandle = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w' | 'line-st
 
 export default function BackgroundFrameResizeHandles({
   frame,
-  mmToPx,
+  // mmToPx,
   pxToMm,
   onResize,
   onUpdateFrame,
-  zoom,
+  // zoom,
 }: BackgroundFrameResizeHandlesProps) {
   const [isResizing, setIsResizing] = useState(false);
-  const [resizeStart, setResizeStart] = useState({ x: 0, y: 0 });
-  const [originalFrame, setOriginalFrame] = useState<BackgroundFrame | null>(null);
+  // const [resizeStart, setResizeStart] = useState({ x: 0, y: 0 });
+  // const [originalFrame, setOriginalFrame] = useState<BackgroundFrame | null>(null);
   const [activeHandle, setActiveHandle] = useState<ResizeHandle | null>(null);
-  const [isShiftPressed, setIsShiftPressed] = useState(false);
+  // const [isShiftPressed, setIsShiftPressed] = useState(false);
 
   // キーボードイベントの監視
-  React.useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Shift') {
-        setIsShiftPressed(true);
-      }
-    };
+  // React.useEffect(() => {
+  //   const handleKeyDown = (e: KeyboardEvent) => {
+  //     if (e.key === 'Shift') {
+  //       setIsShiftPressed(true);
+  //     }
+  //   };
 
-    const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.key === 'Shift') {
-        setIsShiftPressed(false);
-      }
-    };
+  //   const handleKeyUp = (e: KeyboardEvent) => {
+  //     if (e.key === 'Shift') {
+  //       setIsShiftPressed(false);
+  //     }
+  //   };
 
-    document.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('keyup', handleKeyUp);
+  //   document.addEventListener('keydown', handleKeyDown);
+  //   document.addEventListener('keyup', handleKeyUp);
 
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('keyup', handleKeyUp);
-    };
-  }, []);
+  //   return () => {
+  //     document.removeEventListener('keydown', handleKeyDown);
+  //     document.removeEventListener('keyup', handleKeyUp);
+  //   };
+  // }, []);
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent, handle: ResizeHandle) => {
@@ -85,7 +85,7 @@ export default function BackgroundFrameResizeHandles({
           };
 
           if (handle === 'line-start') {
-            let newStart = {
+            const newStart = {
               x: Math.round((currentStart.x + deltaX) * 2) / 2, // 0.5mm単位に丸める
               y: Math.round((currentStart.y + deltaY) * 2) / 2, // 0.5mm単位に丸める
             };
@@ -147,7 +147,7 @@ export default function BackgroundFrameResizeHandles({
             }
             return;
           } else if (handle === 'line-end') {
-            let newEnd = {
+            const newEnd = {
               x: Math.round((currentEnd.x + deltaX) * 2) / 2, // 0.5mm単位に丸める
               y: Math.round((currentEnd.y + deltaY) * 2) / 2, // 0.5mm単位に丸める
             };
@@ -309,7 +309,7 @@ export default function BackgroundFrameResizeHandles({
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
     },
-    [frame, resizeStart, originalFrame, onResize, onUpdateFrame, pxToMm]
+    [frame, onResize, onUpdateFrame, pxToMm]
   );
 
   // ハンドルのスタイル

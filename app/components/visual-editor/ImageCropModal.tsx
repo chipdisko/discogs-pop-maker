@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import type { TemplateElement } from './types';
 
 interface ImageCropModalProps {
@@ -66,9 +66,9 @@ export default function ImageCropModal({
       drawCropArea(ctx, width, height);
     };
     img.src = element.imageSettings.src;
-  }, [isOpen, element.imageSettings?.src, cropArea]);
+  }, [isOpen, element.imageSettings?.src, cropArea, drawCropArea]);
 
-  const drawCropArea = (ctx: CanvasRenderingContext2D, canvasWidth: number, canvasHeight: number) => {
+  const drawCropArea = useCallback((ctx: CanvasRenderingContext2D, canvasWidth: number, canvasHeight: number) => {
     const x = cropArea.x * canvasWidth;
     const y = cropArea.y * canvasHeight;
     const width = cropArea.width * canvasWidth;
@@ -121,7 +121,7 @@ export default function ImageCropModal({
       drawHandle(x + width, y + height/2);
     };
     img.src = element.imageSettings!.src;
-  };
+  }, [cropArea, element.imageSettings]);
 
   const getMousePos = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -199,7 +199,7 @@ export default function ImageCropModal({
       const deltaY = (pos.y - startPos.y) / imageDimensions.height;
 
       setCropArea(prev => {
-        let newArea = { ...prev };
+        const newArea = { ...prev };
 
         switch (resizeHandle) {
           case 'nw':
