@@ -151,6 +151,15 @@ export function createElement(
         baseElement.customText = 'カスタムテキスト';
       }
       break;
+    case 'image':
+      baseElement.size = { width: 40, height: 30 }; // 4:3のアスペクト比
+      baseElement.imageSettings = {
+        src: '', // 空の画像として開始
+        fileName: '',
+        originalWidth: 0,
+        originalHeight: 0,
+      };
+      break;
     case 'qrcode':
       baseElement.size = { width: 20, height: 20 }; // 正方形
       baseElement.qrSettings = {

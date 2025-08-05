@@ -33,6 +33,19 @@ export interface TemplateElement {
     color: string; // 前景色（通常は黒）
     backgroundColor: string; // 背景色（通常は白）
   };
+  // 画像要素専用
+  imageSettings?: {
+    src: string; // 画像のData URL
+    fileName?: string; // ファイル名
+    originalWidth: number; // 元の画像サイズ（px）
+    originalHeight: number; // 元の画像サイズ（px）
+    crop?: {
+      x: number; // クロップ開始位置（元画像に対する比率 0-1）
+      y: number; // クロップ開始位置（元画像に対する比率 0-1）
+      width: number; // クロップ幅（元画像に対する比率 0-1）
+      height: number; // クロップ高さ（元画像に対する比率 0-1）
+    };
+  };
 }
 
 export interface BackgroundFrame {

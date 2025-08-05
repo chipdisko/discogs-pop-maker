@@ -64,7 +64,7 @@ export default function VisualEditor({
     isDragging: false,
     zoom: 1,
     panOffset: { x: 0, y: 0 },
-    showBackSidePreview: false,
+    showBackSidePreview: true,
     editMode: "elements", // デフォルトは表示エリア編集モード
   });
 
@@ -129,13 +129,7 @@ export default function VisualEditor({
     setEditorState((prev) => ({ ...prev, zoom }));
   }, []);
 
-  // プレビューモード切り替え
-  const handleTogglePreview = useCallback(() => {
-    setEditorState((prev) => ({
-      ...prev,
-      showBackSidePreview: !prev.showBackSidePreview,
-    }));
-  }, []);
+  // プレビューモード切り替え（削除 - 常にON）
 
   // テンプレート保存
   const handleSaveTemplate = useCallback(() => {
@@ -350,8 +344,6 @@ export default function VisualEditor({
           <Toolbar
             zoom={editorState.zoom}
             onZoomChange={handleZoomChange}
-            showBackSidePreview={editorState.showBackSidePreview}
-            onTogglePreview={handleTogglePreview}
             onSave={handleSaveTemplate}
             onReset={handleResetTemplate}
             currentSample={currentSample}

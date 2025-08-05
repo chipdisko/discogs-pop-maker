@@ -5,8 +5,6 @@ import React from "react";
 interface ToolbarProps {
   zoom: number;
   onZoomChange: (zoom: number) => void;
-  showBackSidePreview: boolean;
-  onTogglePreview: () => void;
   onSave: () => void;
   onReset: () => void;
   currentSample: 1 | 2 | 3;
@@ -16,8 +14,6 @@ interface ToolbarProps {
 export default function Toolbar({
   zoom,
   onZoomChange,
-  showBackSidePreview,
-  onTogglePreview,
   onSave,
   onReset,
   currentSample,
@@ -50,22 +46,8 @@ export default function Toolbar({
         </button>
       </div>
 
-      {/* 中央: プレビューオプション */}
-      <div className='flex items-center space-x-4'>
-
-        <button
-          onClick={onTogglePreview}
-          className={`px-4 py-2 rounded transition-colors ${
-            showBackSidePreview
-              ? "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"
-              : "border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
-          }`}
-        >
-          {showBackSidePreview
-            ? "🔄 裏面プレビュー ON"
-            : "🔄 裏面プレビュー OFF"}
-        </button>
-      </div>
+      {/* 中央: 空のスペース */}
+      <div className="flex-1"></div>
 
       {/* 右側: サンプル選択とズーム */}
       <div className='flex items-center space-x-4'>

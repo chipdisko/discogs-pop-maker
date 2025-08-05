@@ -7,6 +7,7 @@ import { calculateAutoFitStyle } from "./utils/textUtils";
 import { getSampleValue, getSampleBadges } from "./utils/sampleData";
 import QRCodeRenderer from "./QRCodeRenderer";
 import BadgeRenderer from "./BadgeRenderer";
+import ImageRenderer from "./ImageRenderer";
 
 interface ElementRendererProps {
   element: TemplateElement;
@@ -288,6 +289,15 @@ export default function ElementRenderer({
               fontSize: `${(element.style?.fontSize || 12) * zoom}px`,
               fontFamily: element.style?.fontFamily || "Arial, sans-serif",
             }}
+          />
+        );
+
+      case "image":
+        // 画像のレンダリング
+        return (
+          <ImageRenderer
+            element={element}
+            zoom={zoom}
           />
         );
 

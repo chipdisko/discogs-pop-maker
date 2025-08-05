@@ -30,6 +30,7 @@ const PALETTE_ITEMS: PaletteItem[] = [
   { type: 'text', dataBinding: 'custom', label: 'カスタムテキスト', icon: '✏️' },
   // その他の要素
   { type: 'badge', dataBinding: 'badges', label: 'バッジ', icon: '🏅' },
+  { type: 'image', dataBinding: 'image', label: '画像', icon: '🖼️', description: 'JPG/PNG対応' },
   { type: 'qrcode', dataBinding: 'discogsUrl', label: 'QRコード', icon: '📱', description: '表面のみ' },
 ];
 
