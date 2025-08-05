@@ -35,8 +35,10 @@ export default function PropertyPanel({
   };
 
   const handlePositionChange = (axis: 'x' | 'y', value: string) => {
-    const numValue = parseFloat(value);
+    let numValue = parseFloat(value);
     if (!isNaN(numValue)) {
+      // 2mmグリッドにスナップ
+      numValue = Math.round(numValue / 2) * 2;
       onUpdateElement(selectedElement.id, {
         position: {
           ...selectedElement.position,
@@ -47,12 +49,42 @@ export default function PropertyPanel({
   };
 
   const handleSizeChange = (dimension: 'width' | 'height', value: string) => {
-    const numValue = parseFloat(value);
+    let numValue = parseFloat(value);
     if (!isNaN(numValue) && numValue > 0) {
+      // 2mmグリッドにスナップ
+      numValue = Math.round(numValue / 2) * 2;
       onUpdateElement(selectedElement.id, {
         size: {
           ...selectedElement.size,
           [dimension]: numValue,
+        },
+      });
+    }
+  };
+
+  const handleBorderChange = (side: 'Top' | 'Right' | 'Bottom' | 'Left', property: 'color' | 'width' | 'style', value: string | number) => {
+    const borderKey = `border${side}` as keyof typeof selectedElement.style;
+    const currentBorder = (selectedElement.style?.[borderKey] as { color: string; width: number; style: string }) || { color: '#000000', width: 0, style: 'solid' };
+    
+    onUpdateElement(selectedElement.id, {
+      style: {
+        ...(selectedElement.style || {}),
+        [borderKey]: {
+          ...currentBorder,
+          [property]: value,
+        },
+      },
+    });
+  };
+
+  const handleBorderRadiusChange = (corner: 'TopLeft' | 'TopRight' | 'BottomRight' | 'BottomLeft', value: string) => {
+    const numValue = parseFloat(value);
+    if (!isNaN(numValue) && numValue >= 0) {
+      const radiusKey = `border${corner}Radius` as keyof typeof selectedElement.style;
+      onUpdateElement(selectedElement.id, {
+        style: {
+          ...(selectedElement.style || {}),
+          [radiusKey]: numValue,
         },
       });
     }
@@ -194,6 +226,49 @@ export default function PropertyPanel({
               </div>
             </div>
 
+            {/* テキスト配置設定 */}
+            <div>
+              <h5 className="text-sm font-medium mb-2">テキスト配置</h5>
+              <div className="space-y-2">
+                <div>
+                  <label className="text-xs text-gray-600 dark:text-gray-400">水平配置</label>
+                  <div className="flex gap-1 mt-1">
+                    {(['left', 'center', 'right'] as const).map((align) => (
+                      <button
+                        key={align}
+                        onClick={() => handleStyleChange('textAlign', align)}
+                        className={`px-2 py-1 text-xs border rounded ${
+                          (selectedElement.style?.textAlign || 'center') === align
+                            ? 'bg-blue-500 text-white border-blue-500'
+                            : 'border-gray-300 dark:border-gray-600'
+                        }`}
+                      >
+                        {align === 'left' ? '左' : align === 'center' ? '中央' : '右'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs text-gray-600 dark:text-gray-400">垂直配置</label>
+                  <div className="flex gap-1 mt-1">
+                    {(['top', 'middle', 'bottom'] as const).map((align) => (
+                      <button
+                        key={align}
+                        onClick={() => handleStyleChange('verticalAlign', align)}
+                        className={`px-2 py-1 text-xs border rounded ${
+                          (selectedElement.style?.verticalAlign || 'middle') === align
+                            ? 'bg-blue-500 text-white border-blue-500'
+                            : 'border-gray-300 dark:border-gray-600'
+                        }`}
+                      >
+                        {align === 'top' ? '上' : align === 'middle' ? '中央' : '下'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* コメント専用設定 */}
             {selectedElement.dataBinding === 'comment' && (
               <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded">
@@ -206,6 +281,163 @@ export default function PropertyPanel({
 
           </>
         )}
+
+        {/* 枠線設定 */}
+        <div>
+          <h4 className="text-sm font-medium mb-2">枠線設定</h4>
+          <div className="space-y-3">
+            {(['Top', 'Right', 'Bottom', 'Left'] as const).map((side) => {
+              const borderKey = `border${side}` as keyof typeof selectedElement.style;
+              const currentBorder = (selectedElement.style?.[borderKey] as { color: string; width: number; style: string }) || { color: '#000000', width: 0, style: 'solid' };
+              
+              return (
+                <div key={side} className="p-2 border rounded dark:border-gray-600">
+                  <h5 className="text-xs font-medium mb-2">{side === 'Top' ? '上' : side === 'Right' ? '右' : side === 'Bottom' ? '下' : '左'}辺</h5>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div>
+                      <label className="text-xs text-gray-600 dark:text-gray-400">色</label>
+                      <input
+                        type="color"
+                        value={currentBorder.color}
+                        onChange={(e) => handleBorderChange(side, 'color', e.target.value)}
+                        className="w-full h-6 border rounded cursor-pointer"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-600 dark:text-gray-400">太さ(mm)</label>
+                      <input
+                        type="number"
+                        value={currentBorder.width}
+                        onChange={(e) => handleBorderChange(side, 'width', parseFloat(e.target.value) || 0)}
+                        step="0.5"
+                        min="0"
+                        max="5"
+                        className="w-full px-1 py-1 text-xs border rounded dark:bg-gray-700 dark:border-gray-600"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-600 dark:text-gray-400">スタイル</label>
+                      <select
+                        value={currentBorder.style}
+                        onChange={(e) => handleBorderChange(side, 'style', e.target.value)}
+                        className="w-full px-1 py-1 text-xs border rounded dark:bg-gray-700 dark:border-gray-600"
+                      >
+                        <option value="none">なし</option>
+                        <option value="solid">実線</option>
+                        <option value="dashed">破線</option>
+                        <option value="dotted">点線</option>
+                        <option value="double">二重線</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 角丸設定 */}
+        <div>
+          <h4 className="text-sm font-medium mb-2">角丸設定</h4>
+          <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-xs text-gray-600 dark:text-gray-400">左上 (mm)</label>
+                <input
+                  type="number"
+                  value={selectedElement.style?.borderTopLeftRadius || 0}
+                  onChange={(e) => handleBorderRadiusChange('TopLeft', e.target.value)}
+                  step="0.5"
+                  min="0"
+                  max="20"
+                  className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-600 dark:text-gray-400">右上 (mm)</label>
+                <input
+                  type="number"
+                  value={selectedElement.style?.borderTopRightRadius || 0}
+                  onChange={(e) => handleBorderRadiusChange('TopRight', e.target.value)}
+                  step="0.5"
+                  min="0"
+                  max="20"
+                  className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-600 dark:text-gray-400">左下 (mm)</label>
+                <input
+                  type="number"
+                  value={selectedElement.style?.borderBottomLeftRadius || 0}
+                  onChange={(e) => handleBorderRadiusChange('BottomLeft', e.target.value)}
+                  step="0.5"
+                  min="0"
+                  max="20"
+                  className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-600 dark:text-gray-400">右下 (mm)</label>
+                <input
+                  type="number"
+                  value={selectedElement.style?.borderBottomRightRadius || 0}
+                  onChange={(e) => handleBorderRadiusChange('BottomRight', e.target.value)}
+                  step="0.5"
+                  min="0"
+                  max="20"
+                  className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600"
+                />
+              </div>
+            </div>
+            <div className="flex gap-1 mt-2">
+              <button
+                onClick={() => {
+                  handleBorderRadiusChange('TopLeft', '0');
+                  handleBorderRadiusChange('TopRight', '0');
+                  handleBorderRadiusChange('BottomRight', '0');
+                  handleBorderRadiusChange('BottomLeft', '0');
+                }}
+                className="px-2 py-1 text-xs border rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                なし
+              </button>
+              <button
+                onClick={() => {
+                  handleBorderRadiusChange('TopLeft', '2');
+                  handleBorderRadiusChange('TopRight', '2');
+                  handleBorderRadiusChange('BottomRight', '2');
+                  handleBorderRadiusChange('BottomLeft', '2');
+                }}
+                className="px-2 py-1 text-xs border rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                小(2mm)
+              </button>
+              <button
+                onClick={() => {
+                  handleBorderRadiusChange('TopLeft', '4');
+                  handleBorderRadiusChange('TopRight', '4');
+                  handleBorderRadiusChange('BottomRight', '4');
+                  handleBorderRadiusChange('BottomLeft', '4');
+                }}
+                className="px-2 py-1 text-xs border rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                中(4mm)
+              </button>
+              <button
+                onClick={() => {
+                  handleBorderRadiusChange('TopLeft', '8');
+                  handleBorderRadiusChange('TopRight', '8');
+                  handleBorderRadiusChange('BottomRight', '8');
+                  handleBorderRadiusChange('BottomLeft', '8');
+                }}
+                className="px-2 py-1 text-xs border rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                大(8mm)
+              </button>
+            </div>
+          </div>
+        </div>
 
         {/* QRコード設定 */}
         {selectedElement.type === 'qrcode' && selectedElement.qrSettings && (

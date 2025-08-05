@@ -64,14 +64,33 @@ export interface FrameStyle {
   lineStyle?: "solid" | "dashed" | "dotted"; // 線のスタイル
 }
 
+// 枠線の詳細設定用
+export interface BorderStyle {
+  color: string; // 枠線の色
+  width: number; // 枠線の太さ（mm単位、0.5mm刻み）
+  style: "solid" | "dashed" | "dotted" | "double" | "none"; // 線のタイプ
+}
+
 export interface ElementStyle {
   fontSize?: number;
   fontFamily?: string;
   color?: string;
   backgroundColor?: string;
-  borderColor?: string;
-  borderWidth?: number;
-  borderRadius?: number;
+  // 枠線設定（後方互換性のため残す）
+  borderColor?: string; // 非推奨: borderTop.colorなどを使用
+  borderWidth?: number; // 非推奨: borderTop.widthなどを使用
+  // 新しい詳細な枠線設定
+  borderTop?: BorderStyle;
+  borderRight?: BorderStyle;
+  borderBottom?: BorderStyle;
+  borderLeft?: BorderStyle;
+  // 角丸設定（後方互換性のため残す）
+  borderRadius?: number; // 非推奨: 四隅個別設定を使用
+  // 新しい詳細な角丸設定
+  borderTopLeftRadius?: number; // 左上の角丸（mm単位）
+  borderTopRightRadius?: number; // 右上の角丸（mm単位）
+  borderBottomRightRadius?: number; // 右下の角丸（mm単位）
+  borderBottomLeftRadius?: number; // 左下の角丸（mm単位）
   shadow?: ShadowStyle;
   opacity?: number;
   // テキスト要素の自動調整
@@ -80,6 +99,12 @@ export interface ElementStyle {
   minFontSize?: number; // 自動調整時の最小フォントサイズ
   maxLines?: number; // 最大行数
   overflow?: 'clip' | 'scale' | 'shrink' | 'auto'; // オーバーフロー時の処理
+  // テキスト配置設定
+  textAlign?: "left" | "center" | "right"; // 水平方向の配置
+  verticalAlign?: "top" | "middle" | "bottom"; // 垂直方向の配置
+  // 注意: transform（scaleX/scaleY）との併用時は
+  // transform-originの設定により表示位置がずれる可能性があるため、
+  // 適切なtransform-originの調整が必要
 }
 
 export interface ShadowStyle {
@@ -144,7 +169,7 @@ export const DEFAULT_ELEMENT_STYLE: Partial<ElementStyle> = {
 };
 
 export const DEFAULT_TEMPLATE_SETTINGS: TemplateSettings = {
-  gridSize: 1, // 1mm
+  gridSize: 2, // 2mm
   snapToGrid: true,
   showGuides: true,
   showFoldLine: true,

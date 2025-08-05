@@ -8,6 +8,8 @@ interface ResizeHandlerProps {
   onResize: (elementId: string, newSize: { width: number; height: number }, newPosition?: { x: number; y: number }) => void;
   mmToPx: (mm: number) => number;
   pxToMm: (px: number) => number;
+  gridSize: number; // グリッドサイズ（mm単位）
+  snapToGrid: boolean; // グリッドスナップ有効フラグ
 }
 
 export default function ResizeHandler({
@@ -15,6 +17,8 @@ export default function ResizeHandler({
   onResize,
   mmToPx,
   pxToMm,
+  gridSize,
+  snapToGrid,
 }: ResizeHandlerProps) {
   const [isResizing, setIsResizing] = useState(false);
   const [resizeHandle, setResizeHandle] = useState<string | null>(null);
@@ -91,6 +95,18 @@ export default function ResizeHandler({
         newHeight = size;
       }
 
+      // グリッドスナップの適用
+      if (snapToGrid) {
+        newWidth = Math.round(newWidth / gridSize) * gridSize;
+        newHeight = Math.round(newHeight / gridSize) * gridSize;
+        newPosX = Math.round(newPosX / gridSize) * gridSize;
+        newPosY = Math.round(newPosY / gridSize) * gridSize;
+        
+        // 最小サイズの確保（グリッドスナップ後も最小サイズを維持）
+        newWidth = Math.max(gridSize, newWidth);
+        newHeight = Math.max(gridSize, newHeight);
+      }
+
       // 位置が変更された場合は、新しい位置も渡す
       if (newPosX !== startPosX || newPosY !== startPosY) {
         onResize(element.id, { width: newWidth, height: newHeight }, { x: newPosX, y: newPosY });
@@ -108,7 +124,7 @@ export default function ResizeHandler({
 
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
-  }, [element, onResize, pxToMm]);
+  }, [element, onResize, pxToMm, gridSize, snapToGrid]);
 
   const renderHandle = (position: string, cursor: string) => (
     <div

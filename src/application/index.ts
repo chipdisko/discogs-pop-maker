@@ -2,6 +2,18 @@
 export { PopApplicationService } from "./services/PopApplicationService";
 export { PrintApplicationService } from "./services/PrintApplicationService";
 
+// Utilities
+export { TemplateConverter } from "./utils/TemplateConverter";
+export type { 
+  VisualTemplate, 
+  BackgroundFrame, 
+  FrameStyle, 
+  TemplateElement, 
+  ElementStyle, 
+  DisplayCondition, 
+  TemplateSettings 
+} from "./utils/TemplateConverter";
+
 // DTOs - Pop関連
 export type {
   CreatePopRequest,
@@ -29,7 +41,12 @@ export type {
   PopElementData,
   TextElementData,
   BadgeElementData,
+  BackgroundFrameElementData,
   PopTemplateData,
   TextLayoutData,
   BadgeLayoutData,
+  VisualTemplateData,
+  BackgroundFrameData,
+  TemplateElementData,
+  TemplateSettingsData,
 } from "./dtos/PrintDtos";

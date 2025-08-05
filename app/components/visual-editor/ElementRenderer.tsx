@@ -80,26 +80,69 @@ export default function ElementRenderer({
     );
   }, [element, dataValue]);
 
-  // スタイルの適用
-  const style: React.CSSProperties = useMemo(() => {
+  // 外側のコンテナスタイル（レイアウト用）
+  const containerStyle: React.CSSProperties = useMemo(() => {
     const baseStyle: React.CSSProperties = {
       width: "100%",
       height: "100%",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
+      position: "relative",
       fontSize: `${
         (autoFitStyle.fontSize || element.style?.fontSize || 12) * zoom
       }px`,
       fontFamily: element.style?.fontFamily || "Arial, sans-serif",
       color: element.style?.color || "#000000",
       backgroundColor: element.style?.backgroundColor || "transparent",
-      borderRadius: element.style?.borderRadius
-        ? `${element.style.borderRadius}px`
-        : "0",
       opacity: element.style?.opacity || 1,
       overflow: "visible",
     };
+
+    // 後方互換性: 旧borderスタイルの適用
+    if (element.style?.borderColor || element.style?.borderWidth) {
+      baseStyle.borderStyle = "solid";
+      baseStyle.borderColor = element.style.borderColor || "transparent";
+      baseStyle.borderWidth = element.style.borderWidth ? `${element.style.borderWidth}px` : "0";
+    }
+
+    // 新しいborder設定の適用（優先）
+    if (element.style?.borderTop) {
+      baseStyle.borderTopStyle = element.style.borderTop.style;
+      baseStyle.borderTopColor = element.style.borderTop.color;
+      baseStyle.borderTopWidth = `${element.style.borderTop.width}mm`;
+    }
+    if (element.style?.borderRight) {
+      baseStyle.borderRightStyle = element.style.borderRight.style;
+      baseStyle.borderRightColor = element.style.borderRight.color;
+      baseStyle.borderRightWidth = `${element.style.borderRight.width}mm`;
+    }
+    if (element.style?.borderBottom) {
+      baseStyle.borderBottomStyle = element.style.borderBottom.style;
+      baseStyle.borderBottomColor = element.style.borderBottom.color;
+      baseStyle.borderBottomWidth = `${element.style.borderBottom.width}mm`;
+    }
+    if (element.style?.borderLeft) {
+      baseStyle.borderLeftStyle = element.style.borderLeft.style;
+      baseStyle.borderLeftColor = element.style.borderLeft.color;
+      baseStyle.borderLeftWidth = `${element.style.borderLeft.width}mm`;
+    }
+
+    // 後方互換性: 旧borderRadiusの適用
+    if (element.style?.borderRadius !== undefined) {
+      baseStyle.borderRadius = `${element.style.borderRadius}px`;
+    }
+
+    // 新しい角丸設定の適用（優先）
+    if (element.style?.borderTopLeftRadius !== undefined) {
+      baseStyle.borderTopLeftRadius = `${element.style.borderTopLeftRadius}mm`;
+    }
+    if (element.style?.borderTopRightRadius !== undefined) {
+      baseStyle.borderTopRightRadius = `${element.style.borderTopRightRadius}mm`;
+    }
+    if (element.style?.borderBottomRightRadius !== undefined) {
+      baseStyle.borderBottomRightRadius = `${element.style.borderBottomRightRadius}mm`;
+    }
+    if (element.style?.borderBottomLeftRadius !== undefined) {
+      baseStyle.borderBottomLeftRadius = `${element.style.borderBottomLeftRadius}mm`;
+    }
 
     // 変換の適用
     const transforms: string[] = [];
@@ -124,10 +167,22 @@ export default function ElementRenderer({
       let transformOrigin = "center center";
 
       if (element.type === "text") {
-        // 裏面要素でZ軸回転がある場合は中央基準、それ以外は左基準
+        // 裏面要素でZ軸回転がある場合は中央基準
         const hasZRotation =
           isBackSide && element.autoRotate && showBackSidePreview;
-        transformOrigin = hasZRotation ? "center center" : "left top";
+        
+        if (hasZRotation) {
+          transformOrigin = "center center";
+        } else {
+          // テキスト配置設定に基づいてtransform-originを調整
+          const horizontalOrigin = 
+            element.style?.textAlign === "left" ? "left" :
+            element.style?.textAlign === "right" ? "right" : "center";
+          const verticalOrigin = 
+            element.style?.verticalAlign === "top" ? "top" :
+            element.style?.verticalAlign === "bottom" ? "bottom" : "center";
+          transformOrigin = `${horizontalOrigin} ${verticalOrigin}`;
+        }
       }
 
       baseStyle.transformOrigin = transformOrigin;
@@ -141,6 +196,35 @@ export default function ElementRenderer({
 
     return baseStyle;
   }, [element, autoFitStyle, isBackSide, showBackSidePreview, zoom]);
+
+  // 内側のコンテンツスタイル（テキスト配置用）
+  const innerStyle: React.CSSProperties = useMemo(() => {
+    const style: React.CSSProperties = {
+      width: "100%",
+      height: "100%",
+      display: "flex",
+      flexDirection: "column",
+    };
+
+    // テキスト配置の適用
+    if (element.style?.textAlign) {
+      style.alignItems = 
+        element.style.textAlign === "left" ? "flex-start" :
+        element.style.textAlign === "right" ? "flex-end" : "center";
+    } else {
+      style.alignItems = "center";
+    }
+
+    if (element.style?.verticalAlign) {
+      style.justifyContent = 
+        element.style.verticalAlign === "top" ? "flex-start" :
+        element.style.verticalAlign === "bottom" ? "flex-end" : "center";
+    } else {
+      style.justifyContent = "center";
+    }
+
+    return style;
+  }, [element.style?.textAlign, element.style?.verticalAlign]);
 
   // 要素タイプに応じたレンダリング
   const renderContent = () => {
@@ -159,9 +243,9 @@ export default function ElementRenderer({
 
         return (
           <div
-            className='w-full h-full flex items-start px-1'
+            className='px-1'
             style={{
-              textAlign: "left",
+              textAlign: element.style?.textAlign || "left",
               wordBreak: isSingleLine ? "keep-all" : "break-word",
               whiteSpace: isSingleLine ? "nowrap" : "normal",
               lineHeight: 1.2,
@@ -172,7 +256,7 @@ export default function ElementRenderer({
               <div
                 className='w-full'
                 style={{
-                  textAlign: "left",
+                  textAlign: element.style?.textAlign || "left",
                   lineHeight: 1.2,
                   whiteSpace: "pre", // 改行を保持し、空白を維持、自動折り返しなし
                   wordBreak: "keep-all",
@@ -184,7 +268,6 @@ export default function ElementRenderer({
             ) : (
               <span
                 style={{
-                  textAlign: "left",
                   display: "block",
                   width: "100%",
                 }}
@@ -226,5 +309,11 @@ export default function ElementRenderer({
     }
   };
 
-  return <div style={style}>{renderContent()}</div>;
+  return (
+    <div style={containerStyle}>
+      <div style={innerStyle}>
+        {renderContent()}
+      </div>
+    </div>
+  );
 }

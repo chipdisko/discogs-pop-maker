@@ -385,6 +385,8 @@ export default function EditorCanvas({
             pop={pop}
             isPanningMode={isSpacePressed}
             sampleKey={sampleKey}
+            gridSize={template.settings.gridSize}
+            snapToGrid={template.settings.snapToGrid}
           />
         ))}
       </div>

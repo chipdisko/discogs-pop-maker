@@ -5,6 +5,7 @@ import { PopResponse, ReleaseResponse, BadgeResponse } from "./PopDtos";
 export interface GeneratePrintDataRequest {
   popIds: string[];
   dpi?: number; // デフォルト300dpi
+  template?: VisualTemplateData; // カスタムテンプレート（オプション）
 }
 
 // ========== レスポンスDTO ==========
@@ -72,13 +73,13 @@ export interface CanvasDataResponse {
 }
 
 export interface CanvasElementResponse {
-  type: "pop" | "text" | "badge";
+  type: "pop" | "text" | "badge" | "backgroundFrame";
   id: string;
   x: number;
   y: number;
   width?: number;
   height?: number;
-  data: PopElementData | TextElementData | BadgeElementData;
+  data: PopElementData | TextElementData | BadgeElementData | BackgroundFrameElementData;
 }
 
 // 要素固有のデータ型
@@ -103,6 +104,25 @@ export interface BadgeElementData {
   backgroundColor: string;
   textColor: string;
   fontSize: number;
+}
+
+export interface BackgroundFrameElementData {
+  frameType: "rectangle" | "circle" | "roundedRectangle" | "line" | "text";
+  style: {
+    fillColor?: string;
+    strokeColor?: string;
+    strokeWidth?: number;
+    borderRadius?: number;
+    fontSize?: number;
+    color?: string;
+    opacity?: number;
+    lineStyle?: "solid" | "dashed" | "dotted";
+  };
+  text?: string; // テキスト要素の場合
+  fontFamily?: string; // テキスト要素の場合
+  lineStart?: { x: number; y: number }; // 線要素の場合
+  lineEnd?: { x: number; y: number }; // 線要素の場合
+  zIndex?: number;
 }
 
 // ========== ポップテンプレート用 ==========
@@ -145,4 +165,80 @@ export interface BadgeLayoutData {
   backgroundColor: string;
   textColor: string;
   fontSize: number;
+}
+
+// ========== ビジュアルテンプレート用 ==========
+
+export interface VisualTemplateData {
+  id: string;
+  name: string;
+  backgroundFrames: BackgroundFrameData[];
+  elements: TemplateElementData[];
+  settings: TemplateSettingsData;
+}
+
+export interface BackgroundFrameData {
+  id: string;
+  type: "rectangle" | "circle" | "roundedRectangle" | "line" | "text";
+  position: { x: number; y: number }; // mm
+  size: { width: number; height: number }; // mm
+  style: {
+    fillColor?: string;
+    strokeColor?: string;
+    strokeWidth?: number;
+    borderRadius?: number;
+    fontSize?: number;
+    color?: string;
+    opacity?: number;
+    lineStyle?: "solid" | "dashed" | "dotted";
+  };
+  zIndex: number;
+  text?: string;
+  fontFamily?: string;
+  lineStart?: { x: number; y: number };
+  lineEnd?: { x: number; y: number };
+  isBackSide?: boolean;
+  autoRotate?: boolean;
+}
+
+export interface TemplateElementData {
+  id: string;
+  type: 'text' | 'badge' | 'image' | 'shape' | 'qrcode';
+  dataBinding: string;
+  position: { x: number; y: number }; // mm
+  size: { width: number; height: number }; // mm
+  style: {
+    fontSize?: number;
+    fontFamily?: string;
+    color?: string;
+    backgroundColor?: string;
+    borderColor?: string;
+    borderWidth?: number;
+    borderRadius?: number;
+    opacity?: number;
+    scaleX?: number;
+    scaleY?: number;
+  };
+  isBackSide?: boolean;
+  autoRotate?: boolean;
+  customText?: string;
+  label?: {
+    show: boolean;
+    text?: string;
+    fontSize?: number;
+    color?: string;
+  };
+  qrSettings?: {
+    errorCorrectionLevel: 'L' | 'M' | 'Q' | 'H';
+    margin: number;
+    color: string;
+    backgroundColor: string;
+  };
+}
+
+export interface TemplateSettingsData {
+  gridSize: number;
+  snapToGrid: boolean;
+  showGuides: boolean;
+  showFoldLine: boolean;
 }

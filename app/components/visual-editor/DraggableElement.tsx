@@ -25,6 +25,8 @@ interface DraggableElementProps {
   pop: PopResponse;
   isPanningMode?: boolean;
   sampleKey?: string;
+  gridSize: number; // グリッドサイズ（mm単位）
+  snapToGrid: boolean; // グリッドスナップ有効フラグ
 }
 
 export default function DraggableElement({
@@ -40,8 +42,58 @@ export default function DraggableElement({
   pop,
   isPanningMode = false,
   sampleKey,
+  gridSize,
+  snapToGrid,
 }: DraggableElementProps) {
   const [isDragging, setIsDragging] = useState(false);
+
+  // キーボード移動機能
+  useEffect(() => {
+    if (!isSelected) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // 入力フィールドにフォーカスがある場合は無効化
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.contentEditable === 'true') {
+        return;
+      }
+
+      // 矢印キーでの移動
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
+        e.preventDefault();
+        
+        let deltaX = 0;
+        let deltaY = 0;
+        const moveDistance = snapToGrid ? gridSize : 1; // グリッドスナップが有効な場合はグリッドサイズ、無効な場合は1mm
+
+        switch (e.code) {
+          case 'ArrowUp':
+            deltaY = -moveDistance;
+            break;
+          case 'ArrowDown':
+            deltaY = moveDistance;
+            break;
+          case 'ArrowLeft':
+            deltaX = -moveDistance;
+            break;
+          case 'ArrowRight':
+            deltaX = moveDistance;
+            break;
+        }
+
+        // mmからpxに変換してonMoveを呼び出し
+        const deltaXPx = deltaX * 3.7795275591 * zoom; // mm to px
+        const deltaYPx = deltaY * 3.7795275591 * zoom;
+        onMove(element.id, deltaXPx, deltaYPx);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isSelected, element.id, onMove, snapToGrid, gridSize, zoom]);
 
   // ドラッグ設定
   const [{ opacity }, drag] = useDrag(
@@ -116,6 +168,8 @@ export default function DraggableElement({
         onResize={onResize}
         mmToPx={mmToPx}
         pxToMm={pxToMm}
+        gridSize={gridSize}
+        snapToGrid={snapToGrid}
       />
     );
   };
