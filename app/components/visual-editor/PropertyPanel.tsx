@@ -108,6 +108,22 @@ export default function PropertyPanel({
     }
   };
 
+  // 一括角丸設定用のヘルパー関数
+  const handleBorderRadiusSetAll = (value: string) => {
+    const numValue = parseFloat(value);
+    if (!isNaN(numValue) && numValue >= 0) {
+      onUpdateElement(selectedElement.id, {
+        style: {
+          ...(selectedElement.style || {}),
+          borderTopLeftRadius: numValue,
+          borderTopRightRadius: numValue,
+          borderBottomRightRadius: numValue,
+          borderBottomLeftRadius: numValue,
+        },
+      });
+    }
+  };
+
   return (
     <div className='h-full overflow-y-auto p-4'>
       <div className='space-y-6'>
@@ -637,45 +653,25 @@ export default function PropertyPanel({
             </div>
             <div className='flex gap-1 mt-2'>
               <button
-                onClick={() => {
-                  handleBorderRadiusChange("TopLeft", "0");
-                  handleBorderRadiusChange("TopRight", "0");
-                  handleBorderRadiusChange("BottomRight", "0");
-                  handleBorderRadiusChange("BottomLeft", "0");
-                }}
+                onClick={() => handleBorderRadiusSetAll("0")}
                 className='px-2 py-1 text-xs border rounded hover:bg-gray-100 dark:hover:bg-gray-700'
               >
                 なし
               </button>
               <button
-                onClick={() => {
-                  handleBorderRadiusChange("TopLeft", "2");
-                  handleBorderRadiusChange("TopRight", "2");
-                  handleBorderRadiusChange("BottomRight", "2");
-                  handleBorderRadiusChange("BottomLeft", "2");
-                }}
+                onClick={() => handleBorderRadiusSetAll("2")}
                 className='px-2 py-1 text-xs border rounded hover:bg-gray-100 dark:hover:bg-gray-700'
               >
                 小(2mm)
               </button>
               <button
-                onClick={() => {
-                  handleBorderRadiusChange("TopLeft", "4");
-                  handleBorderRadiusChange("TopRight", "4");
-                  handleBorderRadiusChange("BottomRight", "4");
-                  handleBorderRadiusChange("BottomLeft", "4");
-                }}
+                onClick={() => handleBorderRadiusSetAll("4")}
                 className='px-2 py-1 text-xs border rounded hover:bg-gray-100 dark:hover:bg-gray-700'
               >
                 中(4mm)
               </button>
               <button
-                onClick={() => {
-                  handleBorderRadiusChange("TopLeft", "8");
-                  handleBorderRadiusChange("TopRight", "8");
-                  handleBorderRadiusChange("BottomRight", "8");
-                  handleBorderRadiusChange("BottomLeft", "8");
-                }}
+                onClick={() => handleBorderRadiusSetAll("8")}
                 className='px-2 py-1 text-xs border rounded hover:bg-gray-100 dark:hover:bg-gray-700'
               >
                 大(8mm)
