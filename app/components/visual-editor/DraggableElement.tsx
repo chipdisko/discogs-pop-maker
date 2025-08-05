@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useRef, useCallback, useEffect, useState } from "react";
-import { useDrag, ConnectDragSource } from "react-dnd";
+import React, { useCallback, useEffect, useState } from "react";
+import { useDrag } from "react-dnd";
 import type { PopResponse } from "@/src/application";
 import type { TemplateElement, DropResult } from "./types";
 import ElementRenderer from "./ElementRenderer";

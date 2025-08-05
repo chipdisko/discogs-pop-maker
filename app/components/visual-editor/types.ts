@@ -89,17 +89,12 @@ export interface ElementStyle {
   fontFamily?: string;
   color?: string;
   backgroundColor?: string;
-  // 枠線設定（後方互換性のため残す）
-  borderColor?: string; // 非推奨: borderTop.colorなどを使用
-  borderWidth?: number; // 非推奨: borderTop.widthなどを使用
-  // 新しい詳細な枠線設定
+  // 詳細な枠線設定
   borderTop?: BorderStyle;
   borderRight?: BorderStyle;
   borderBottom?: BorderStyle;
   borderLeft?: BorderStyle;
-  // 角丸設定（後方互換性のため残す）
-  borderRadius?: number; // 非推奨: 四隅個別設定を使用
-  // 新しい詳細な角丸設定
+  // 詳細な角丸設定
   borderTopLeftRadius?: number; // 左上の角丸（mm単位）
   borderTopRightRadius?: number; // 右上の角丸（mm単位）
   borderBottomRightRadius?: number; // 右下の角丸（mm単位）
@@ -115,9 +110,6 @@ export interface ElementStyle {
   // テキスト配置設定
   textAlign?: "left" | "center" | "right"; // 水平方向の配置
   verticalAlign?: "top" | "middle" | "bottom"; // 垂直方向の配置
-  // 注意: transform（scaleX/scaleY）との併用時は
-  // transform-originの設定により表示位置がずれる可能性があるため、
-  // 適切なtransform-originの調整が必要
 }
 
 export interface ShadowStyle {

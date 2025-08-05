@@ -117,7 +117,6 @@ export default function CreatePopModal({
   const [currentStep, setCurrentStep] = useState<1 | 2>(1);
   const [formData, setFormData] =
     useState<CreatePopFormData>(DEFAULT_FORM_DATA);
-  const [discogsData, setDiscogsData] = useState<ReleaseResponse | null>(null);
   const [isFetchingDiscogs, setIsFetchingDiscogs] = useState(false);
   const [isFetchingPriceSuggestions, setIsFetchingPriceSuggestions] =
     useState(false);
@@ -132,7 +131,6 @@ export default function CreatePopModal({
   const resetForm = useCallback(() => {
     setFormData(DEFAULT_FORM_DATA);
     setCurrentStep(1);
-    setDiscogsData(null);
     setIsFetchingDiscogs(false);
     setIsFetchingPriceSuggestions(false);
     setTempGenres("");
@@ -264,7 +262,6 @@ export default function CreatePopModal({
         ].join(", "),
       };
 
-      setDiscogsData(discogsResponse);
       setFormData((prev) => ({
         ...prev,
         title: discogsResponse.title,

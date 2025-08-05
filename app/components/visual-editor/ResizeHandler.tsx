@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import type { TemplateElement } from './types';
 
 interface ResizeHandlerProps {
@@ -15,20 +15,14 @@ interface ResizeHandlerProps {
 export default function ResizeHandler({
   element,
   onResize,
-  mmToPx,
   pxToMm,
   gridSize,
   snapToGrid,
 }: ResizeHandlerProps) {
-  const [isResizing, setIsResizing] = useState(false);
-  const [resizeHandle, setResizeHandle] = useState<string | null>(null);
 
   const handleMouseDown = useCallback((e: React.MouseEvent, handle: string) => {
     e.preventDefault();
     e.stopPropagation();
-    
-    setIsResizing(true);
-    setResizeHandle(handle);
     
     const startX = e.clientX;
     const startY = e.clientY;
@@ -116,8 +110,6 @@ export default function ResizeHandler({
     };
 
     const handleMouseUp = () => {
-      setIsResizing(false);
-      setResizeHandle(null);
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };

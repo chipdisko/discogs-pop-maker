@@ -4,7 +4,7 @@ import React, { useMemo } from "react";
 import type { PopResponse } from "@/src/application";
 import type { TemplateElement } from "./types";
 import { calculateAutoFitStyle } from "./utils/textUtils";
-import { getSampleValue, getSampleBadges } from "./utils/sampleData";
+import { getSampleValue } from "./utils/sampleData";
 import QRCodeRenderer from "./QRCodeRenderer";
 import BadgeRenderer from "./BadgeRenderer";
 import ImageRenderer from "./ImageRenderer";
@@ -26,7 +26,6 @@ export default function ElementRenderer({
   showBackSidePreview = false,
   useSampleData = true,
   zoom = 1,
-  sampleKey,
 }: ElementRendererProps) {
   // データバインディングから実際の値またはサンプル値を取得
   const dataValue = useMemo((): string => {
@@ -63,7 +62,7 @@ export default function ElementRenderer({
       default:
         return "";
     }
-  }, [element.dataBinding, element.customText, pop, useSampleData, sampleKey]);
+  }, [element.dataBinding, element.customText, pop, useSampleData]);
 
   // 自動調整スタイルの計算
   const autoFitStyle = useMemo(() => {
@@ -97,14 +96,7 @@ export default function ElementRenderer({
       overflow: "visible",
     };
 
-    // 後方互換性: 旧borderスタイルの適用
-    if (element.style?.borderColor || element.style?.borderWidth) {
-      baseStyle.borderStyle = "solid";
-      baseStyle.borderColor = element.style.borderColor || "transparent";
-      baseStyle.borderWidth = element.style.borderWidth ? `${element.style.borderWidth}px` : "0";
-    }
-
-    // 新しいborder設定の適用（優先）
+    // border設定の適用
     if (element.style?.borderTop) {
       baseStyle.borderTopStyle = element.style.borderTop.style;
       baseStyle.borderTopColor = element.style.borderTop.color;
@@ -126,12 +118,7 @@ export default function ElementRenderer({
       baseStyle.borderLeftWidth = `${element.style.borderLeft.width}mm`;
     }
 
-    // 後方互換性: 旧borderRadiusの適用
-    if (element.style?.borderRadius !== undefined) {
-      baseStyle.borderRadius = `${element.style.borderRadius}px`;
-    }
-
-    // 新しい角丸設定の適用（優先）
+    // 角丸設定の適用
     if (element.style?.borderTopLeftRadius !== undefined) {
       baseStyle.borderTopLeftRadius = `${element.style.borderTopLeftRadius}mm`;
     }

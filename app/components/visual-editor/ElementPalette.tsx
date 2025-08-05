@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useDrag, ConnectDragSource } from 'react-dnd';
+import { useDrag } from 'react-dnd';
 import type { TemplateElement } from './types';
 import { createElement } from './utils/templateUtils';
 

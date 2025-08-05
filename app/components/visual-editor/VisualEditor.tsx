@@ -10,7 +10,6 @@ import type {
   EditorState,
   BackgroundFrame,
 } from "./types";
-import { POP_DIMENSIONS, DEFAULT_TEMPLATE_SETTINGS } from "./types";
 import EditorCanvas from "./EditorCanvas";
 import ElementPalette from "./ElementPalette";
 import BackgroundFramePalette from "./BackgroundFramePalette";
@@ -19,14 +18,12 @@ import BackgroundFramePropertyPanel from "./BackgroundFramePropertyPanel";
 import Toolbar from "./Toolbar";
 import {
   createDefaultTemplate,
-  createBackgroundFrame,
 } from "./utils/templateUtils";
 import {
   autoSaveCurrentTemplate,
   getAutoSavedTemplate,
   clearAutoSave,
   saveTemplate,
-  getSavedTemplates,
 } from "./utils/storageUtils";
 import { setSampleData } from "./utils/sampleData";
 

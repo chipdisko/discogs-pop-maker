@@ -32,7 +32,6 @@ export default function PopMakerPage() {
     editingPop,
 
     // Actions
-    setError,
     setIsPreviewOpen,
     setPrintData,
     setIsCreateModalOpen,

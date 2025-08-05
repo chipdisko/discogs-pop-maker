@@ -31,6 +31,55 @@ export default function ImageCropModal({
     height: element.imageSettings?.crop?.height || 1,
   });
 
+  const drawCropArea = useCallback((ctx: CanvasRenderingContext2D, canvasWidth: number, canvasHeight: number) => {
+    const x = cropArea.x * canvasWidth;
+    const y = cropArea.y * canvasHeight;
+    const width = cropArea.width * canvasWidth;
+    const height = cropArea.height * canvasHeight;
+
+    // 先に画像を描画
+    const img = new Image();
+    img.onload = () => {
+      // 画像全体を描画
+      ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
+      
+      // 半透明オーバーレイを描画（全体）
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+      
+      // クロップ領域をクリアして元の画像を表示
+      ctx.clearRect(x, y, width, height);
+      ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
+      
+      // クロップ領域の枠線を描画
+      ctx.strokeStyle = '#3b82f6';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x, y, width, height);
+      
+      // リサイズハンドルを描画
+      const drawHandle = (hx: number, hy: number) => {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(hx - 4, hy - 4, 8, 8);
+        ctx.strokeStyle = '#3b82f6';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(hx - 4, hy - 4, 8, 8);
+      };
+      
+      // 四隅のハンドル
+      drawHandle(x, y);
+      drawHandle(x + width, y);
+      drawHandle(x, y + height);
+      drawHandle(x + width, y + height);
+      
+      // 辺の中央のハンドル
+      drawHandle(x + width/2, y);
+      drawHandle(x + width/2, y + height);
+      drawHandle(x, y + height/2);
+      drawHandle(x + width, y + height/2);
+    };
+    img.src = element.imageSettings!.src;
+  }, [cropArea, element.imageSettings]);
+
   // 画像の読み込みとキャンバスの描画
   useEffect(() => {
     if (!isOpen || !element.imageSettings?.src) return;
@@ -67,61 +116,6 @@ export default function ImageCropModal({
     };
     img.src = element.imageSettings.src;
   }, [isOpen, element.imageSettings?.src, cropArea, drawCropArea]);
-
-  const drawCropArea = useCallback((ctx: CanvasRenderingContext2D, canvasWidth: number, canvasHeight: number) => {
-    const x = cropArea.x * canvasWidth;
-    const y = cropArea.y * canvasHeight;
-    const width = cropArea.width * canvasWidth;
-    const height = cropArea.height * canvasHeight;
-
-    // 先に画像を描画
-    const img = new Image();
-    img.onload = () => {
-      // 画像全体を描画
-      ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
-      
-      // 半透明オーバーレイを描画（全体）
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-      
-      // クロップ領域のオーバーレイをクリア（元の画像が見えるように）
-      ctx.clearRect(x, y, width, height);
-      
-      // クロップ領域に元の画像を再描画
-      ctx.drawImage(img, x, y, width, height, x, y, width, height);
-      
-      // クロップ枠を描画
-      ctx.strokeStyle = '#3B82F6';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(x, y, width, height);
-
-      // リサイズハンドルを描画（白い背景と青い枠で見やすく）
-      const handleSize = 8;
-      
-      const drawHandle = (hx: number, hy: number) => {
-        // 白い背景
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(hx - handleSize/2, hy - handleSize/2, handleSize, handleSize);
-        // 青い枠
-        ctx.strokeStyle = '#3B82F6';
-        ctx.lineWidth = 1;
-        ctx.strokeRect(hx - handleSize/2, hy - handleSize/2, handleSize, handleSize);
-      };
-      
-      // 四隅のハンドル
-      drawHandle(x, y);
-      drawHandle(x + width, y);
-      drawHandle(x, y + height);
-      drawHandle(x + width, y + height);
-      
-      // 辺の中央のハンドル
-      drawHandle(x + width/2, y);
-      drawHandle(x + width/2, y + height);
-      drawHandle(x, y + height/2);
-      drawHandle(x + width, y + height/2);
-    };
-    img.src = element.imageSettings!.src;
-  }, [cropArea, element.imageSettings]);
 
   const getMousePos = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;

@@ -194,15 +194,6 @@ export default function BackgroundFrameRenderer({
           }
         };
 
-        // マウスオーバー時のカーソル制御
-        const handleMouseMove = (e: React.MouseEvent) => {
-          const svg = e.currentTarget as SVGElement;
-          if (isInHandleArea(e)) {
-            svg.style.cursor = 'default'; // ハンドル領域では default カーソル
-          } else {
-            svg.style.cursor = isEditable ? 'move' : 'default'; // 線の領域では move カーソル
-          }
-        };
 
         return (
           <svg 

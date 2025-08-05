@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useDrag } from 'react-dnd';
 import type { BackgroundFrame, DropResult } from './types';
 import BackgroundFrameRenderer from './BackgroundFrameRenderer';
@@ -189,7 +189,7 @@ export default function DraggableBackgroundFrame({
 
   return (
     <div
-      ref={ref}
+      ref={ref as React.Ref<HTMLDivElement>}
       style={style}
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
@@ -198,7 +198,7 @@ export default function DraggableBackgroundFrame({
       {/* 背景枠の内容（テキスト編集中でない場合） */}
       {!isEditing && (
         <BackgroundFrameRenderer
-          key={`${frame.id}-${JSON.stringify(frame.cropSettings || {})}`}
+          key={`${frame.id}-${JSON.stringify(frame.style || {})}`}
           frame={frame}
           isBackSide={frame.isBackSide || false}
           showBackSidePreview={showBackSidePreview}

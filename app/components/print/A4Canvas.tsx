@@ -12,7 +12,6 @@ interface A4CanvasProps {
 export default function A4Canvas({
   pageData,
   dpi = 300,
-  scale = 0.3,
   onCanvasReady,
 }: A4CanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);

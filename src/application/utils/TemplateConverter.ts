@@ -64,6 +64,18 @@ export interface TemplateElement {
     color: string;
     backgroundColor: string;
   };
+  imageSettings?: {
+    src: string;
+    fileName?: string;
+    originalWidth: number;
+    originalHeight: number;
+    crop?: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    };
+  };
 }
 
 export interface ElementStyle {
@@ -71,15 +83,47 @@ export interface ElementStyle {
   fontFamily?: string;
   color?: string;
   backgroundColor?: string;
-  borderColor?: string;
-  borderWidth?: number;
-  borderRadius?: number;
+  // 詳細な枠線設定
+  borderTop?: {
+    color: string;
+    width: number;
+    style: "solid" | "dashed" | "dotted" | "double" | "none";
+  };
+  borderRight?: {
+    color: string;
+    width: number;
+    style: "solid" | "dashed" | "dotted" | "double" | "none";
+  };
+  borderBottom?: {
+    color: string;
+    width: number;
+    style: "solid" | "dashed" | "dotted" | "double" | "none";
+  };
+  borderLeft?: {
+    color: string;
+    width: number;
+    style: "solid" | "dashed" | "dotted" | "double" | "none";
+  };
+  // 詳細な角丸設定
+  borderTopLeftRadius?: number;
+  borderTopRightRadius?: number;
+  borderBottomRightRadius?: number;
+  borderBottomLeftRadius?: number;
+  shadow?: {
+    offsetX: number;
+    offsetY: number;
+    blur: number;
+    color: string;
+  };
   opacity?: number;
   scaleX?: number;
   scaleY?: number;
   minFontSize?: number;
   maxLines?: number;
   overflow?: 'clip' | 'scale' | 'shrink' | 'auto';
+  // テキスト配置設定
+  textAlign?: "left" | "center" | "right";
+  verticalAlign?: "top" | "middle" | "bottom";
 }
 
 export interface DisplayCondition {
@@ -164,11 +208,13 @@ export class TemplateConverter {
       position: element.position,
       size: element.size,
       style: element.style || {},
+      conditions: element.conditions,
       isBackSide: element.isBackSide,
       autoRotate: element.autoRotate,
       customText: element.customText,
       label: element.label,
       qrSettings: element.qrSettings,
+      imageSettings: element.imageSettings,
     };
   }
 
@@ -180,11 +226,13 @@ export class TemplateConverter {
       position: data.position,
       size: data.size,
       style: data.style,
+      conditions: data.conditions,
       isBackSide: data.isBackSide,
       autoRotate: data.autoRotate,
       customText: data.customText,
       label: data.label,
       qrSettings: data.qrSettings,
+      imageSettings: data.imageSettings,
     };
   }
 

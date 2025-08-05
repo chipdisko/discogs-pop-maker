@@ -53,7 +53,7 @@ export default function ImageRenderer({
       setCroppedImageSrc(canvas.toDataURL());
     };
     img.src = src;
-  }, [element.imageSettings?.src, element.imageSettings?.crop, element.imageSettings?.originalWidth, element.imageSettings?.originalHeight]);
+  }, [element.imageSettings]);
 
   const imageStyle = useMemo(() => {
     if (!element.imageSettings) {

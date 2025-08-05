@@ -26,9 +26,8 @@ function PaletteItem({ type, label, icon }: PaletteItemProps) {
     }),
   }), [type]);
 
-  return (
+  return drag(
     <div
-      ref={drag}
       className={`
         p-4 bg-white dark:bg-gray-700 rounded-lg border-2 
         border-gray-200 dark:border-gray-600 
@@ -42,10 +41,10 @@ function PaletteItem({ type, label, icon }: PaletteItemProps) {
         <span className="text-sm font-medium">{label}</span>
       </div>
     </div>
-  );
+  ) as React.ReactElement;
 }
 
-export default function BackgroundFramePalette({ onAddFrame }: BackgroundFramePaletteProps) {
+export default function BackgroundFramePalette({}: BackgroundFramePaletteProps) {
   const frameTypes: PaletteItemProps[] = [
     {
       type: 'rectangle',

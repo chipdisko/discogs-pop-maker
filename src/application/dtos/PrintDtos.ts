@@ -212,13 +212,53 @@ export interface TemplateElementData {
     fontFamily?: string;
     color?: string;
     backgroundColor?: string;
-    borderColor?: string;
-    borderWidth?: number;
-    borderRadius?: number;
+    // 詳細な枠線設定
+    borderTop?: {
+      color: string;
+      width: number;
+      style: "solid" | "dashed" | "dotted" | "double" | "none";
+    };
+    borderRight?: {
+      color: string;
+      width: number;
+      style: "solid" | "dashed" | "dotted" | "double" | "none";
+    };
+    borderBottom?: {
+      color: string;
+      width: number;
+      style: "solid" | "dashed" | "dotted" | "double" | "none";
+    };
+    borderLeft?: {
+      color: string;
+      width: number;
+      style: "solid" | "dashed" | "dotted" | "double" | "none";
+    };
+    // 詳細な角丸設定
+    borderTopLeftRadius?: number;
+    borderTopRightRadius?: number;
+    borderBottomRightRadius?: number;
+    borderBottomLeftRadius?: number;
     opacity?: number;
     scaleX?: number;
     scaleY?: number;
+    minFontSize?: number;
+    maxLines?: number;
+    overflow?: 'clip' | 'scale' | 'shrink' | 'auto';
+    // テキスト配置設定
+    textAlign?: "left" | "center" | "right";
+    verticalAlign?: "top" | "middle" | "bottom";
+    shadow?: {
+      offsetX: number;
+      offsetY: number;
+      blur: number;
+      color: string;
+    };
   };
+  conditions?: {
+    field: string;
+    operator: 'exists' | 'equals' | 'contains' | 'greater' | 'less';
+    value?: string | number | boolean;
+  }[];
   isBackSide?: boolean;
   autoRotate?: boolean;
   customText?: string;
@@ -233,6 +273,18 @@ export interface TemplateElementData {
     margin: number;
     color: string;
     backgroundColor: string;
+  };
+  imageSettings?: {
+    src: string;
+    fileName?: string;
+    originalWidth: number;
+    originalHeight: number;
+    crop?: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    };
   };
 }
 

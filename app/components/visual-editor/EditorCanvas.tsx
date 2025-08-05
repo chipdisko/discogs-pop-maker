@@ -31,11 +31,9 @@ export default function EditorCanvas({
   onAddElement,
   onUpdateElement,
   onSelectElement,
-  onDeleteElement,
   onAddBackgroundFrame,
   onUpdateBackgroundFrame,
   onSelectBackgroundFrame,
-  onDeleteBackgroundFrame,
   sampleKey,
 }: EditorCanvasProps) {
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -139,7 +137,6 @@ export default function EditorCanvas({
       // パンオフセットを更新（親コンポーネントのstateとして管理する必要がある）
       // 今回は簡易実装として、transformでキャンバス全体を移動
       if (canvasRef.current) {
-        const currentTransform = canvasRef.current.style.transform || '';
         const newTransform = `translate(${deltaX}px, ${deltaY}px)`;
         canvasRef.current.style.transform = newTransform;
       }
@@ -230,7 +227,7 @@ export default function EditorCanvas({
       isBackSide,
       autoRotate: isBackSide,
     });
-  }, [template, pxToMm, onUpdateElement, isInBackSide]);
+  }, [template, pxToMm, onUpdateElement]);
 
   // Background frame move handler
   const handleBackgroundFrameMove = useCallback((frameId: string, deltaX: number, deltaY: number) => {
@@ -276,7 +273,7 @@ export default function EditorCanvas({
     }
 
     onUpdateBackgroundFrame?.(frameId, updates);
-  }, [template, pxToMm, onUpdateBackgroundFrame, isInBackSide]);
+  }, [template, pxToMm, onUpdateBackgroundFrame]);
 
   // Background frame resize handler
   const handleBackgroundFrameResize = useCallback((frameId: string, newSize: { width: number; height: number }, newPosition?: { x: number; y: number }) => {

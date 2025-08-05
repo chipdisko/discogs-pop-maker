@@ -78,7 +78,7 @@ export default function PropertyPanel({
       color: string;
       width: number;
       style: string;
-    }) || { color: "#000000", width: 0, style: "solid" };
+    } | undefined) || { color: "#000000", width: 0, style: "solid" };
 
     onUpdateElement(selectedElement.id, {
       style: {
@@ -505,7 +505,7 @@ export default function PropertyPanel({
                 color: string;
                 width: number;
                 style: string;
-              }) || { color: "#000000", width: 0, style: "solid" };
+              } | undefined) || { color: "#000000", width: 0, style: "solid" };
 
               return (
                 <div
