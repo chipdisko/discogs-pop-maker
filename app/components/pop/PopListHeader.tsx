@@ -7,7 +7,6 @@ interface PopListHeaderProps {
   isLoading: boolean;
   onSelectAll: () => void;
   onDeselectAll: () => void;
-  onGeneratePrint: () => void;
   onOpenPrintPreview: () => void;
 }
 
@@ -17,7 +16,6 @@ export default function PopListHeader({
   isLoading,
   onSelectAll,
   onDeselectAll,
-  onGeneratePrint,
   onOpenPrintPreview,
 }: PopListHeaderProps) {
   return (
@@ -53,15 +51,6 @@ export default function PopListHeader({
             variant='default'
           >
             印刷プレビュー
-          </Button>
-        )}
-        {selectedCount > 0 && (
-          <Button
-            onClick={onGeneratePrint}
-            disabled={isLoading}
-            variant='secondary'
-          >
-            選択したポップを印刷 ({selectedCount}個)
           </Button>
         )}
       </div>

@@ -8,7 +8,6 @@ interface PopCardProps {
   onToggleSelection: (popId: string) => void;
   onStartEdit: (pop: PopResponse) => void;
   onDelete: (popId: string) => void;
-  onOpenVisualEditor: (pop: PopResponse) => void;
   isLoading: boolean;
 }
 
@@ -19,7 +18,6 @@ export default function PopCard({
   onToggleSelection,
   onStartEdit,
   onDelete,
-  onOpenVisualEditor,
   isLoading,
 }: PopCardProps) {
   return (
@@ -60,16 +58,6 @@ export default function PopCard({
             className='px-2 py-1 bg-secondary text-secondary-foreground text-xs rounded hover:bg-secondary/90 disabled:opacity-50'
           >
             編集
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onOpenVisualEditor(pop);
-            }}
-            disabled={isLoading}
-            className='px-2 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600 disabled:opacity-50'
-          >
-            デザイン
           </button>
           <button
             onClick={(e) => {

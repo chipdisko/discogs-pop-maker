@@ -243,7 +243,7 @@ export default function CreatePopModal({
       const responseType = result.type; // master or release
       
       // Master URLの場合、main_releaseの情報も考慮する
-      let discogsId = releaseData.id?.toString();
+      const discogsId = releaseData.id?.toString();
       let actualReleaseId = discogsId; // 価格提案用のID
       
       // Masterの場合、main_releaseのIDを価格提案に使用

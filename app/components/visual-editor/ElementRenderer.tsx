@@ -29,40 +29,40 @@ export default function ElementRenderer({
 }: ElementRendererProps) {
   // データバインディングから実際の値またはサンプル値を取得
   const dataValue = useMemo((): string => {
-    console.log(`🎯 Element ${element.id} | binding: ${element.dataBinding} | value: "${element.dataBinding === 'artist' ? pop.release.artistName : element.dataBinding === 'title' ? pop.release.title : 'other'}" | useSample: ${useSampleData}`);
+    console.log(`🎯 Element ${element.id} | binding: ${element.dataBinding} | value: "${element.dataBinding === 'artist' ? pop?.release?.artistName || 'sample' : element.dataBinding === 'title' ? pop?.release?.title || 'sample' : 'other'}" | useSample: ${useSampleData}`);
     
-    if (useSampleData) {
+    if (useSampleData || !pop) {
       return getSampleValue(element.dataBinding, element.customText);
     }
 
     switch (element.dataBinding) {
       case "artist":
-        return pop.release.artistName;
+        return pop?.release?.artistName || "";
       case "title":
-        return pop.release.title;
+        return pop?.release?.title || "";
       case "label":
-        return pop.release.label || "不明";
+        return pop?.release?.label || "不明";
       case "countryYear":
         return [
-          pop.release.country || "不明",
-          pop.release.releaseYear || "不明",
+          pop?.release?.country || "不明",
+          pop?.release?.releaseYear || "不明",
         ]
           .filter(Boolean)
           .join(" • ");
       case "condition":
-        return pop.condition;
+        return pop?.condition || "";
       case "genre":
-        return pop.release.genreStyleString || "";
+        return pop?.release?.genreStyleString || "";
       case "price":
-        return pop.price === 0 ? "FREE" : `¥${pop.price.toLocaleString()}`;
+        return pop?.price === 0 ? "FREE" : `¥${pop?.price?.toLocaleString() || 0}`;
       case "comment":
-        return pop.comment || "";
+        return pop?.comment || "";
       case "custom":
         return element.customText || "";
       case "discogsUrl":
         // discogsTypeに応じて適切なURLを生成
-        const urlType = pop.release.discogsType || "release";
-        return `https://www.discogs.com/${urlType}/${pop.release.discogsId}` || "";
+        const urlType = pop?.release?.discogsType || "release";
+        return `https://www.discogs.com/${urlType}/${pop?.release?.discogsId}` || "";
       default:
         return "";
     }

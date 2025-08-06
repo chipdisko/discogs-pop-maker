@@ -1,16 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
-import { usePopService, usePrintService } from "@/src/infrastructure";
+import { usePopService } from "@/src/infrastructure";
 import type {
   PopResponse,
   CreatePopRequest,
-  PrintDataResponse,
 } from "@/src/application";
 import type { CreatePopFormData } from "../components/modal/CreatePopModal";
 
 export function usePopMaker() {
   // Services
   const popService = usePopService();
-  const printService = usePrintService();
 
   // State
   const [pops, setPops] = useState<PopResponse[]>([]);
@@ -18,9 +16,6 @@ export function usePopMaker() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 印刷プレビュー関連
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [printData, setPrintData] = useState<PrintDataResponse | null>(null);
 
   // 編集関連
   const [newlyCreatedPopIds, setNewlyCreatedPopIds] = useState<string[]>([]);
@@ -203,37 +198,6 @@ export function usePopMaker() {
     }
   };
 
-  /**
-   * 印刷データ生成
-   */
-  const handleGeneratePrint = async () => {
-    if (selectedPopIds.length === 0) {
-      setError("印刷するポップを選択してください");
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const result = await printService.generatePrintData({
-        popIds: selectedPopIds,
-      });
-
-      if ("message" in result) {
-        setError(result.message);
-      } else {
-        console.log("印刷データが生成されました:", result);
-        setPrintData(result);
-        setIsPreviewOpen(true);
-      }
-    } catch {
-      setError("印刷データの生成に失敗しました");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return {
     // State
     pops,
@@ -241,16 +205,12 @@ export function usePopMaker() {
     newlyCreatedPopIds,
     isLoading,
     error,
-    isPreviewOpen,
-    printData,
     isCreateModalOpen,
     isEditModalOpen,
     editingPop,
 
     // Actions
     setError,
-    setIsPreviewOpen,
-    setPrintData,
     setIsCreateModalOpen,
     setIsEditModalOpen,
     setEditingPop,
@@ -261,6 +221,5 @@ export function usePopMaker() {
     deselectAllPops,
     handleStartEdit,
     handleUpdatePopFromModal,
-    handleGeneratePrint,
   };
 }

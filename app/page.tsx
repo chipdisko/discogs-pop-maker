@@ -34,7 +34,6 @@ export default function Home() {
     deselectAllPops,
     handleStartEdit,
     handleUpdatePopFromModal,
-    handleGeneratePrint,
   } = usePopMaker();
 
   // ビジュアルエディタ用の状態
@@ -46,10 +45,6 @@ export default function Home() {
   // 印刷プレビュー用の状態
   const [isPrintPreviewOpen, setIsPrintPreviewOpen] = useState(false);
 
-  const handleOpenVisualEditor = (pop: PopResponse) => {
-    setVisualEditorPop(pop);
-    setIsVisualEditorOpen(true);
-  };
 
   // 印刷プレビューを開く
   const handleOpenPrintPreview = () => {
@@ -66,7 +61,10 @@ export default function Home() {
         <ErrorDisplay error={error} />
 
         {/* ポップ作成ボタン */}
-        <CreatePopSection onCreateClick={() => setIsCreateModalOpen(true)} />
+        <CreatePopSection 
+          onCreateClick={() => setIsCreateModalOpen(true)}
+          onTemplateDesignClick={() => setIsVisualEditorOpen(true)}
+        />
 
         {/* ポップ一覧・印刷機能 */}
         <PopListSection
@@ -76,11 +74,9 @@ export default function Home() {
           isLoading={isLoading}
           onSelectAll={selectAllPops}
           onDeselectAll={deselectAllPops}
-          onGeneratePrint={handleGeneratePrint}
           onToggleSelection={togglePopSelection}
           onStartEdit={handleStartEdit}
           onDelete={handleDeletePop}
-          onOpenVisualEditor={handleOpenVisualEditor}
           onOpenPrintPreview={handleOpenPrintPreview}
         />
       </div>
@@ -127,16 +123,14 @@ export default function Home() {
       />
 
       {/* ビジュアルエディタモーダル */}
-      {visualEditorPop && (
-        <VisualEditorModal
-          isOpen={isVisualEditorOpen}
-          onClose={() => {
-            setIsVisualEditorOpen(false);
-            setVisualEditorPop(null);
-          }}
-          pop={visualEditorPop}
-        />
-      )}
+      <VisualEditorModal
+        isOpen={isVisualEditorOpen}
+        onClose={() => {
+          setIsVisualEditorOpen(false);
+          setVisualEditorPop(null);
+        }}
+        pop={visualEditorPop}
+      />
 
       {/* 印刷プレビューモーダル */}
       <PrintPreviewModal
