@@ -57,6 +57,9 @@ export interface TemplateElement {
     text?: string;
     fontSize?: number;
     color?: string;
+    displayMode?: 'positioned' | 'inline';
+    placement?: 'outside' | 'inside';
+    position?: 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right' | 'middle-left' | 'middle-right';
   };
   qrSettings?: {
     errorCorrectionLevel: 'L' | 'M' | 'Q' | 'H';
@@ -137,6 +140,41 @@ export interface TemplateSettings {
   snapToGrid: boolean;
   showGuides: boolean;
   showFoldLine: boolean;
+  // 統一カラー設定
+  unifiedColors: {
+    dataLabelColor: string;
+    contentColor: string;
+    backgroundColor: string;
+  };
+  // 統一フォント設定
+  unifiedFonts: {
+    dataLabel: {
+      fontFamily: string;
+      fontWeight: 'normal' | 'bold';
+      fontStyle: 'normal' | 'italic';
+      letterSpacing?: number;
+      textDecoration?: {
+        color?: string;
+        line?: ('underline' | 'overline' | 'line-through')[];
+        style?: 'solid' | 'double' | 'dotted' | 'dashed' | 'wavy';
+        thickness?: number;
+        underlineOffset?: number;
+      };
+    };
+    content: {
+      fontFamily: string;
+      fontWeight: 'normal' | 'bold';
+      fontStyle: 'normal' | 'italic';
+      letterSpacing?: number;
+      textDecoration?: {
+        color?: string;
+        line?: ('underline' | 'overline' | 'line-through')[];
+        style?: 'solid' | 'double' | 'dotted' | 'dashed' | 'wavy';
+        thickness?: number;
+        underlineOffset?: number;
+      };
+    };
+  };
 }
 
 export class TemplateConverter {
@@ -242,6 +280,8 @@ export class TemplateConverter {
       snapToGrid: settings.snapToGrid,
       showGuides: settings.showGuides,
       showFoldLine: settings.showFoldLine,
+      unifiedColors: settings.unifiedColors,
+      unifiedFonts: settings.unifiedFonts,
     };
   }
 
@@ -251,6 +291,23 @@ export class TemplateConverter {
       snapToGrid: data.snapToGrid,
       showGuides: data.showGuides,
       showFoldLine: data.showFoldLine,
+      unifiedColors: data.unifiedColors || {
+        dataLabelColor: '#666666',
+        contentColor: '#1e293b',
+        backgroundColor: '#ffffff',
+      },
+      unifiedFonts: data.unifiedFonts || {
+        dataLabel: {
+          fontFamily: 'Arial, sans-serif',
+          fontWeight: 'normal',
+          fontStyle: 'normal',
+        },
+        content: {
+          fontFamily: 'Arial, sans-serif',
+          fontWeight: 'normal',
+          fontStyle: 'normal',
+        },
+      },
     };
   }
 }

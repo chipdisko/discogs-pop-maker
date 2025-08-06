@@ -265,7 +265,7 @@ export default function ElementRenderer({
     }
 
     return baseStyle;
-  }, [element, autoFitStyle, isBackSide, showBackSidePreview, zoom, template.settings.unifiedColors, template.settings.unifiedFonts, getContentFontStyle]);
+  }, [element, autoFitStyle, isBackSide, showBackSidePreview, zoom, template.settings.unifiedColors, template.settings.unifiedFonts, getContentFontStyle, getElementColor]);
 
   // 内側のコンテンツスタイル（テキスト配置用）
   const innerStyle: React.CSSProperties = useMemo(() => {

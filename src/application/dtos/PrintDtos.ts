@@ -267,6 +267,11 @@ export interface TemplateElementData {
     text?: string;
     fontSize?: number;
     color?: string;
+    // 表示モード
+    displayMode?: 'positioned' | 'inline';
+    // 配置設定（positioned モードの場合のみ）
+    placement?: 'outside' | 'inside';
+    position?: 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right' | 'middle-left' | 'middle-right';
   };
   qrSettings?: {
     errorCorrectionLevel: 'L' | 'M' | 'Q' | 'H';
@@ -293,4 +298,39 @@ export interface TemplateSettingsData {
   snapToGrid: boolean;
   showGuides: boolean;
   showFoldLine: boolean;
+  // 統一カラー設定
+  unifiedColors?: {
+    dataLabelColor: string;
+    contentColor: string;
+    backgroundColor: string;
+  };
+  // 統一フォント設定
+  unifiedFonts?: {
+    dataLabel: {
+      fontFamily: string;
+      fontWeight: 'normal' | 'bold';
+      fontStyle: 'normal' | 'italic';
+      letterSpacing?: number;
+      textDecoration?: {
+        color?: string;
+        line?: ('underline' | 'overline' | 'line-through')[];
+        style?: 'solid' | 'double' | 'dotted' | 'dashed' | 'wavy';
+        thickness?: number;
+        underlineOffset?: number;
+      };
+    };
+    content: {
+      fontFamily: string;
+      fontWeight: 'normal' | 'bold';
+      fontStyle: 'normal' | 'italic';
+      letterSpacing?: number;
+      textDecoration?: {
+        color?: string;
+        line?: ('underline' | 'overline' | 'line-through')[];
+        style?: 'solid' | 'double' | 'dotted' | 'dashed' | 'wavy';
+        thickness?: number;
+        underlineOffset?: number;
+      };
+    };
+  };
 }
