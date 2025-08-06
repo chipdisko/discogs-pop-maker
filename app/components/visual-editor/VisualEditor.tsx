@@ -314,115 +314,116 @@ export default function VisualEditor({
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className='flex bg-gray-50 dark:bg-gray-900 h-full'>
-        {/* 左サイドバー: 要素パレット/背景枠パレット */}
-        <div className='w-64 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'>
-          <div className='p-4 border-b border-gray-200 dark:border-gray-700'>
-            {/* 編集モード切り替え */}
-            <div className='flex gap-2'>
-              <button
-                onClick={() => handleEditModeChange("background")}
-                className={`px-3 py-2 text-sm rounded transition-colors ${
-                  editorState.editMode === "background"
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
-                }`}
-              >
-                背景枠
-              </button>
-              <button
-                onClick={() => handleEditModeChange("elements")}
-                className={`px-3 py-2 text-sm rounded transition-colors ${
-                  editorState.editMode === "elements"
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
-                }`}
-              >
-                表示エリア
-              </button>
+      <div className='flex flex-col overflow-y-auto min-h-0 grow'>
+        {/* ツールバー */}
+        <Toolbar
+          zoom={editorState.zoom}
+          onZoomChange={handleZoomChange}
+          onSave={handleSaveTemplate}
+          onReset={handleResetTemplate}
+          currentSample={currentSample}
+          onSampleChange={handleSampleChange}
+          template={template}
+          onLoad={handleLoadTemplate}
+        />
+        <div className='flex bg-gray-50 dark:bg-gray-900 overflow-y-auto min-h-0 grow'>
+          {/* 左サイドバー: 要素パレット/背景枠パレット */}
+          <div className='flex flex-col w-64 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'>
+            <div className='p-4 border-b border-gray-200 dark:border-gray-700'>
+              {/* 編集モード切り替え */}
+              <div className='flex gap-2'>
+                <button
+                  onClick={() => handleEditModeChange("background")}
+                  className={`px-3 py-2 text-sm rounded transition-colors ${
+                    editorState.editMode === "background"
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
+                  }`}
+                >
+                  背景枠
+                </button>
+                <button
+                  onClick={() => handleEditModeChange("elements")}
+                  className={`px-3 py-2 text-sm rounded transition-colors ${
+                    editorState.editMode === "elements"
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
+                  }`}
+                >
+                  表示エリア
+                </button>
+              </div>
+            </div>
+            {editorState.editMode === "elements" ? (
+              <ElementPalette onAddElement={handleAddElement} />
+            ) : (
+              <BackgroundFramePalette onAddFrame={handleAddBackgroundFrame} />
+            )}
+          </div>
+
+          {/* メインエリア */}
+          <div className='flex-1 flex flex-col'>
+            {/* キャンバスエリア */}
+            <div
+              ref={canvasRef}
+              className='flex-1 overflow-auto bg-gray-100 dark:bg-gray-900 p-8'
+            >
+              <EditorCanvas
+                pop={pop}
+                template={template}
+                editorState={editorState}
+                onAddElement={handleAddElement}
+                onUpdateElement={handleUpdateElement}
+                onSelectElement={handleSelectElement}
+                onDeleteElement={handleDeleteElement}
+                onAddBackgroundFrame={handleAddBackgroundFrame}
+                onUpdateBackgroundFrame={handleUpdateBackgroundFrame}
+                onSelectBackgroundFrame={handleSelectBackgroundFrame}
+                onDeleteBackgroundFrame={handleDeleteBackgroundFrame}
+                sampleKey={`sample-${currentSample}`}
+              />
             </div>
           </div>
-          {editorState.editMode === "elements" ? (
-            <ElementPalette onAddElement={handleAddElement} />
-          ) : (
-            <BackgroundFramePalette onAddFrame={handleAddBackgroundFrame} />
-          )}
-        </div>
 
-        {/* メインエリア */}
-        <div className='flex-1 flex flex-col'>
-          {/* ツールバー */}
-          <Toolbar
-            zoom={editorState.zoom}
-            onZoomChange={handleZoomChange}
-            onSave={handleSaveTemplate}
-            onReset={handleResetTemplate}
-            currentSample={currentSample}
-            onSampleChange={handleSampleChange}
-            template={template}
-            onLoad={handleLoadTemplate}
-          />
-
-          {/* キャンバスエリア */}
-          <div
-            ref={canvasRef}
-            className='flex-1 overflow-auto bg-gray-100 dark:bg-gray-900 p-8'
-          >
-            <EditorCanvas
-              pop={pop}
-              template={template}
-              editorState={editorState}
-              onAddElement={handleAddElement}
-              onUpdateElement={handleUpdateElement}
-              onSelectElement={handleSelectElement}
-              onDeleteElement={handleDeleteElement}
-              onAddBackgroundFrame={handleAddBackgroundFrame}
-              onUpdateBackgroundFrame={handleUpdateBackgroundFrame}
-              onSelectBackgroundFrame={handleSelectBackgroundFrame}
-              onDeleteBackgroundFrame={handleDeleteBackgroundFrame}
-              sampleKey={`sample-${currentSample}`}
-            />
+          {/* 右サイドバー: プロパティパネル */}
+          <div className='w-80 border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'>
+            {editorState.editMode === "elements" ? (
+              <PropertyPanel
+                selectedElement={selectedElement}
+                onUpdateElement={handleUpdateElement}
+                onDeleteElement={handleDeleteElement}
+              />
+            ) : (
+              <BackgroundFramePropertyPanel
+                selectedFrame={selectedBackgroundFrame}
+                onUpdateFrame={handleUpdateBackgroundFrame}
+                onDeleteFrame={handleDeleteBackgroundFrame}
+              />
+            )}
           </div>
-        </div>
 
-        {/* 右サイドバー: プロパティパネル */}
-        <div className='w-80 border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'>
-          {editorState.editMode === "elements" ? (
-            <PropertyPanel
-              selectedElement={selectedElement}
-              onUpdateElement={handleUpdateElement}
-              onDeleteElement={handleDeleteElement}
-            />
-          ) : (
-            <BackgroundFramePropertyPanel
-              selectedFrame={selectedBackgroundFrame}
-              onUpdateFrame={handleUpdateBackgroundFrame}
-              onDeleteFrame={handleDeleteBackgroundFrame}
-            />
-          )}
-        </div>
-
-        {/* 自動保存通知 */}
-        {showAutoSaveNotification && (
-          <div className='fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50'>
-            <div className='flex items-center gap-2'>
-              <svg
-                className='w-4 h-4'
-                fill='none'
-                stroke='currentColor'
-                viewBox='0 0 24 24'
-              >
-                <path
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  strokeWidth={2}
-                  d='M5 13l4 4L19 7'
-                />
-              </svg>
-              自動保存しました
+          {/* 自動保存通知 */}
+          {showAutoSaveNotification && (
+            <div className='fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50'>
+              <div className='flex items-center gap-2'>
+                <svg
+                  className='w-4 h-4'
+                  fill='none'
+                  stroke='currentColor'
+                  viewBox='0 0 24 24'
+                >
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    strokeWidth={2}
+                    d='M5 13l4 4L19 7'
+                  />
+                </svg>
+                自動保存しました
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </DndProvider>
   );

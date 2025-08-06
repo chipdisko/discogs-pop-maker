@@ -20,10 +20,10 @@ export default function VisualEditorModal({
   return (
     <>
       <div className='fixed inset-0 z-10 bg-black bg-opacity-50'></div>
-      <div className='fixed inset-4 z-20 bg-white dark:bg-gray-900 rounded-lg shadow-xl'>
-        <div className='flex flex-col h-full'>
+      <div className='fixed inset-4 z-20 bg-white dark:bg-gray-900 rounded-lg shadow-xl overflow-hidden'>
+        <div className='flex flex-col h-full '>
           {/* ヘッダー */}
-          <div className='flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700'>
+          <div className='flex items-center justify-between px-4 h-14 shrink-0 border-b border-gray-200 dark:border-gray-700'>
             <h2 className='text-xl font-semibold'>
               POPテンプレート ビジュアルエディタ
             </h2>
@@ -48,14 +48,12 @@ export default function VisualEditorModal({
           </div>
 
           {/* エディタ本体 */}
-          <div className='flex-1 overflow-hidden'>
-            <VisualEditor
-              pop={pop}
-              onTemplateChange={(template) => {
-                console.log("Template changed:", template);
-              }}
-            />
-          </div>
+          <VisualEditor
+            pop={pop}
+            onTemplateChange={(template) => {
+              console.log("Template changed:", template);
+            }}
+          />
         </div>
       </div>
     </>
