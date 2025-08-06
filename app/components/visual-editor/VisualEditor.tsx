@@ -64,7 +64,7 @@ export default function VisualEditor({
   });
 
   const [currentSample, setCurrentSample] = useState<1 | 2 | 3>(1);
-  const [isPrintPreviewOpen, setIsPrintPreviewOpen] = useState(false);
+  // const [isPrintPreviewOpen, setIsPrintPreviewOpen] = useState(false);
 
   const canvasRef = useRef<HTMLDivElement>(null);
 
@@ -308,9 +308,9 @@ export default function VisualEditor({
   ]);
 
   // 印刷プレビューハンドラー
-  const handlePrintPreview = useCallback(() => {
-    setIsPrintPreviewOpen(true);
-  }, []);
+  // const handlePrintPreview = useCallback(() => {
+  //   setIsPrintPreviewOpen(true);
+  // }, []);
 
   return (
     <DndProvider backend={HTML5Backend}>

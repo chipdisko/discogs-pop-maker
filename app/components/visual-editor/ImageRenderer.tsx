@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo, useEffect, useState } from 'react';
+import Image from 'next/image';
 import type { TemplateElement } from './types';
 
 interface ImageRendererProps {
@@ -30,7 +31,7 @@ export default function ImageRenderer({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const img = new Image();
+    const img = new window.Image();
     img.onload = () => {
       // クロップ領域のサイズを計算
       const cropX = x * originalWidth;
@@ -101,11 +102,13 @@ export default function ImageRenderer({
 
   return (
     <div style={containerStyle}>
-      <img
+      <Image
         src={croppedImageSrc || element.imageSettings.src}
         alt={element.imageSettings.fileName || '画像'}
+        fill
         style={imageStyle}
         draggable={false}
+        unoptimized // data URLやローカル画像の場合は最適化をスキップ
       />
     </div>
   );

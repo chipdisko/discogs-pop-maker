@@ -64,7 +64,7 @@ export default function ElementRenderer({
       default:
         return "";
     }
-  }, [element.dataBinding, element.customText, pop, useSampleData]);
+  }, [element.id, element.dataBinding, element.customText, pop, useSampleData]);
 
   // 実際に返される値をログ出力
   console.log(`✅ Final value for ${element.id} (${element.dataBinding}): "${dataValue}"`);

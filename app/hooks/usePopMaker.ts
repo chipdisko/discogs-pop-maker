@@ -33,7 +33,7 @@ export function usePopMaker() {
   // 初期化時に既存のポップを読み込み
   useEffect(() => {
     loadAllPops();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 新しく作成されたポップのアニメーションを3秒後に削除
   useEffect(() => {
