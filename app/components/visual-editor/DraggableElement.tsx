@@ -6,7 +6,7 @@ import type { PopResponse } from "@/src/application";
 import type { TemplateElement, DropResult, VisualTemplate } from "./types";
 import ElementRenderer from "./ElementRenderer";
 import ResizeHandler from "./ResizeHandler";
-import { getLabelText } from "./utils/labelUtils";
+
 
 interface DraggableElementProps {
   element: TemplateElement;
@@ -177,34 +177,7 @@ export default function DraggableElement({
   };
 
   // データ名ラベル
-  const renderLabel = () => {
-    if (!element.label?.show) return null;
-
-    const labelText = getLabelText(element.dataBinding, element.label?.text);
-    const fontSize = (element.label?.fontSize || 12) * zoom;
-    const color = element.dataBinding === "custom" 
-      ? element.label?.color || "#666666"
-      : template.settings.unifiedColors.dataLabelColor;
-
-    return (
-      <div
-        className='absolute pointer-events-none leading-none'
-        style={{
-          top: -fontSize - 2,
-          left: 0,
-          fontSize: `${fontSize}px`,
-          color,
-          fontFamily: "Arial, sans-serif",
-          padding: "1px 4px",
-          borderRadius: "2px",
-          whiteSpace: "pre",
-          zIndex: 1001,
-        }}
-      >
-        {labelText}
-      </div>
-    );
-  };
+  // ラベル表示はElementRendererで行うため、ここでは削除
 
   return drag(
     <div
@@ -224,8 +197,7 @@ export default function DraggableElement({
         template={template}
       />
 
-      {/* データ名ラベル */}
-      {renderLabel()}
+      {/* データ名ラベル - ElementRendererで処理 */}
 
       {/* リサイズハンドル */}
       {renderResizeHandles()}

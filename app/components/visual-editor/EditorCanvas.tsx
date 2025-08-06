@@ -297,13 +297,14 @@ export default function EditorCanvas({
           drop(node);
           canvasRef.current = node;
         }}
-        className={`relative bg-white shadow-lg transition-all ${
+        className={`relative shadow-lg transition-all ${
           isOver && canDrop ? 'ring-2 ring-blue-400 ring-opacity-50' : ''
         } ${isOver ? 'bg-blue-50' : ''}`}
         style={{
           width: canvasSize.width,
           height: canvasSize.height,
           cursor: isSpacePressed ? (isPanning ? 'grabbing' : 'grab') : 'default',
+          backgroundColor: template.settings.unifiedColors?.backgroundColor || '#ffffff',
         }}
         onClick={handleCanvasClick}
         onMouseDown={handleMouseDown}

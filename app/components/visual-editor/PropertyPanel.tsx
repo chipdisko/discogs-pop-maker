@@ -731,7 +731,272 @@ export default function PropertyPanel({
             </label>
 
             {selectedElement.label?.show && (
-              <div className='pl-6 space-y-2'>
+              <div className='pl-6 space-y-3'>
+                {/* 表示モード選択 */}
+                <div>
+                  <label className='text-xs text-gray-600 dark:text-gray-400 block mb-1'>
+                    表示モード
+                  </label>
+                  <div className='flex gap-1'>
+                    <button
+                      onClick={() =>
+                        onUpdateElement(selectedElement.id, {
+                          label: {
+                            show: selectedElement.label?.show ?? false,
+                            ...selectedElement.label,
+                            displayMode: 'positioned',
+                          },
+                        })
+                      }
+                      className={`px-3 py-1 text-xs border rounded ${
+                        (selectedElement.label?.displayMode || 'positioned') === 'positioned'
+                          ? "bg-blue-500 text-white border-blue-500"
+                          : "border-gray-300 dark:border-gray-600"
+                      }`}
+                    >
+                      配置
+                    </button>
+                    <button
+                      onClick={() =>
+                        onUpdateElement(selectedElement.id, {
+                          label: {
+                            show: selectedElement.label?.show ?? false,
+                            ...selectedElement.label,
+                            displayMode: 'inline',
+                          },
+                        })
+                      }
+                      className={`px-3 py-1 text-xs border rounded ${
+                        selectedElement.label?.displayMode === 'inline'
+                          ? "bg-blue-500 text-white border-blue-500"
+                          : "border-gray-300 dark:border-gray-600"
+                      }`}
+                    >
+                      インライン
+                    </button>
+                  </div>
+                  <p className='text-xs text-gray-500 mt-1'>
+                    {selectedElement.label?.displayMode === 'inline' 
+                      ? '[ラベル]: [内容] 形式で表示' 
+                      : '要素の外側または内側に配置'}
+                  </p>
+                </div>
+
+                {/* 配置モード設定 */}
+                {(selectedElement.label?.displayMode || 'positioned') === 'positioned' && (
+                  <>
+                    <div>
+                      <label className='text-xs text-gray-600 dark:text-gray-400 block mb-1'>
+                        配置位置
+                      </label>
+                      <div className='flex gap-1'>
+                        <button
+                          onClick={() =>
+                            onUpdateElement(selectedElement.id, {
+                              label: {
+                                show: selectedElement.label?.show ?? false,
+                                ...selectedElement.label,
+                                placement: 'outside',
+                              },
+                            })
+                          }
+                          className={`px-3 py-1 text-xs border rounded ${
+                            (selectedElement.label?.placement || 'outside') === 'outside'
+                              ? "bg-blue-500 text-white border-blue-500"
+                              : "border-gray-300 dark:border-gray-600"
+                          }`}
+                        >
+                          外側
+                        </button>
+                        <button
+                          onClick={() =>
+                            onUpdateElement(selectedElement.id, {
+                              label: {
+                                show: selectedElement.label?.show ?? false,
+                                ...selectedElement.label,
+                                placement: 'inside',
+                              },
+                            })
+                          }
+                          className={`px-3 py-1 text-xs border rounded ${
+                            selectedElement.label?.placement === 'inside'
+                              ? "bg-blue-500 text-white border-blue-500"
+                              : "border-gray-300 dark:border-gray-600"
+                          }`}
+                        >
+                          内側
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className='text-xs text-gray-600 dark:text-gray-400 block mb-1'>
+                        位置（8箇所）
+                      </label>
+                      <div className='grid grid-cols-3 gap-1 max-w-24'>
+                        {/* 上段 */}
+                        <button
+                          onClick={() =>
+                            onUpdateElement(selectedElement.id, {
+                              label: {
+                                show: selectedElement.label?.show ?? false,
+                                ...selectedElement.label,
+                                position: 'top-left',
+                              },
+                            })
+                          }
+                          className={`w-6 h-6 text-xs border rounded ${
+                            (selectedElement.label?.position || 'top-left') === 'top-left'
+                              ? "bg-blue-500 text-white border-blue-500"
+                              : "border-gray-300 dark:border-gray-600"
+                          }`}
+                          title='左上'
+                        >
+                          ↖
+                        </button>
+                        <button
+                          onClick={() =>
+                            onUpdateElement(selectedElement.id, {
+                              label: {
+                                show: selectedElement.label?.show ?? false,
+                                ...selectedElement.label,
+                                position: 'top-center',
+                              },
+                            })
+                          }
+                          className={`w-6 h-6 text-xs border rounded ${
+                            selectedElement.label?.position === 'top-center'
+                              ? "bg-blue-500 text-white border-blue-500"
+                              : "border-gray-300 dark:border-gray-600"
+                          }`}
+                          title='中央上'
+                        >
+                          ↑
+                        </button>
+                        <button
+                          onClick={() =>
+                            onUpdateElement(selectedElement.id, {
+                              label: {
+                                show: selectedElement.label?.show ?? false,
+                                ...selectedElement.label,
+                                position: 'top-right',
+                              },
+                            })
+                          }
+                          className={`w-6 h-6 text-xs border rounded ${
+                            selectedElement.label?.position === 'top-right'
+                              ? "bg-blue-500 text-white border-blue-500"
+                              : "border-gray-300 dark:border-gray-600"
+                          }`}
+                          title='右上'
+                        >
+                          ↗
+                        </button>
+                        
+                        {/* 中段 */}
+                        <button
+                          onClick={() =>
+                            onUpdateElement(selectedElement.id, {
+                              label: {
+                                show: selectedElement.label?.show ?? false,
+                                ...selectedElement.label,
+                                position: 'middle-left',
+                              },
+                            })
+                          }
+                          className={`w-6 h-6 text-xs border rounded ${
+                            selectedElement.label?.position === 'middle-left'
+                              ? "bg-blue-500 text-white border-blue-500"
+                              : "border-gray-300 dark:border-gray-600"
+                          }`}
+                          title='左中央'
+                        >
+                          ←
+                        </button>
+                        <div className='w-6 h-6 border border-gray-200 dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-800'></div>
+                        <button
+                          onClick={() =>
+                            onUpdateElement(selectedElement.id, {
+                              label: {
+                                show: selectedElement.label?.show ?? false,
+                                ...selectedElement.label,
+                                position: 'middle-right',
+                              },
+                            })
+                          }
+                          className={`w-6 h-6 text-xs border rounded ${
+                            selectedElement.label?.position === 'middle-right'
+                              ? "bg-blue-500 text-white border-blue-500"
+                              : "border-gray-300 dark:border-gray-600"
+                          }`}
+                          title='右中央'
+                        >
+                          →
+                        </button>
+                        
+                        {/* 下段 */}
+                        <button
+                          onClick={() =>
+                            onUpdateElement(selectedElement.id, {
+                              label: {
+                                show: selectedElement.label?.show ?? false,
+                                ...selectedElement.label,
+                                position: 'bottom-left',
+                              },
+                            })
+                          }
+                          className={`w-6 h-6 text-xs border rounded ${
+                            selectedElement.label?.position === 'bottom-left'
+                              ? "bg-blue-500 text-white border-blue-500"
+                              : "border-gray-300 dark:border-gray-600"
+                          }`}
+                          title='左下'
+                        >
+                          ↙
+                        </button>
+                        <button
+                          onClick={() =>
+                            onUpdateElement(selectedElement.id, {
+                              label: {
+                                show: selectedElement.label?.show ?? false,
+                                ...selectedElement.label,
+                                position: 'bottom-center',
+                              },
+                            })
+                          }
+                          className={`w-6 h-6 text-xs border rounded ${
+                            selectedElement.label?.position === 'bottom-center'
+                              ? "bg-blue-500 text-white border-blue-500"
+                              : "border-gray-300 dark:border-gray-600"
+                          }`}
+                          title='中央下'
+                        >
+                          ↓
+                        </button>
+                        <button
+                          onClick={() =>
+                            onUpdateElement(selectedElement.id, {
+                              label: {
+                                show: selectedElement.label?.show ?? false,
+                                ...selectedElement.label,
+                                position: 'bottom-right',
+                              },
+                            })
+                          }
+                          className={`w-6 h-6 text-xs border rounded ${
+                            selectedElement.label?.position === 'bottom-right'
+                              ? "bg-blue-500 text-white border-blue-500"
+                              : "border-gray-300 dark:border-gray-600"
+                          }`}
+                          title='右下'
+                        >
+                          ↘
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
+
                 <div>
                   <label className='text-xs text-gray-600 dark:text-gray-400'>
                     表示テキスト

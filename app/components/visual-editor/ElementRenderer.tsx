@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useCallback } from "react";
 import type { PopResponse } from "@/src/application";
 import type { TemplateElement, VisualTemplate } from "./types";
 import { calculateAutoFitStyle } from "./utils/textUtils";
@@ -73,6 +73,22 @@ export default function ElementRenderer({
   // 実際に返される値をログ出力
   console.log(`✅ Final value for ${element.id} (${element.dataBinding}): "${dataValue}"`);
 
+  // データバインディングに対応するラベル名を取得
+  const getDataBindingLabel = (dataBinding: string): string => {
+    const labelMap: Record<string, string> = {
+      artist: "アーティスト名",
+      title: "タイトル", 
+      label: "レーベル",
+      countryYear: "国・年",
+      condition: "コンディション",
+      genre: "ジャンル",
+      price: "価格",
+      comment: "コメント",
+      custom: "カスタムテキスト",
+    };
+    return labelMap[dataBinding] || dataBinding;
+  };
+
   // 統一カラー設定の適用（カスタムテキスト以外）
   const getElementColor = () => {
     // カスタムテキストの場合は個別色設定を保持
@@ -91,6 +107,73 @@ export default function ElementRenderer({
     // カスタムテキスト以外は統一色設定を使用（フォールバック付き）
     return template.settings.unifiedColors?.dataLabelColor || "#666666";
   };
+
+  // データラベル用のフォント設定を取得
+  const getLabelFontStyle = useCallback(() => {
+    const fontSettings = template.settings.unifiedFonts?.dataLabel || {
+      fontFamily: 'Arial, sans-serif',
+      fontWeight: 'normal',
+      fontStyle: 'normal',
+    };
+    
+    const style: React.CSSProperties = {
+      fontFamily: fontSettings.fontFamily,
+      fontWeight: fontSettings.fontWeight,
+      fontStyle: fontSettings.fontStyle,
+      letterSpacing: fontSettings.letterSpacing ? `${fontSettings.letterSpacing}em` : undefined,
+    };
+
+    // テキスト装飾の適用
+    if (fontSettings.textDecoration?.line && fontSettings.textDecoration.line.length > 0) {
+      style.textDecorationLine = fontSettings.textDecoration.line.join(' ');
+      style.textDecorationColor = fontSettings.textDecoration.color;
+      style.textDecorationStyle = fontSettings.textDecoration.style as React.CSSProperties['textDecorationStyle'];
+      if (fontSettings.textDecoration.thickness) {
+        style.textDecorationThickness = `${fontSettings.textDecoration.thickness}px`;
+      }
+      if (fontSettings.textDecoration.underlineOffset) {
+        style.textUnderlineOffset = `${fontSettings.textDecoration.underlineOffset}px`;
+      }
+    }
+
+    return style;
+  }, [template.settings.unifiedFonts]);
+
+  // コンテンツ用のフォント設定を取得
+  const getContentFontStyle = useCallback(() => {
+    // カスタムテキストの場合は個別設定を保持
+    if (element.dataBinding === "custom") {
+      return {};
+    }
+
+    const fontSettings = template.settings.unifiedFonts?.content || {
+      fontFamily: 'Arial, sans-serif',
+      fontWeight: 'normal',
+      fontStyle: 'normal',
+    };
+    
+    const style: React.CSSProperties = {
+      fontFamily: fontSettings.fontFamily,
+      fontWeight: fontSettings.fontWeight,
+      fontStyle: fontSettings.fontStyle,
+      letterSpacing: fontSettings.letterSpacing ? `${fontSettings.letterSpacing}em` : undefined,
+    };
+
+    // テキスト装飾の適用
+    if (fontSettings.textDecoration?.line && fontSettings.textDecoration.line.length > 0) {
+      style.textDecorationLine = fontSettings.textDecoration.line.join(' ');
+      style.textDecorationColor = fontSettings.textDecoration.color;
+      style.textDecorationStyle = fontSettings.textDecoration.style as React.CSSProperties['textDecorationStyle'];
+      if (fontSettings.textDecoration.thickness) {
+        style.textDecorationThickness = `${fontSettings.textDecoration.thickness}px`;
+      }
+      if (fontSettings.textDecoration.underlineOffset) {
+        style.textUnderlineOffset = `${fontSettings.textDecoration.underlineOffset}px`;
+      }
+    }
+
+    return style;
+  }, [element.dataBinding, template.settings.unifiedFonts]);
 
   // 自動調整スタイルの計算
   const autoFitStyle = useMemo(() => {
@@ -122,6 +205,8 @@ export default function ElementRenderer({
       backgroundColor: element.style?.backgroundColor || "transparent",
       opacity: element.style?.opacity || 1,
       overflow: "visible",
+      // コンテンツ用のフォント設定を適用（カスタムテキスト以外）
+      ...getContentFontStyle(),
     };
 
     // border設定の適用
@@ -180,7 +265,7 @@ export default function ElementRenderer({
     }
 
     return baseStyle;
-  }, [element, autoFitStyle, isBackSide, showBackSidePreview, zoom, template.settings.unifiedColors]);
+  }, [element, autoFitStyle, isBackSide, showBackSidePreview, zoom, template.settings.unifiedColors, template.settings.unifiedFonts, getContentFontStyle]);
 
   // 内側のコンテンツスタイル（テキスト配置用）
   const innerStyle: React.CSSProperties = useMemo(() => {
@@ -247,6 +332,10 @@ export default function ElementRenderer({
         ];
         const isSingleLine = singleLineBindings.includes(element.dataBinding);
 
+        // インラインモードの場合は [ラベル]: [内容] 形式で表示
+        const isInlineMode = element.label?.show && element.label.displayMode === 'inline';
+        const labelText = element.label?.text || getDataBindingLabel(element.dataBinding);
+
         return (
           <div
             className='px-1'
@@ -269,7 +358,24 @@ export default function ElementRenderer({
                   overflow: "visible",
                 }}
               >
-                {dataValue}
+                {isInlineMode ? (
+                  <>
+                    <span style={{ 
+                      color: getLabelColor(),
+                      fontSize: `${(element.label?.fontSize || 12) * zoom}px`,
+                      ...getLabelFontStyle()
+                    }}>
+                      {labelText}:{' '}
+                    </span>
+                    <span style={{
+                      color: getElementColor()
+                    }}>
+                      {dataValue}
+                    </span>
+                  </>
+                ) : (
+                  dataValue
+                )}
               </div>
             ) : (
               <span
@@ -278,7 +384,24 @@ export default function ElementRenderer({
                   width: "100%",
                 }}
               >
-                {dataValue}
+                {isInlineMode ? (
+                  <>
+                    <span style={{ 
+                      color: getLabelColor(),
+                      fontSize: `${(element.label?.fontSize || 12) * zoom}px`,
+                      ...getLabelFontStyle()
+                    }}>
+                      {labelText}:{' '}
+                    </span>
+                    <span style={{
+                      color: getElementColor()
+                    }}>
+                      {dataValue}
+                    </span>
+                  </>
+                ) : (
+                  dataValue
+                )}
               </span>
             )}
           </div>
@@ -328,20 +451,82 @@ export default function ElementRenderer({
   const renderLabel = () => {
     if (!element.label?.show) return null;
 
+    const labelText = element.label?.text || getDataBindingLabel(element.dataBinding);
+    const displayMode = element.label?.displayMode || 'positioned';
+
+    // インラインモード: [ラベル]: [内容] 形式
+    if (displayMode === 'inline') {
+      return null; // インラインモードの場合はここでは何も返さず、メインコンテンツ内で処理
+    }
+
+    // 配置モード: 要素の外側または内側に配置
+    const placement = element.label?.placement || 'outside';
+    const position = element.label?.position || 'top-left';
+    
+    // 配置位置の計算
+    const getPositionStyle = (): React.CSSProperties => {
+      const baseStyle: React.CSSProperties = {
+        position: 'absolute',
+        fontSize: `${(element.label?.fontSize || 12) * zoom}px`,
+        color: getLabelColor(),
+        whiteSpace: 'nowrap',
+        pointerEvents: 'none',
+        zIndex: 10,
+        ...getLabelFontStyle(), // ラベル用フォント設定を適用
+      };
+
+      // 外側配置の場合
+      if (placement === 'outside') {
+        switch (position) {
+          case 'top-left':
+            return { ...baseStyle, bottom: '100%', left: '0', marginBottom: '2px' };
+          case 'top-center':
+            return { ...baseStyle, bottom: '100%', left: '50%', transform: 'translateX(-50%)', marginBottom: '2px' };
+          case 'top-right':
+            return { ...baseStyle, bottom: '100%', right: '0', marginBottom: '2px' };
+          case 'bottom-left':
+            return { ...baseStyle, top: '100%', left: '0', marginTop: '2px' };
+          case 'bottom-center':
+            return { ...baseStyle, top: '100%', left: '50%', transform: 'translateX(-50%)', marginTop: '2px' };
+          case 'bottom-right':
+            return { ...baseStyle, top: '100%', right: '0', marginTop: '2px' };
+          case 'middle-left':
+            return { ...baseStyle, top: '50%', right: '100%', transform: 'translateY(-50%)', marginRight: '4px' };
+          case 'middle-right':
+            return { ...baseStyle, top: '50%', left: '100%', transform: 'translateY(-50%)', marginLeft: '4px' };
+          default:
+            return { ...baseStyle, bottom: '100%', left: '0', marginBottom: '2px' };
+        }
+      }
+      
+      // 内側配置の場合
+      else {
+        switch (position) {
+          case 'top-left':
+            return { ...baseStyle, top: '2px', left: '2px' };
+          case 'top-center':
+            return { ...baseStyle, top: '2px', left: '50%', transform: 'translateX(-50%)' };
+          case 'top-right':
+            return { ...baseStyle, top: '2px', right: '2px' };
+          case 'bottom-left':
+            return { ...baseStyle, bottom: '2px', left: '2px' };
+          case 'bottom-center':
+            return { ...baseStyle, bottom: '2px', left: '50%', transform: 'translateX(-50%)' };
+          case 'bottom-right':
+            return { ...baseStyle, bottom: '2px', right: '2px' };
+          case 'middle-left':
+            return { ...baseStyle, top: '50%', left: '2px', transform: 'translateY(-50%)' };
+          case 'middle-right':
+            return { ...baseStyle, top: '50%', right: '2px', transform: 'translateY(-50%)' };
+          default:
+            return { ...baseStyle, top: '2px', left: '2px' };
+        }
+      }
+    };
+
     return (
-      <div
-        className="absolute"
-        style={{
-          top: "-1.2em",
-          left: "0",
-          fontSize: `${(element.label.fontSize || 12) * zoom}px`,
-          color: getLabelColor(), // 統一カラーまたは個別カラーを適用
-          whiteSpace: "nowrap",
-          pointerEvents: "none",
-          zIndex: 10,
-        }}
-      >
-        {element.label.text || getSampleValue(element.dataBinding)}
+      <div style={getPositionStyle()}>
+        {labelText}
       </div>
     );
   };

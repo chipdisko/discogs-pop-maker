@@ -32,6 +32,19 @@ const getDefaultTemplate = (): Template => ({
     unifiedColors: {
       dataLabelColor: '#666666',
       contentColor: '#1e293b',
+      backgroundColor: '#ffffff',
+    },
+    unifiedFonts: {
+      dataLabel: {
+        fontFamily: 'Arial, sans-serif',
+        fontWeight: 'normal',
+        fontStyle: 'normal',
+      },
+      content: {
+        fontFamily: 'Arial, sans-serif',
+        fontWeight: 'normal',
+        fontStyle: 'normal',
+      },
     },
   },
 });
@@ -77,7 +90,7 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
         width: `${width}px`,
         height: `${height}px`,
         position: "relative",
-        backgroundColor: "white",
+        backgroundColor: activeTemplate.settings.unifiedColors?.backgroundColor || "white",
         overflow: "hidden",
       }}
     >

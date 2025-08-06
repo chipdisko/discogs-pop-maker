@@ -25,6 +25,11 @@ export interface TemplateElement {
     text?: string; // カスタムラベルテキスト（未設定時はデフォルト）
     fontSize?: number; // ラベルフォントサイズ（デフォルト12px）
     color?: string; // ラベル文字色（デフォルト#666666）
+    // 表示モード
+    displayMode?: 'positioned' | 'inline'; // positioned: 配置モード, inline: [ラベル]: [内容] モード
+    // 配置設定（positioned モードの場合のみ）
+    placement?: 'outside' | 'inside'; // 外側/内側
+    position?: 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right' | 'middle-left' | 'middle-right'; // 8箇所
   };
   // QRコード要素専用
   qrSettings?: {
@@ -135,6 +140,38 @@ export interface TemplateSettings {
   unifiedColors: {
     dataLabelColor: string; // データラベルの色
     contentColor: string; // コンテンツの色
+    backgroundColor: string; // 全体背景色
+  };
+  // 統一フォント設定
+  unifiedFonts: {
+    // データラベル用
+    dataLabel: {
+      fontFamily: string;
+      fontWeight: 'normal' | 'bold';
+      fontStyle: 'normal' | 'italic';
+      letterSpacing?: number; // em単位
+      textDecoration?: {
+        color?: string;
+        line?: ('underline' | 'overline' | 'line-through')[];
+        style?: 'solid' | 'double' | 'dotted' | 'dashed' | 'wavy';
+        thickness?: number; // px
+        underlineOffset?: number; // px
+      };
+    };
+    // コンテンツ用
+    content: {
+      fontFamily: string;
+      fontWeight: 'normal' | 'bold';
+      fontStyle: 'normal' | 'italic';
+      letterSpacing?: number; // em単位
+      textDecoration?: {
+        color?: string;
+        line?: ('underline' | 'overline' | 'line-through')[];
+        style?: 'solid' | 'double' | 'dotted' | 'dashed' | 'wavy';
+        thickness?: number; // px
+        underlineOffset?: number; // px
+      };
+    };
   };
 }
 
@@ -187,5 +224,18 @@ export const DEFAULT_TEMPLATE_SETTINGS: TemplateSettings = {
   unifiedColors: {
     dataLabelColor: '#666666', // データラベルのデフォルト色
     contentColor: '#1e293b', // コンテンツのデフォルト色
+    backgroundColor: '#ffffff', // 全体背景のデフォルト色
+  },
+  unifiedFonts: {
+    dataLabel: {
+      fontFamily: 'Arial, sans-serif',
+      fontWeight: 'normal',
+      fontStyle: 'normal',
+    },
+    content: {
+      fontFamily: 'Arial, sans-serif',
+      fontWeight: 'normal',
+      fontStyle: 'normal',
+    },
   },
 };

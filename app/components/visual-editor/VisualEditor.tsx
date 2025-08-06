@@ -16,7 +16,7 @@ import BackgroundFramePalette from "./BackgroundFramePalette";
 import PropertyPanel from "./PropertyPanel";
 import BackgroundFramePropertyPanel from "./BackgroundFramePropertyPanel";
 import Toolbar from "./Toolbar";
-import UnifiedColorPanel from "./UnifiedColorPanel";
+import UnifiedStylePanel from "./UnifiedStylePanel";
 import { createDefaultTemplate } from "./utils/templateUtils";
 import {
   autoSaveCurrentTemplate,
@@ -386,7 +386,7 @@ export default function VisualEditor({
           {/* メインエリア */}
           <div className='flex-1 flex flex-col'>
             {/* 統一カラー設定パネル */}
-            <UnifiedColorPanel
+            <UnifiedStylePanel
               template={template}
               onUpdateTemplate={handleUpdateTemplate}
             />
