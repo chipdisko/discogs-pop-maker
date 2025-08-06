@@ -64,7 +64,7 @@ export default function PopMakerPage() {
 
   return (
     <div className='min-h-screen bg-background p-6'>
-      <div className='max-w-6xl mx-auto space-y-8'>
+      <div id='main' className='max-w-6xl mx-auto space-y-8'>
         {/* ヘッダー */}
         <Header onClearStorage={clearLocalStorage} />
 
