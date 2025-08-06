@@ -17,8 +17,9 @@
 
 - **基本要素のドラッグ&ドロップ**
   - アーティスト名、タイトル、レーベル、価格、コメント、コンディション、ジャンル、リリース情報（国・年）、バッジなどの要素を自由に配置
+  - 画像要素（JPG/PNG/WebP対応、ファイルアップロード機能付き）
   - 裏面要素（店舗名など、任意のテキスト要素）
-  - グリッドスナップ機能（1mm 単位で調整可能）
+  - グリッドスナップ機能（2mm 単位で調整可能）
   - ガイドライン表示（他の要素との整列時に表示）
 - **折り線の管理**
   - 15mm 位置の折り線表示（破線で視覚的に表現）
@@ -35,6 +36,12 @@
 - **要素のグループ化**
   - 複数要素を選択してグループ化
   - グループ単位での移動・コピー・削除
+- **グリッドスナップの詳細仕様**
+  - すべての要素の位置（x, y）は2mm単位でスナップ
+  - すべての要素のサイズ（width, height）も2mm単位でスナップ
+  - ドラッグによる要素移動時も常に2mmグリッドにスナップ
+  - リサイズ操作時も2mmグリッドにスナップ
+  - 数値入力時も自動的に2mmの倍数に丸められる
 
 ### 2. リアルタイムプレビュー
 
@@ -54,6 +61,11 @@
   - 文字色の選択（カラーピッカー）
   - 太字・斜体・下線
   - 行間・文字間調整
+- **画像編集**
+  - ファイルアップロード（JPG、PNG、WebP形式対応）
+  - インタラクティブなトリミング機能（ユーザー指定範囲でクロップ）
+  - 画像の表示方法（contain: アスペクト比維持・全体表示）
+  - 画像ファイルの変更・削除機能
 - **要素サイズの調整**
   - 各要素（アーティスト名、タイトル、レーベル等）の表示領域サイズを個別調整
   - ドラッグによるリサイズ（角と辺のハンドル）
@@ -76,10 +88,24 @@
   - プレビューで圧縮状態を確認可能
   - 注意：コメントの行数は増減できない仕様
 - **要素のスタイル設定**
-  - 背景色・枠線の設定
-  - 角丸の調整
+  - 背景色の設定
+  - 枠線（ボーダー）の詳細設定：
+    - 上下左右個別の枠線設定（borderTop, borderRight, borderBottom, borderLeft）
+    - 各辺ごとの色設定（カラーピッカー対応）
+    - 線の太さ設定（0.5mm単位、0〜5mmの範囲）
+    - 線のタイプ設定（solid：実線、dashed：破線、dotted：点線、double：二重線、none：なし）
+  - 角丸の詳細設定：
+    - 四隅個別の角丸設定（borderTopLeftRadius, borderTopRightRadius, borderBottomRightRadius, borderBottomLeftRadius）
+    - 各角の半径設定（mm単位、0〜20mmの範囲）
+    - 全角一括設定オプション（borderRadius）
+    - プリセット値（なし、小：2mm、中：4mm、大：8mm）
   - 影の追加（ドロップシャドウ）
   - 透明度の調整
+  - テキスト配置設定：
+    - 水平配置（textAlign）: left（左寄せ）、center（中央寄せ）、right（右寄せ）
+    - 垂直配置（verticalAlign）: top（上寄せ）、middle（中央寄せ）、bottom（下寄せ）
+    - 要素ブロック内でのコンテンツ位置を細かく制御
+    - 注意: transform（scaleX/scaleY）使用時はtransform-originとの競合に注意が必要
 
 ### 4. テンプレート管理
 
@@ -122,6 +148,10 @@
   - 上揃え、中央揃え、下揃え
   - 等間隔配置
   - 要素の複製（Ctrl+D）
+- **キーボード操作**
+  - 矢印キーによる要素移動（2mmグリッド単位）
+  - 選択中要素のみキーボード操作が有効
+  - 入力フィールドにフォーカスがある場合は無効化
 
 ### 7. データ連携
 
@@ -176,6 +206,25 @@ interface TemplateElement {
     color: string; // 前景色（通常は黒）
     backgroundColor: string; // 背景色（通常は白）
   };
+  // 画像要素専用
+  imageSettings?: {
+    src: string; // 画像のData URL
+    fileName?: string; // ファイル名
+    originalWidth: number; // 元の画像サイズ（px）
+    originalHeight: number; // 元の画像サイズ（px）
+    crop?: {
+      x: number; // クロップ開始位置（元画像に対する比率 0-1）
+      y: number; // クロップ開始位置（元画像に対する比率 0-1）
+      width: number; // クロップ幅（元画像に対する比率 0-1）
+      height: number; // クロップ高さ（元画像に対する比率 0-1）
+    };
+  };
+}
+
+interface BorderStyle {
+  color: string; // 枠線の色
+  width: number; // 枠線の太さ（mm単位、0.5mm刻み）
+  style: "solid" | "dashed" | "dotted" | "double" | "none"; // 線のタイプ
 }
 
 interface ElementStyle {
@@ -183,9 +232,21 @@ interface ElementStyle {
   fontFamily?: string;
   color?: string;
   backgroundColor?: string;
-  borderColor?: string;
-  borderWidth?: number;
-  borderRadius?: number;
+  // 枠線設定（後方互換性のため残す）
+  borderColor?: string; // 非推奨: borderTop.colorなどを使用
+  borderWidth?: number; // 非推奨: borderTop.widthなどを使用
+  // 新しい詳細な枠線設定
+  borderTop?: BorderStyle;
+  borderRight?: BorderStyle;
+  borderBottom?: BorderStyle;
+  borderLeft?: BorderStyle;
+  // 角丸設定（後方互換性のため残す）
+  borderRadius?: number; // 非推奨: 四隅個別設定を使用
+  // 新しい詳細な角丸設定
+  borderTopLeftRadius?: number; // 左上の角丸（mm単位）
+  borderTopRightRadius?: number; // 右上の角丸（mm単位）
+  borderBottomRightRadius?: number; // 右下の角丸（mm単位）
+  borderBottomLeftRadius?: number; // 左下の角丸（mm単位）
   shadow?: ShadowStyle;
   opacity?: number;
   // テキスト要素の自動調整
@@ -195,6 +256,12 @@ interface ElementStyle {
   minFontSize?: number; // 自動調整時の最小フォントサイズ
   maxLines?: number; // 最大行数（コメントは3固定）
   overflow?: "clip" | "scale" | "shrink" | "auto"; // オーバーフロー時の処理
+  // テキスト配置設定
+  textAlign?: "left" | "center" | "right"; // 水平方向の配置
+  verticalAlign?: "top" | "middle" | "bottom"; // 垂直方向の配置
+  // 注意: transform（scaleX/scaleY）との併用時は
+  // transform-originの設定により表示位置がずれる可能性があるため、
+  // 適切なtransform-originの調整が必要
 }
 
 interface DisplayCondition {
