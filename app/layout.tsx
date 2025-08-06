@@ -14,8 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Discogs Pop Maker",
-  description: "Discogsのレコード情報を使ってポップを作成するアプリケーション",
+  title: "Vinyl Tag Maker with Discogs",
+  description:
+    "Discogsのレコード情報を使って中古レコードショップのタグを作成するアプリケーション",
 };
 
 export default function RootLayout({
