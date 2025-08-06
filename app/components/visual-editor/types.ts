@@ -110,6 +110,7 @@ export interface ElementStyle {
   // テキスト配置設定
   textAlign?: "left" | "center" | "right"; // 水平方向の配置
   verticalAlign?: "top" | "middle" | "bottom"; // 垂直方向の配置
+  alignItems?: "flex-start" | "center" | "flex-end"; // Flexboxの垂直配置（内部使用）
 }
 
 export interface ShadowStyle {
@@ -130,6 +131,11 @@ export interface TemplateSettings {
   snapToGrid: boolean;
   showGuides: boolean;
   showFoldLine: boolean;
+  // 統一カラー設定
+  unifiedColors: {
+    dataLabelColor: string; // データラベルの色
+    contentColor: string; // コンテンツの色
+  };
 }
 
 // エディタの状態管理用
@@ -178,4 +184,8 @@ export const DEFAULT_TEMPLATE_SETTINGS: TemplateSettings = {
   snapToGrid: true,
   showGuides: true,
   showFoldLine: true,
+  unifiedColors: {
+    dataLabelColor: '#666666', // データラベルのデフォルト色
+    contentColor: '#1e293b', // コンテンツのデフォルト色
+  },
 };

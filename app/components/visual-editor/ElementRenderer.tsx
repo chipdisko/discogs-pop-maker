@@ -2,7 +2,7 @@
 
 import React, { useMemo } from "react";
 import type { PopResponse } from "@/src/application";
-import type { TemplateElement } from "./types";
+import type { TemplateElement, VisualTemplate } from "./types";
 import { calculateAutoFitStyle } from "./utils/textUtils";
 import { getSampleValue } from "./utils/sampleData";
 import QRCodeRenderer from "./QRCodeRenderer";
@@ -11,12 +11,13 @@ import ImageRenderer from "./ImageRenderer";
 
 interface ElementRendererProps {
   element: TemplateElement;
-  pop: PopResponse;
+  pop: PopResponse | null;
   isBackSide: boolean;
   showBackSidePreview?: boolean;
   useSampleData?: boolean; // エディター用のサンプルデータを使用するかどうか
   zoom?: number; // ズームレベル
   sampleKey?: string; // サンプルデータの変更を検知するためのキー
+  template: VisualTemplate; // 統一カラー設定用
 }
 
 export default function ElementRenderer({
@@ -26,6 +27,7 @@ export default function ElementRenderer({
   showBackSidePreview = false,
   useSampleData = true,
   zoom = 1,
+  template,
 }: ElementRendererProps) {
   // データバインディングから実際の値またはサンプル値を取得
   const dataValue = useMemo((): string => {
@@ -71,6 +73,25 @@ export default function ElementRenderer({
   // 実際に返される値をログ出力
   console.log(`✅ Final value for ${element.id} (${element.dataBinding}): "${dataValue}"`);
 
+  // 統一カラー設定の適用（カスタムテキスト以外）
+  const getElementColor = () => {
+    // カスタムテキストの場合は個別色設定を保持
+    if (element.dataBinding === "custom") {
+      return element.style?.color || "#000000";
+    }
+    // カスタムテキスト以外は統一色設定を使用（フォールバック付き）
+    return template.settings.unifiedColors?.contentColor || "#000000";
+  };
+
+  const getLabelColor = () => {
+    // カスタムテキストの場合は個別色設定を保持
+    if (element.dataBinding === "custom") {
+      return element.label?.color || "#666666";
+    }
+    // カスタムテキスト以外は統一色設定を使用（フォールバック付き）
+    return template.settings.unifiedColors?.dataLabelColor || "#666666";
+  };
+
   // 自動調整スタイルの計算
   const autoFitStyle = useMemo(() => {
     if (element.type !== "text" || !dataValue) return {};
@@ -97,7 +118,7 @@ export default function ElementRenderer({
         (autoFitStyle.fontSize || element.style?.fontSize || 12) * zoom
       }px`,
       fontFamily: element.style?.fontFamily || "Arial, sans-serif",
-      color: element.style?.color || "#000000",
+      color: getElementColor(), // 統一カラーまたは個別カラーを適用
       backgroundColor: element.style?.backgroundColor || "transparent",
       opacity: element.style?.opacity || 1,
       overflow: "visible",
@@ -159,7 +180,7 @@ export default function ElementRenderer({
     }
 
     return baseStyle;
-  }, [element, autoFitStyle, isBackSide, showBackSidePreview, zoom]);
+  }, [element, autoFitStyle, isBackSide, showBackSidePreview, zoom, template.settings.unifiedColors]);
 
   // 内側のコンテンツスタイル（テキスト配置用）
   const innerStyle: React.CSSProperties = useMemo(() => {
@@ -303,8 +324,31 @@ export default function ElementRenderer({
     }
   };
 
+  // データラベルのレンダリング
+  const renderLabel = () => {
+    if (!element.label?.show) return null;
+
+    return (
+      <div
+        className="absolute"
+        style={{
+          top: "-1.2em",
+          left: "0",
+          fontSize: `${(element.label.fontSize || 12) * zoom}px`,
+          color: getLabelColor(), // 統一カラーまたは個別カラーを適用
+          whiteSpace: "nowrap",
+          pointerEvents: "none",
+          zIndex: 10,
+        }}
+      >
+        {element.label.text || getSampleValue(element.dataBinding)}
+      </div>
+    );
+  };
+
   return (
     <div style={containerStyle}>
+      {renderLabel()}
       <div style={innerStyle}>
         {renderContent()}
       </div>

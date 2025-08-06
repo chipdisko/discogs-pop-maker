@@ -7,7 +7,7 @@ import VisualEditor from "../visual-editor/VisualEditor";
 interface VisualEditorModalProps {
   isOpen: boolean;
   onClose: () => void;
-  pop: PopResponse;
+  pop: PopResponse | null;
 }
 
 export default function VisualEditorModal({

@@ -10,7 +10,7 @@ import ElementRenderer from "./ElementRenderer";
 import BackgroundFrameRenderer from "./BackgroundFrameRenderer";
 
 interface TemplateRendererProps {
-  pop: PopResponse;
+  pop: PopResponse | null;
   template?: Template | null;
   width?: number; // px
   height?: number; // px
@@ -29,6 +29,10 @@ const getDefaultTemplate = (): Template => ({
     gridSize: 5,
     showGuides: true,
     showFoldLine: true,
+    unifiedColors: {
+      dataLabelColor: '#666666',
+      contentColor: '#1e293b',
+    },
   },
 });
 
@@ -60,7 +64,7 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
   const activeTemplate = getActiveTemplate();
   
   // デバッグログ
-  console.log("TemplateRenderer - pop:", pop.release.title, pop.release.artistName);
+  console.log("TemplateRenderer - pop:", pop?.release?.title, pop?.release?.artistName);
   console.log("TemplateRenderer - template elements:", activeTemplate.elements.map(e => ({ id: e.id, dataBinding: e.dataBinding })));
   
   // mm to px conversion (assuming 96dpi)
@@ -121,6 +125,7 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
               useSampleData={false}
               showBackSidePreview={true}
               zoom={1}
+              template={activeTemplate}
             />
           </div>
         ))}

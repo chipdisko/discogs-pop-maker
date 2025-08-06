@@ -10,7 +10,7 @@ import DraggableElement from './DraggableElement';
 import DraggableBackgroundFrame from './DraggableBackgroundFrame';
 
 interface EditorCanvasProps {
-  pop: PopResponse;
+  pop: PopResponse | null;
   template: VisualTemplate;
   editorState: EditorState;
   onAddElement: (element: TemplateElement) => void;
@@ -384,6 +384,7 @@ export default function EditorCanvas({
             sampleKey={sampleKey}
             gridSize={template.settings.gridSize}
             snapToGrid={template.settings.snapToGrid}
+            template={template}
           />
         ))}
       </div>

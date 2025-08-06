@@ -16,6 +16,7 @@ import BackgroundFramePalette from "./BackgroundFramePalette";
 import PropertyPanel from "./PropertyPanel";
 import BackgroundFramePropertyPanel from "./BackgroundFramePropertyPanel";
 import Toolbar from "./Toolbar";
+import UnifiedColorPanel from "./UnifiedColorPanel";
 import { createDefaultTemplate } from "./utils/templateUtils";
 import {
   autoSaveCurrentTemplate,
@@ -26,7 +27,7 @@ import {
 import { setSampleData } from "./utils/sampleData";
 
 interface VisualEditorProps {
-  pop: PopResponse;
+  pop: PopResponse | null;
   onTemplateChange?: (template: VisualTemplate) => void;
   initialTemplate?: VisualTemplate;
 }
@@ -151,6 +152,17 @@ export default function VisualEditor({
     [onTemplateChange]
   );
 
+
+  // テンプレート更新（統一カラー設定など）
+  const handleUpdateTemplate = useCallback(
+    (updates: Partial<VisualTemplate>) => {
+      const newTemplate = { ...template, ...updates };
+      setTemplate(newTemplate);
+      onTemplateChange?.(newTemplate);
+    },
+    [template, onTemplateChange]
+  );
+
   // テンプレートリセット
   const handleResetTemplate = useCallback(() => {
     if (confirm("現在の編集内容をリセットしますか？")) {
@@ -242,6 +254,15 @@ export default function VisualEditor({
     setEditorState((prev) => ({ ...prev, selectedBackgroundFrameId: frameId }));
   }, []);
 
+  // 選択状態を解除
+  const handleDeselectAll = useCallback(() => {
+    if (editorState.editMode === "elements") {
+      handleSelectElement(null);
+    } else if (editorState.editMode === "background") {
+      handleSelectBackgroundFrame(null);
+    }
+  }, [editorState.editMode, handleSelectElement, handleSelectBackgroundFrame]);
+
   const selectedElement = template.elements.find(
     (el) => el.id === editorState.selectedElementId
   );
@@ -325,6 +346,7 @@ export default function VisualEditor({
           onSampleChange={handleSampleChange}
           template={template}
           onLoad={handleLoadTemplate}
+          onDeselectAll={handleDeselectAll}
         />
         <div className='flex bg-gray-50 dark:bg-gray-900 overflow-y-auto min-h-0 grow'>
           {/* 左サイドバー: 要素パレット/背景枠パレット */}
@@ -363,6 +385,12 @@ export default function VisualEditor({
 
           {/* メインエリア */}
           <div className='flex-1 flex flex-col'>
+            {/* 統一カラー設定パネル */}
+            <UnifiedColorPanel
+              template={template}
+              onUpdateTemplate={handleUpdateTemplate}
+            />
+            
             {/* キャンバスエリア */}
             <div
               ref={canvasRef}
@@ -392,6 +420,7 @@ export default function VisualEditor({
                 selectedElement={selectedElement}
                 onUpdateElement={handleUpdateElement}
                 onDeleteElement={handleDeleteElement}
+                template={template}
               />
             ) : (
               <BackgroundFramePropertyPanel

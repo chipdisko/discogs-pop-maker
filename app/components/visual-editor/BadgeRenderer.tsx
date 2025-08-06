@@ -5,7 +5,7 @@ import type { PopResponse } from '@/src/application';
 import { getSampleBadges } from './utils/sampleData';
 
 interface BadgeRendererProps {
-  pop: PopResponse;
+  pop: PopResponse | null;
   style: React.CSSProperties;
   useSampleData?: boolean;
 }
@@ -18,7 +18,7 @@ const BADGE_COLORS: Record<string, { bg: string; text: string }> = {
 };
 
 export default function BadgeRenderer({ pop, style, useSampleData = false }: BadgeRendererProps) {
-  const badges = useSampleData ? getSampleBadges() : pop.badges;
+  const badges = useSampleData ? getSampleBadges() : pop?.badges || [];
   
   if (badges.length === 0) {
     return (

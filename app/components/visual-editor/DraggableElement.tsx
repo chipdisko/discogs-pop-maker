@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useDrag } from "react-dnd";
 import type { PopResponse } from "@/src/application";
-import type { TemplateElement, DropResult } from "./types";
+import type { TemplateElement, DropResult, VisualTemplate } from "./types";
 import ElementRenderer from "./ElementRenderer";
 import ResizeHandler from "./ResizeHandler";
 import { getLabelText } from "./utils/labelUtils";
@@ -22,11 +22,12 @@ interface DraggableElementProps {
     newPosition?: { x: number; y: number }
   ) => void;
   onSelect: () => void;
-  pop: PopResponse;
+  pop: PopResponse | null;
   isPanningMode?: boolean;
   sampleKey?: string;
   gridSize: number; // グリッドサイズ（mm単位）
   snapToGrid: boolean; // グリッドスナップ有効フラグ
+  template: VisualTemplate; // 統一カラー設定用
 }
 
 export default function DraggableElement({
@@ -44,6 +45,7 @@ export default function DraggableElement({
   sampleKey,
   gridSize,
   snapToGrid,
+  template,
 }: DraggableElementProps) {
   const [isDragging, setIsDragging] = useState(false);
 
@@ -180,7 +182,9 @@ export default function DraggableElement({
 
     const labelText = getLabelText(element.dataBinding, element.label?.text);
     const fontSize = (element.label?.fontSize || 12) * zoom;
-    const color = element.label?.color || "#666666";
+    const color = element.dataBinding === "custom" 
+      ? element.label?.color || "#666666"
+      : template.settings.unifiedColors.dataLabelColor;
 
     return (
       <div
@@ -217,6 +221,7 @@ export default function DraggableElement({
         useSampleData={true}
         zoom={zoom}
         sampleKey={sampleKey}
+        template={template}
       />
 
       {/* データ名ラベル */}

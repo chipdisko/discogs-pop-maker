@@ -19,6 +19,7 @@ Discogs のデータベースと連携してレコード情報を取得し、視
 - **React**: 19.1.0
 - **言語**: TypeScript 5.x
 - **スタイリング**: Tailwind CSS 4.x, shadcn/ui (Radix UI)
+- **アイコン**: lucide-react
 - **アーキテクチャ**: DDD (Domain-Driven Design)
 - **外部 API 連携**: Discogs API (disconnect library)
 - **QR コード生成**: qrcode 1.5.4
@@ -128,6 +129,7 @@ npm run lint
    - **新しいライブラリを使用する前に、必ず公式ドキュメントを検索して確認する**
    - バージョンによる差異に注意する
    - package.json で使用中のバージョンを確認する
+   - **アイコンは lucide-react を使用する**
 
 3. **DDD 層の分離を守る**
 
@@ -135,13 +137,13 @@ npm run lint
    - Domain 層は他の層に依存しない
    - Infrastructure 層は外部サービスとの連携を担当
 
-3. **型安全性**
+4. **型安全性**
 
    - すべての関数に型定義を付ける
    - any の使用は避ける
    - 値オブジェクトを活用する
 
-4. **エラーハンドリング**
+5. **エラーハンドリング**
    - try-catch で適切にエラーをハンドリング
    - ユーザーにわかりやすいエラーメッセージを表示
 

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import type { TemplateElement } from "./types";
+import type { TemplateElement, VisualTemplate } from "./types";
 import { getLabelText } from "./utils/labelUtils";
 import ImageCropModal from "./ImageCropModal";
 
@@ -12,12 +12,14 @@ interface PropertyPanelProps {
     updates: Partial<TemplateElement>
   ) => void;
   onDeleteElement: (elementId: string) => void;
+  template: VisualTemplate; // 統一カラー設定の表示と編集のため
 }
 
 export default function PropertyPanel({
   selectedElement,
   onUpdateElement,
   onDeleteElement,
+  template,
 }: PropertyPanelProps) {
   const [cropModalOpen, setCropModalOpen] = useState(false);
 
@@ -268,17 +270,41 @@ export default function PropertyPanel({
                     className='w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600'
                   />
                 </div>
-                <div>
-                  <label className='text-xs text-gray-600 dark:text-gray-400'>
-                    文字色
-                  </label>
-                  <input
-                    type='color'
-                    value={selectedElement.style?.color || "#000000"}
-                    onChange={(e) => handleStyleChange("color", e.target.value)}
-                    className='w-full h-8 border rounded cursor-pointer'
-                  />
-                </div>
+                {selectedElement.dataBinding === "custom" && (
+                  <div>
+                    <label className='text-xs text-gray-600 dark:text-gray-400'>
+                      文字色
+                    </label>
+                    <input
+                      type='color'
+                      value={selectedElement.style?.color || "#000000"}
+                      onChange={(e) => handleStyleChange("color", e.target.value)}
+                      className='w-full h-8 border rounded cursor-pointer'
+                    />
+                    <p className='text-xs text-gray-500 mt-1'>
+                      カスタムテキストは個別の色設定を使用します
+                    </p>
+                  </div>
+                )}
+                {selectedElement.dataBinding !== "custom" && (
+                  <div>
+                    <label className='text-xs text-gray-600 dark:text-gray-400'>
+                      文字色（統一設定）
+                    </label>
+                    <div className='w-full h-8 border rounded flex items-center px-2 bg-gray-50 dark:bg-gray-700'>
+                      <div 
+                        className='w-4 h-4 rounded mr-2' 
+                        style={{ backgroundColor: template.settings.unifiedColors.contentColor }}
+                      />
+                      <span className='text-sm text-gray-600 dark:text-gray-400'>
+                        {template.settings.unifiedColors.contentColor}
+                      </span>
+                    </div>
+                    <p className='text-xs text-gray-500 mt-1'>
+                      統一カラー設定が適用されます
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -296,7 +322,8 @@ export default function PropertyPanel({
                         key={align}
                         onClick={() => handleStyleChange("textAlign", align)}
                         className={`px-2 py-1 text-xs border rounded ${
-                          (selectedElement.style?.textAlign || "center") ===
+                          (selectedElement.style?.textAlign || 
+                           (selectedElement.dataBinding === 'price' ? "right" : "left")) ===
                           align
                             ? "bg-blue-500 text-white border-blue-500"
                             : "border-gray-300 dark:border-gray-600"
@@ -746,25 +773,49 @@ export default function PropertyPanel({
                     className='w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600'
                   />
                 </div>
-                <div>
-                  <label className='text-xs text-gray-600 dark:text-gray-400'>
-                    文字色
-                  </label>
-                  <input
-                    type='color'
-                    value={selectedElement.label?.color || "#666666"}
-                    onChange={(e) =>
-                      onUpdateElement(selectedElement.id, {
-                        label: {
-                          show: selectedElement.label?.show ?? false,
-                          ...selectedElement.label,
-                          color: e.target.value,
-                        },
-                      })
-                    }
-                    className='w-full h-8 border rounded cursor-pointer'
-                  />
-                </div>
+                {selectedElement.dataBinding === "custom" && (
+                  <div>
+                    <label className='text-xs text-gray-600 dark:text-gray-400'>
+                      文字色
+                    </label>
+                    <input
+                      type='color'
+                      value={selectedElement.label?.color || "#666666"}
+                      onChange={(e) =>
+                        onUpdateElement(selectedElement.id, {
+                          label: {
+                            show: selectedElement.label?.show ?? false,
+                            ...selectedElement.label,
+                            color: e.target.value,
+                          },
+                        })
+                      }
+                      className='w-full h-8 border rounded cursor-pointer'
+                    />
+                    <p className='text-xs text-gray-500 mt-1'>
+                      カスタムテキストのラベルは個別の色設定を使用します
+                    </p>
+                  </div>
+                )}
+                {selectedElement.dataBinding !== "custom" && (
+                  <div>
+                    <label className='text-xs text-gray-600 dark:text-gray-400'>
+                      文字色（統一設定）
+                    </label>
+                    <div className='w-full h-8 border rounded flex items-center px-2 bg-gray-50 dark:bg-gray-700'>
+                      <div 
+                        className='w-4 h-4 rounded mr-2' 
+                        style={{ backgroundColor: template.settings.unifiedColors.dataLabelColor }}
+                      />
+                      <span className='text-sm text-gray-600 dark:text-gray-400'>
+                        {template.settings.unifiedColors.dataLabelColor}
+                      </span>
+                    </div>
+                    <p className='text-xs text-gray-500 mt-1'>
+                      統一ラベルカラー設定が適用されます
+                    </p>
+                  </div>
+                )}
               </div>
             )}
           </div>

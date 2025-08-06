@@ -1,13 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { Settings } from "lucide-react";
 import type { VisualTemplate } from "./types";
-import {
-  hasSavedTemplates,
-  getSavedTemplates,
-  downloadTemplateAsJSON,
-  importTemplateFromFile,
-} from "./utils/storageUtils";
+import TemplateManagerModal from "./TemplateManagerModal";
 
 interface ToolbarProps {
   zoom: number;
@@ -18,6 +14,7 @@ interface ToolbarProps {
   onSampleChange: (sample: 1 | 2 | 3) => void;
   template: VisualTemplate;
   onLoad: (template: VisualTemplate) => void;
+  onDeselectAll?: () => void; // 選択状態を解除する関数
 }
 
 export default function Toolbar({
@@ -29,37 +26,25 @@ export default function Toolbar({
   onSampleChange,
   template,
   onLoad,
+  onDeselectAll,
 }: ToolbarProps) {
-  const [showLoadModal, setShowLoadModal] = useState(false);
-  const [hasTemplatesInStorage, setHasTemplatesInStorage] = useState(false);
+  const [showTemplateManager, setShowTemplateManager] = useState(false);
 
-  // ローカルストレージの状態をチェック
-  useEffect(() => {
-    setHasTemplatesInStorage(hasSavedTemplates());
-  }, []);
-
-  // エクスポート機能
-  const handleExport = () => {
-    downloadTemplateAsJSON(template);
+  // テンプレート管理モーダルを開く
+  const handleOpenTemplateManager = () => {
+    // 要素の選択状態を解除
+    onDeselectAll?.();
+    setShowTemplateManager(true);
   };
 
-  // インポート機能
-  const handleImport = async () => {
-    try {
-      const importedTemplate = await importTemplateFromFile();
-      if (importedTemplate) {
-        onLoad(importedTemplate);
-        alert("テンプレートをインポートしました");
-      }
-    } catch {
-      alert("インポートに失敗しました");
-    }
+  // テンプレート管理モーダルから呼び出される保存処理
+  const handleSaveFromModal = () => {
+    onSave();
   };
 
-  // 読み込み機能
-  const handleLoadTemplate = (savedTemplate: VisualTemplate) => {
-    onLoad(savedTemplate);
-    setShowLoadModal(false);
+  // テンプレート管理モーダルから呼び出される読み込み処理
+  const handleLoadFromModal = (loadedTemplate: VisualTemplate) => {
+    onLoad(loadedTemplate);
   };
   const zoomOptions = [
     { value: 0.5, label: "50%" },
@@ -74,36 +59,11 @@ export default function Toolbar({
       {/* 左側: 基本ツール */}
       <div className='flex items-center space-x-4'>
         <button
-          onClick={onSave}
-          className='px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors'
+          onClick={handleOpenTemplateManager}
+          className='flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors'
         >
-          保存
-        </button>
-
-        <button
-          onClick={() => setShowLoadModal(true)}
-          disabled={!hasTemplatesInStorage}
-          className={`px-4 py-2 border rounded transition-colors ${
-            hasTemplatesInStorage
-              ? "border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
-              : "border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-600 cursor-not-allowed"
-          }`}
-        >
-          読み込み
-        </button>
-
-        <button
-          onClick={handleExport}
-          className='px-4 py-2 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors'
-        >
-          エクスポート
-        </button>
-
-        <button
-          onClick={handleImport}
-          className='px-4 py-2 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors'
-        >
-          インポート
+          <Settings className='w-4 h-4' />
+          <span>テンプレート管理</span>
         </button>
 
         <button
@@ -160,36 +120,14 @@ export default function Toolbar({
         </div>
       </div>
 
-      {/* 読み込みモーダル */}
-      {showLoadModal && (
-        <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
-          <div className='bg-white dark:bg-gray-800 rounded-lg p-6 w-96 max-h-96 overflow-y-auto'>
-            <div className='flex justify-between items-center mb-4'>
-              <h3 className='text-lg font-semibold'>保存されたテンプレート</h3>
-              <button
-                onClick={() => setShowLoadModal(false)}
-                className='text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-              >
-                ✕
-              </button>
-            </div>
-            <div className='space-y-2'>
-              {getSavedTemplates().map((savedTemplate) => (
-                <div
-                  key={savedTemplate.id}
-                  className='p-3 border border-gray-200 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer'
-                  onClick={() => handleLoadTemplate(savedTemplate)}
-                >
-                  <div className='font-medium'>{savedTemplate.name}</div>
-                  <div className='text-sm text-gray-500 dark:text-gray-400'>
-                    更新: {new Date(savedTemplate.updatedAt).toLocaleString()}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* テンプレート管理モーダル */}
+      <TemplateManagerModal
+        isOpen={showTemplateManager}
+        onClose={() => setShowTemplateManager(false)}
+        currentTemplate={template}
+        onSave={handleSaveFromModal}
+        onLoad={handleLoadFromModal}
+      />
     </div>
   );
 }

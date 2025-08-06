@@ -21,6 +21,8 @@ export function createDefaultTemplate(): VisualTemplate {
           fontSize: 14,
           fontFamily: 'Arial, sans-serif',
           color: '#1e293b',
+          textAlign: 'left',
+          alignItems: 'center',
         },
         isBackSide: true,
         autoRotate: true,
@@ -37,6 +39,8 @@ export function createDefaultTemplate(): VisualTemplate {
           fontSize: 18,
           fontFamily: 'Arial, sans-serif',
           color: '#1e293b',
+          textAlign: 'left',
+          alignItems: 'center',
         },
       },
       {
@@ -50,6 +54,8 @@ export function createDefaultTemplate(): VisualTemplate {
           fontSize: 16,
           fontFamily: 'Arial, sans-serif',
           color: '#334155',
+          textAlign: 'left',
+          alignItems: 'center',
         },
       },
       {
@@ -62,6 +68,8 @@ export function createDefaultTemplate(): VisualTemplate {
           ...DEFAULT_ELEMENT_STYLE,
           fontSize: 12,
           color: '#666666',
+          textAlign: 'left',
+          alignItems: 'center',
         },
       },
       {
@@ -74,6 +82,8 @@ export function createDefaultTemplate(): VisualTemplate {
           ...DEFAULT_ELEMENT_STYLE,
           fontSize: 12,
           color: '#666666',
+          textAlign: 'left',
+          alignItems: 'center',
         },
       },
       {
@@ -86,6 +96,8 @@ export function createDefaultTemplate(): VisualTemplate {
           ...DEFAULT_ELEMENT_STYLE,
           fontSize: 14,
           color: '#1e293b',
+          textAlign: 'left',
+          alignItems: 'center',
         },
       },
       {
@@ -98,6 +110,8 @@ export function createDefaultTemplate(): VisualTemplate {
           ...DEFAULT_ELEMENT_STYLE,
           fontSize: 11,
           color: '#333333',
+          textAlign: 'left',
+          alignItems: 'center',
         },
       },
       {
@@ -111,6 +125,8 @@ export function createDefaultTemplate(): VisualTemplate {
           fontSize: 20,
           fontFamily: 'Arial, sans-serif',
           color: '#1e293b',
+          textAlign: 'right',
+          alignItems: 'center',
         },
       },
     ],
@@ -147,6 +163,23 @@ export function createElement(
   // タイプごとの特別な設定
   switch (type) {
     case 'text':
+      // テキスト要素の初期配置設定
+      if (dataBinding === 'price') {
+        // 価格は右寄せ/中央
+        baseElement.style = {
+          ...baseElement.style,
+          textAlign: 'right',
+          alignItems: 'center',
+        };
+      } else {
+        // その他のテキスト要素は左寄せ/中央
+        baseElement.style = {
+          ...baseElement.style,
+          textAlign: 'left',
+          alignItems: 'center',
+        };
+      }
+      
       if (dataBinding === 'custom') {
         baseElement.customText = 'カスタムテキスト';
       }
