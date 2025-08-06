@@ -45,6 +45,7 @@ export interface CreatePopFormData {
   price: number;
   priceSuggestions?: DiscogsPriceSuggestionsData;
   discogsReleaseId?: string;
+  discogsType?: "release" | "master"; // URL種別を追加
 }
 
 // 定数定義
@@ -63,6 +64,7 @@ const DEFAULT_FORM_DATA: CreatePopFormData = {
   price: 0,
   priceSuggestions: undefined,
   discogsReleaseId: undefined,
+  discogsType: undefined,
 };
 
 const availableBadges: {
@@ -238,7 +240,19 @@ export default function CreatePopModal({
       }
 
       const releaseData = result.data;
-      const discogsId = releaseData.id?.toString();
+      const responseType = result.type; // master or release
+      
+      // Master URLの場合、main_releaseの情報も考慮する
+      let discogsId = releaseData.id?.toString();
+      let actualReleaseId = discogsId; // 価格提案用のID
+      
+      // Masterの場合、main_releaseのIDを価格提案に使用
+      if (responseType === "master" && releaseData.main_release) {
+        // Masterの場合はmain_releaseのIDを使うことができれば使用
+        // ただし、main_releaseにIDが含まれていない場合はmasterのIDを使用
+        actualReleaseId = releaseData.main_release.id?.toString() || discogsId;
+      }
+      
       if (!discogsId || discogsId.trim() === "") {
         throw new Error("有効なDiscogs IDが取得できませんでした");
       }
@@ -272,13 +286,14 @@ export default function CreatePopModal({
         genres: discogsResponse.genres,
         styles: discogsResponse.styles,
         discogsReleaseId: discogsResponse.discogsId,
+        discogsType: responseType as "release" | "master", // URLタイプも保存
       }));
 
       setTempGenres(discogsResponse.genres.join(", "));
       setTempStyles(discogsResponse.styles.join(", "));
 
-      if (discogsResponse.discogsId) {
-        await fetchPriceSuggestions(discogsResponse.discogsId);
+      if (actualReleaseId) {
+        await fetchPriceSuggestions(actualReleaseId);
       }
 
       setCurrentStep(2);

@@ -15,6 +15,7 @@ interface PopStorageData {
   id: string;
   release: {
     discogsId: string;
+    discogsType?: "release" | "master"; // URLタイプを追加
     title: string;
     artistName: string;
     label: string;
@@ -197,6 +198,7 @@ export class PopRepositoryImpl implements PopRepository {
       id: pop.getId().getValue(),
       release: {
         discogsId: release.getDiscogsId(),
+        discogsType: release.getDiscogsType(),
         title: release.getTitle(),
         artistName: release.getArtistName(),
         label: release.getLabel(),
@@ -225,6 +227,7 @@ export class PopRepositoryImpl implements PopRepository {
     // Release復元
     const release = Release.create({
       discogsId: data.release.discogsId,
+      discogsType: data.release.discogsType,
       title: data.release.title,
       artistName: data.release.artistName,
       label: data.release.label,

@@ -26,8 +26,11 @@ export class DiscogsRepositoryImpl implements DiscogsRepository {
         throw new Error("無効なレスポンス形式");
       }
 
+      // Discogs URLのタイプを取得 (master or release)
+      const discogsType = result.type as "release" | "master" | undefined;
+
       // Discogs APIレスポンスをReleaseエンティティに変換
-      return this.mapDiscogsDataToRelease(result.data);
+      return this.mapDiscogsDataToRelease(result.data, discogsType);
     } catch (error) {
       if (error instanceof Error) {
         throw error;
@@ -46,6 +49,7 @@ export class DiscogsRepositoryImpl implements DiscogsRepository {
     // URLを構築してgetReleaseByUrlを使用
     const urlString = `https://www.discogs.com/${type}/${id}`;
     const url = new DiscogsUrl(urlString);
+    // getReleaseByUrlの中でtypeが設定されるため、そのまま利用
     return this.getReleaseByUrl(url);
   }
 
@@ -68,7 +72,7 @@ export class DiscogsRepositoryImpl implements DiscogsRepository {
   /**
    * Discogs APIレスポンスをReleaseエンティティに変換
    */
-  private mapDiscogsDataToRelease(data: DiscogsReleaseData): Release {
+  private mapDiscogsDataToRelease(data: DiscogsReleaseData, discogsType?: "release" | "master"): Release {
     // アーティスト名を抽出
     const artistName = this.extractArtistName(data);
 
@@ -96,6 +100,7 @@ export class DiscogsRepositoryImpl implements DiscogsRepository {
 
     return Release.create({
       discogsId,
+      discogsType,
       title,
       artistName,
       label,

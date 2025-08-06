@@ -72,6 +72,7 @@ export function usePopMaker() {
     try {
       const request: CreatePopRequest = {
         discogsUrl: formData.discogsUrl?.trim() || undefined,
+        discogsType: formData.discogsType,
         title: formData.title.trim() || undefined,
         artistName: formData.artistName.trim() || undefined,
         label: formData.label.trim() || undefined,

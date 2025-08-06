@@ -5,6 +5,7 @@ import { BadgeType, ConditionType } from "../../domain";
 export interface CreatePopRequest {
   // Discogs URL（オプション）
   discogsUrl?: string;
+  discogsType?: "release" | "master"; // URLタイプを追加
 
   // リリース情報（手動入力またはDiscogsデータ）
   title?: string;
@@ -65,6 +66,7 @@ export interface PopResponse {
 
 export interface ReleaseResponse {
   discogsId: string;
+  discogsType?: "release" | "master"; // URLタイプを追加
   title: string;
   artistName: string;
   label: string;

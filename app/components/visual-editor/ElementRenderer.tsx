@@ -60,7 +60,9 @@ export default function ElementRenderer({
       case "custom":
         return element.customText || "";
       case "discogsUrl":
-        return `https://www.discogs.com/release/${pop.release.discogsId}` || "";
+        // discogsTypeに応じて適切なURLを生成
+        const urlType = pop.release.discogsType || "release";
+        return `https://www.discogs.com/${urlType}/${pop.release.discogsId}` || "";
       default:
         return "";
     }

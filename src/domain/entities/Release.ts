@@ -7,7 +7,8 @@ export class Release {
     private readonly country: string,
     private readonly releaseDate: string,
     private readonly genres: string[],
-    private readonly styles: string[]
+    private readonly styles: string[],
+    private readonly discogsType: "release" | "master" = "release" // デフォルトはrelease
   ) {
     this.validate();
   }
@@ -36,6 +37,7 @@ export class Release {
     releaseDate?: string;
     genres?: string[];
     styles?: string[];
+    discogsType?: "release" | "master";
   }): Release {
     return new Release(
       params.discogsId,
@@ -45,13 +47,19 @@ export class Release {
       params.country || "",
       params.releaseDate || "",
       params.genres || [],
-      params.styles || []
+      params.styles || [],
+      params.discogsType || "release"
     );
   }
 
   // Discogs IDを取得
   getDiscogsId(): string {
     return this.discogsId;
+  }
+
+  // Discogs URLタイプを取得
+  getDiscogsType(): "release" | "master" {
+    return this.discogsType;
   }
 
   // タイトルを取得

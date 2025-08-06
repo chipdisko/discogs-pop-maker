@@ -60,6 +60,7 @@ export class PopApplicationService {
         // 手動入力データからリリース情報を作成
         const release = Release.create({
           discogsId: `manual_${Date.now()}`, // 手動入力用のID
+          discogsType: request.discogsType,
           title: request.title || "",
           artistName: request.artistName || "",
           label: request.label || "",
@@ -100,6 +101,7 @@ export class PopApplicationService {
       // 3. ユーザーが編集したデータを優先してリリース情報を作成
       const release = Release.create({
         discogsId: discogsId, // 有効なDiscogs Release ID
+        discogsType: discogsRelease.getDiscogsType(),
         title: request.title || discogsRelease.getTitle(),
         artistName: request.artistName || discogsRelease.getArtistName(),
         label: request.label || discogsRelease.getLabel(),
@@ -155,6 +157,7 @@ export class PopApplicationService {
       // 1. リリース情報を作成
       const release = Release.create({
         discogsId: request.discogsUrl || `manual_${Date.now()}`,
+        discogsType: request.discogsType,
         title: request.title || "",
         artistName: request.artistName || "",
         label: request.label || "",
@@ -258,6 +261,7 @@ export class PopApplicationService {
         const currentRelease = pop.getRelease();
         const updatedRelease = Release.create({
           discogsId: currentRelease.getDiscogsId(),
+          discogsType: currentRelease.getDiscogsType(),
           title: request.title ?? currentRelease.getTitle(),
           artistName: request.artistName ?? currentRelease.getArtistName(),
           label: request.label ?? currentRelease.getLabel(),
@@ -466,6 +470,7 @@ export class PopApplicationService {
   private toReleaseResponse(release: Release): ReleaseResponse {
     return {
       discogsId: release.getDiscogsId(),
+      discogsType: release.getDiscogsType(),
       title: release.getTitle(),
       artistName: release.getArtistName(),
       label: release.getLabel(),
