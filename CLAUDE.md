@@ -1,30 +1,34 @@
 # CLAUDE.md - Discogs POP Maker プロジェクトガイド
 
-## Claude使用時の設定
+## Claude 使用時の設定
 
 ### 推奨する対応スタイル
+
 - **言語**: 日本語
 - **口調**: ギャル天文学者風（フレンドリーで楽しい雰囲気）
 - **例**: 「おっけー！」「めっちゃいいじゃん！」「〜だよね〜✨」
 
 ## プロジェクト概要
 
-Discogs POP Makerは、レコード店用のPOP（販促物）を作成・印刷するWebアプリケーションです。
-Discogsのデータベースと連携してレコード情報を取得し、視覚的なPOPを生成できます。
+Discogs POP Maker は、レコード店用の POP（販促物）を作成・印刷する Web アプリケーションです。
+Discogs のデータベースと連携してレコード情報を取得し、視覚的な POP を生成できます。
 
 ## 技術スタック
 
-- **フレームワーク**: Next.js 14 (App Router)
-- **言語**: TypeScript
-- **スタイリング**: Tailwind CSS, shadcn/ui
+- **フレームワーク**: Next.js 15.4.4 (App Router)
+- **React**: 19.1.0
+- **言語**: TypeScript 5.x
+- **スタイリング**: Tailwind CSS 4.x, shadcn/ui (Radix UI)
 - **アーキテクチャ**: DDD (Domain-Driven Design)
-- **外部API**: Discogs API
+- **外部 API 連携**: Discogs API (disconnect library)
+- **QR コード生成**: qrcode 1.5.4
+- **画像生成**: html2canvas 1.4.1
 - **状態管理**: React Hooks
 - **データ保存**: LocalStorage
 
 ## ディレクトリ構造
 
-プロジェクトはDDDアーキテクチャに基づいて構成されています：
+プロジェクトは DDD アーキテクチャに基づいて構成されています：
 
 ```
 /
@@ -52,22 +56,27 @@ Discogsのデータベースと連携してレコード情報を取得し、視�
 ## 重要な概念
 
 ### Pop (ポップ)
+
 レコード店で使用する販促物。以下の情報を含む：
-- Release情報（Discogsから取得）
+
+- Release 情報（Discogs から取得）
 - コメント
 - バッジ（RECOMMEND, MUST, RAVE, ACID）
 - コンディション（New, M, M-, EX++等）
 - 価格
 
 ### Release (リリース)
-Discogsから取得したレコード情報：
+
+Discogs から取得したレコード情報：
+
 - DiscogsId
-- DiscogsType ("release" | "master") - URLタイプ
+- DiscogsType ("release" | "master") - URL タイプ
 - タイトル、アーティスト名
 - レーベル、国、リリース日
 - ジャンル、スタイル
 
-### Discogs URLタイプ
+### Discogs URL タイプ
+
 - **Release**: 特定のリリース版 `/release/{id}`
 - **Master**: マスターリリース `/master/{id}`
 
@@ -106,41 +115,57 @@ npm run lint
 
 ### コーディング規約
 
-1. **DDD層の分離を守る**
-   - Presentation層 (app/) はApplication層のDTOのみを扱う
-   - Domain層は他の層に依存しない
-   - Infrastructure層は外部サービスとの連携を担当
+1. **Next.js 15 App Router のベストプラクティス**
 
-2. **型安全性**
+   - Server Components をデフォルトとして使用する
+   - Client Components は `'use client'` ディレクティブで明示的に宣言
+   - API Routes は `/app/api/` ディレクトリに配置
+   - データフェッチングは Server Components で行う
+   - 状態管理が必要な場合のみ Client Components を使用
+
+2. **ライブラリ使用時の鉄則**
+
+   - **新しいライブラリを使用する前に、必ず公式ドキュメントを検索して確認する**
+   - バージョンによる差異に注意する
+   - package.json で使用中のバージョンを確認する
+
+3. **DDD 層の分離を守る**
+
+   - Presentation 層 (app/) は Application 層の DTO のみを扱う
+   - Domain 層は他の層に依存しない
+   - Infrastructure 層は外部サービスとの連携を担当
+
+3. **型安全性**
+
    - すべての関数に型定義を付ける
-   - anyの使用は避ける
+   - any の使用は避ける
    - 値オブジェクトを活用する
 
-3. **エラーハンドリング**
-   - try-catchで適切にエラーをハンドリング
+4. **エラーハンドリング**
+   - try-catch で適切にエラーをハンドリング
    - ユーザーにわかりやすいエラーメッセージを表示
 
 ## よくある作業パターン
 
 ### 新機能追加の流れ
 
-1. Domain層にエンティティ/値オブジェクトを追加
-2. Application層にDTOとサービスメソッドを追加
-3. Infrastructure層に必要な実装を追加
-4. Presentation層でUIを実装
+1. Domain 層にエンティティ/値オブジェクトを追加
+2. Application 層に DTO とサービスメソッドを追加
+3. Infrastructure 層に必要な実装を追加
+4. Presentation 層で UI を実装
 5. `npm run build` でビルドエラーがないことを確認
 6. `npm run typecheck` で型エラーがないことを確認
 
-### Discogs連携の追加
+### Discogs 連携の追加
 
-1. `/app/api/discogs/` にAPIルートを追加
+1. `/app/api/discogs/` に API ルートを追加
 2. `DiscogsRepositoryImpl` に取得ロジックを実装
 3. `PopApplicationService` でビジネスロジックを実装
-4. UIコンポーネントから利用
+4. UI コンポーネントから利用
 
 ### データの永続化
 
-- LocalStorageを使用（`PopRepositoryImpl`）
+- LocalStorage を使用（`PopRepositoryImpl`）
 - 保存時は `PopStorageData` 形式に変換
 - 読み込み時は Domain エンティティに復元
 
@@ -151,15 +176,15 @@ npm run lint
 DISCOGS_API_TOKEN=your_discogs_api_token
 ```
 
-## デバッグTips
+## デバッグ Tips
 
-- ブラウザのDevToolsでLocalStorageの内容を確認
-- Network タブでDiscogs APIの通信を確認
-- Console.logでデータの流れを追跡
+- ブラウザの DevTools で LocalStorage の内容を確認
+- Network タブで Discogs API の通信を確認
+- Console.log でデータの流れを追跡
 
 ## 主要ファイルの説明
 
-- `app/components/modal/CreatePopModal.tsx` - Pop作成/編集モーダル
-- `app/hooks/usePopMaker.ts` - Pop管理のメインフック
+- `app/components/modal/CreatePopModal.tsx` - Pop 作成/編集モーダル
+- `app/hooks/usePopMaker.ts` - Pop 管理のメインフック
 - `src/application/services/PopApplicationService.ts` - ビジネスロジック
 - `src/infrastructure/repositories/PopRepositoryImpl.ts` - データ永続化
