@@ -1,8 +1,8 @@
 "use client";
 
-import PrintPreviewModal from "../components/modal/PrintPreviewModal";
 import CreatePopModal from "../components/modal/CreatePopModal";
 import VisualEditorModal from "../components/modal/VisualEditorModal";
+import PrintPreviewModal from "../components/modal/PrintPreviewModal";
 import Header from "../components/layout/Header";
 import ErrorDisplay from "../components/layout/ErrorDisplay";
 import CreatePopSection from "../components/pop/CreatePopSection";
@@ -25,15 +25,11 @@ export default function PopMakerPage() {
     newlyCreatedPopIds,
     isLoading,
     error,
-    isPreviewOpen,
-    printData,
     isCreateModalOpen,
     isEditModalOpen,
     editingPop,
 
     // Actions
-    setIsPreviewOpen,
-    setPrintData,
     setIsCreateModalOpen,
     setIsEditModalOpen,
     setEditingPop,
@@ -49,11 +45,21 @@ export default function PopMakerPage() {
 
   // ビジュアルエディタ用の状態
   const [isVisualEditorOpen, setIsVisualEditorOpen] = useState(false);
-  const [visualEditorPop, setVisualEditorPop] = useState<PopResponse | null>(null);
+  const [visualEditorPop, setVisualEditorPop] = useState<PopResponse | null>(
+    null
+  );
+
+  // 印刷プレビュー用の状態
+  const [isPrintPreviewOpen, setIsPrintPreviewOpen] = useState(false);
 
   const handleOpenVisualEditor = (pop: PopResponse) => {
     setVisualEditorPop(pop);
     setIsVisualEditorOpen(true);
+  };
+
+  // 印刷プレビューを開く
+  const handleOpenPrintPreview = () => {
+    setIsPrintPreviewOpen(true);
   };
 
   return (
@@ -81,20 +87,9 @@ export default function PopMakerPage() {
           onStartEdit={handleStartEdit}
           onDelete={handleDeletePop}
           onOpenVisualEditor={handleOpenVisualEditor}
+          onOpenPrintPreview={handleOpenPrintPreview}
         />
       </div>
-
-      {/* 印刷プレビューモーダル */}
-      {printData && (
-        <PrintPreviewModal
-          isOpen={isPreviewOpen}
-          onClose={() => {
-            setIsPreviewOpen(false);
-            setPrintData(null);
-          }}
-          printData={printData}
-        />
-      )}
 
       {/* ポップ作成モーダル */}
       <CreatePopModal
@@ -147,6 +142,13 @@ export default function PopMakerPage() {
           pop={visualEditorPop}
         />
       )}
+
+      {/* 印刷プレビューモーダル */}
+      <PrintPreviewModal
+        isOpen={isPrintPreviewOpen}
+        onClose={() => setIsPrintPreviewOpen(false)}
+        pops={pops}
+      />
     </div>
   );
 }

@@ -16,9 +16,7 @@ import BackgroundFramePalette from "./BackgroundFramePalette";
 import PropertyPanel from "./PropertyPanel";
 import BackgroundFramePropertyPanel from "./BackgroundFramePropertyPanel";
 import Toolbar from "./Toolbar";
-import {
-  createDefaultTemplate,
-} from "./utils/templateUtils";
+import { createDefaultTemplate } from "./utils/templateUtils";
 import {
   autoSaveCurrentTemplate,
   getAutoSavedTemplate,
@@ -66,6 +64,7 @@ export default function VisualEditor({
   });
 
   const [currentSample, setCurrentSample] = useState<1 | 2 | 3>(1);
+  const [isPrintPreviewOpen, setIsPrintPreviewOpen] = useState(false);
 
   const canvasRef = useRef<HTMLDivElement>(null);
 
@@ -143,11 +142,14 @@ export default function VisualEditor({
   }, [template]);
 
   // テンプレート読み込み
-  const handleLoadTemplate = useCallback((loadedTemplate: VisualTemplate) => {
-    setTemplate(loadedTemplate);
-    onTemplateChange?.(loadedTemplate);
-    clearAutoSave();
-  }, [onTemplateChange]);
+  const handleLoadTemplate = useCallback(
+    (loadedTemplate: VisualTemplate) => {
+      setTemplate(loadedTemplate);
+      onTemplateChange?.(loadedTemplate);
+      clearAutoSave();
+    },
+    [onTemplateChange]
+  );
 
   // テンプレートリセット
   const handleResetTemplate = useCallback(() => {
@@ -206,7 +208,7 @@ export default function VisualEditor({
           frame.id === frameId ? { ...frame, ...updates } : frame
         ),
       };
-      
+
       setTemplate(newTemplate);
       onTemplateChange?.(newTemplate);
     },
@@ -304,6 +306,11 @@ export default function VisualEditor({
     handleSelectElement,
     handleSelectBackgroundFrame,
   ]);
+
+  // 印刷プレビューハンドラー
+  const handlePrintPreview = useCallback(() => {
+    setIsPrintPreviewOpen(true);
+  }, []);
 
   return (
     <DndProvider backend={HTML5Backend}>

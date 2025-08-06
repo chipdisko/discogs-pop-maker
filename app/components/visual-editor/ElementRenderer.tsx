@@ -29,6 +29,8 @@ export default function ElementRenderer({
 }: ElementRendererProps) {
   // データバインディングから実際の値またはサンプル値を取得
   const dataValue = useMemo((): string => {
+    console.log(`🎯 Element ${element.id} | binding: ${element.dataBinding} | value: "${element.dataBinding === 'artist' ? pop.release.artistName : element.dataBinding === 'title' ? pop.release.title : 'other'}" | useSample: ${useSampleData}`);
+    
     if (useSampleData) {
       return getSampleValue(element.dataBinding, element.customText);
     }
@@ -63,6 +65,9 @@ export default function ElementRenderer({
         return "";
     }
   }, [element.dataBinding, element.customText, pop, useSampleData]);
+
+  // 実際に返される値をログ出力
+  console.log(`✅ Final value for ${element.id} (${element.dataBinding}): "${dataValue}"`);
 
   // 自動調整スタイルの計算
   const autoFitStyle = useMemo(() => {

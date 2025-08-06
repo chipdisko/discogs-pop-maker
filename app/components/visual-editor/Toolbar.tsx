@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import type { VisualTemplate } from "./types";
-import { 
-  hasSavedTemplates, 
-  getSavedTemplates, 
-  downloadTemplateAsJSON, 
-  importTemplateFromFile 
+import {
+  hasSavedTemplates,
+  getSavedTemplates,
+  downloadTemplateAsJSON,
+  importTemplateFromFile,
 } from "./utils/storageUtils";
 
 interface ToolbarProps {
@@ -43,16 +43,16 @@ export default function Toolbar({
     downloadTemplateAsJSON(template);
   };
 
-  // インポート機能  
+  // インポート機能
   const handleImport = async () => {
     try {
       const importedTemplate = await importTemplateFromFile();
       if (importedTemplate) {
         onLoad(importedTemplate);
-        alert('テンプレートをインポートしました');
+        alert("テンプレートをインポートしました");
       }
     } catch {
-      alert('インポートに失敗しました');
+      alert("インポートに失敗しました");
     }
   };
 
@@ -85,8 +85,8 @@ export default function Toolbar({
           disabled={!hasTemplatesInStorage}
           className={`px-4 py-2 border rounded transition-colors ${
             hasTemplatesInStorage
-              ? 'border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'
-              : 'border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-600 cursor-not-allowed'
+              ? "border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+              : "border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-600 cursor-not-allowed"
           }`}
         >
           読み込み
@@ -115,7 +115,7 @@ export default function Toolbar({
       </div>
 
       {/* 中央: 空のスペース */}
-      <div className="flex-1"></div>
+      <div className='flex-1'></div>
 
       {/* 右側: サンプル選択とズーム */}
       <div className='flex items-center space-x-4'>

@@ -8,6 +8,7 @@ interface PopListHeaderProps {
   onSelectAll: () => void;
   onDeselectAll: () => void;
   onGeneratePrint: () => void;
+  onOpenPrintPreview: () => void;
 }
 
 export default function PopListHeader({
@@ -17,6 +18,7 @@ export default function PopListHeader({
   onSelectAll,
   onDeselectAll,
   onGeneratePrint,
+  onOpenPrintPreview,
 }: PopListHeaderProps) {
   return (
     <div className='flex justify-between items-center'>
@@ -43,15 +45,26 @@ export default function PopListHeader({
           )}
         </div>
       </div>
-      {selectedCount > 0 && (
-        <Button
-          onClick={onGeneratePrint}
-          disabled={isLoading}
-          variant='secondary'
-        >
-          選択したポップを印刷 ({selectedCount}個)
-        </Button>
-      )}
+      <div className='flex gap-2'>
+        {popCount > 0 && (
+          <Button
+            onClick={onOpenPrintPreview}
+            disabled={isLoading}
+            variant='default'
+          >
+            印刷プレビュー
+          </Button>
+        )}
+        {selectedCount > 0 && (
+          <Button
+            onClick={onGeneratePrint}
+            disabled={isLoading}
+            variant='secondary'
+          >
+            選択したポップを印刷 ({selectedCount}個)
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

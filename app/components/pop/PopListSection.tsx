@@ -15,6 +15,7 @@ interface PopListSectionProps {
   onStartEdit: (pop: PopResponse) => void;
   onDelete: (popId: string) => void;
   onOpenVisualEditor: (pop: PopResponse) => void;
+  onOpenPrintPreview: () => void;
 }
 
 export default function PopListSection({
@@ -29,6 +30,7 @@ export default function PopListSection({
   onStartEdit,
   onDelete,
   onOpenVisualEditor,
+  onOpenPrintPreview,
 }: PopListSectionProps) {
   if (pops.length === 0) return null;
 
@@ -42,6 +44,7 @@ export default function PopListSection({
           onSelectAll={onSelectAll}
           onDeselectAll={onDeselectAll}
           onGeneratePrint={onGeneratePrint}
+          onOpenPrintPreview={onOpenPrintPreview}
         />
       </CardHeader>
       <CardContent>

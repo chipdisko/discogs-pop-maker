@@ -67,8 +67,8 @@ export default function BackgroundFrameResizeHandles({
       const startPosY = frame.position.y;
 
       const handleMouseMove = (e: MouseEvent) => {
-        const deltaX = Math.round(pxToMm(e.clientX - startX) * 2) / 2; // 0.5mm単位に丸める
-        const deltaY = Math.round(pxToMm(e.clientY - startY) * 2) / 2; // 0.5mm単位に丸める
+        const deltaX = Math.round(pxToMm(e.clientX - startX) / 2) * 2; // 2mm単位に丸める
+        const deltaY = Math.round(pxToMm(e.clientY - startY) / 2) * 2; // 2mm単位に丸める
         
         // リアルタイムでSHIFTキーの状態を取得
         const currentShiftPressed = e.shiftKey;
@@ -86,8 +86,8 @@ export default function BackgroundFrameResizeHandles({
 
           if (handle === 'line-start') {
             const newStart = {
-              x: Math.round((currentStart.x + deltaX) * 2) / 2, // 0.5mm単位に丸める
-              y: Math.round((currentStart.y + deltaY) * 2) / 2, // 0.5mm単位に丸める
+              x: Math.round((currentStart.x + deltaX) / 2) * 2, // 2mm単位に丸める
+              y: Math.round((currentStart.y + deltaY) / 2) * 2, // 2mm単位に丸める
             };
             
 
@@ -119,9 +119,9 @@ export default function BackgroundFrameResizeHandles({
               newStart.x = currentEnd.x + distance * Math.cos(snapAngleRad);
               newStart.y = currentEnd.y + distance * Math.sin(snapAngleRad);
               
-              // 0.5mm単位に丸める
-              newStart.x = Math.round(newStart.x * 2) / 2;
-              newStart.y = Math.round(newStart.y * 2) / 2;
+              // 2mm単位に丸める
+              newStart.x = Math.round(newStart.x / 2) * 2;
+              newStart.y = Math.round(newStart.y / 2) * 2;
             }
 
             // 新しい位置とサイズを計算
@@ -148,8 +148,8 @@ export default function BackgroundFrameResizeHandles({
             return;
           } else if (handle === 'line-end') {
             const newEnd = {
-              x: Math.round((currentEnd.x + deltaX) * 2) / 2, // 0.5mm単位に丸める
-              y: Math.round((currentEnd.y + deltaY) * 2) / 2, // 0.5mm単位に丸める
+              x: Math.round((currentEnd.x + deltaX) / 2) * 2, // 2mm単位に丸める
+              y: Math.round((currentEnd.y + deltaY) / 2) * 2, // 2mm単位に丸める
             };
 
             // SHIFT制約: 0度、45度、90度にスナップ
@@ -180,9 +180,9 @@ export default function BackgroundFrameResizeHandles({
               newEnd.x = currentStart.x + distance * Math.cos(snapAngleRad);
               newEnd.y = currentStart.y + distance * Math.sin(snapAngleRad);
               
-              // 0.5mm単位に丸める
-              newEnd.x = Math.round(newEnd.x * 2) / 2;
-              newEnd.y = Math.round(newEnd.y * 2) / 2;
+              // 2mm単位に丸める
+              newEnd.x = Math.round(newEnd.x / 2) * 2;
+              newEnd.y = Math.round(newEnd.y / 2) * 2;
             }
 
             // 新しい位置とサイズを計算
@@ -212,50 +212,50 @@ export default function BackgroundFrameResizeHandles({
           // 通常の図形の場合
           switch (handle) {
             case 'nw':
-              newSize.width = Math.max(5, Math.round((startWidth - deltaX) * 2) / 2);
-              newSize.height = Math.max(5, Math.round((startHeight - deltaY) * 2) / 2);
-              newPosition.x = Math.round((startPosX + (startWidth - newSize.width)) * 2) / 2;
-              newPosition.y = Math.round((startPosY + (startHeight - newSize.height)) * 2) / 2;
+              newSize.width = Math.max(6, Math.round((startWidth - deltaX) / 2) * 2);
+              newSize.height = Math.max(6, Math.round((startHeight - deltaY) / 2) * 2);
+              newPosition.x = Math.round((startPosX + (startWidth - newSize.width)) / 2) * 2;
+              newPosition.y = Math.round((startPosY + (startHeight - newSize.height)) / 2) * 2;
               break;
             case 'n':
-              newSize.height = Math.max(5, Math.round((startHeight - deltaY) * 2) / 2);
-              newPosition.y = Math.round((startPosY + (startHeight - newSize.height)) * 2) / 2;
+              newSize.height = Math.max(6, Math.round((startHeight - deltaY) / 2) * 2);
+              newPosition.y = Math.round((startPosY + (startHeight - newSize.height)) / 2) * 2;
               break;
             case 'ne':
-              newSize.width = Math.max(5, Math.round((startWidth + deltaX) * 2) / 2);
-              newSize.height = Math.max(5, Math.round((startHeight - deltaY) * 2) / 2);
-              newPosition.y = Math.round((startPosY + (startHeight - newSize.height)) * 2) / 2;
+              newSize.width = Math.max(6, Math.round((startWidth + deltaX) / 2) * 2);
+              newSize.height = Math.max(6, Math.round((startHeight - deltaY) / 2) * 2);
+              newPosition.y = Math.round((startPosY + (startHeight - newSize.height)) / 2) * 2;
               break;
             case 'e':
-              newSize.width = Math.max(5, Math.round((startWidth + deltaX) * 2) / 2);
+              newSize.width = Math.max(6, Math.round((startWidth + deltaX) / 2) * 2);
               break;
             case 'se':
-              newSize.width = Math.max(5, Math.round((startWidth + deltaX) * 2) / 2);
-              newSize.height = Math.max(5, Math.round((startHeight + deltaY) * 2) / 2);
+              newSize.width = Math.max(6, Math.round((startWidth + deltaX) / 2) * 2);
+              newSize.height = Math.max(6, Math.round((startHeight + deltaY) / 2) * 2);
               break;
             case 's':
-              newSize.height = Math.max(5, Math.round((startHeight + deltaY) * 2) / 2);
+              newSize.height = Math.max(6, Math.round((startHeight + deltaY) / 2) * 2);
               break;
             case 'sw':
-              newSize.width = Math.max(5, Math.round((startWidth - deltaX) * 2) / 2);
-              newSize.height = Math.max(5, Math.round((startHeight + deltaY) * 2) / 2);
-              newPosition.x = Math.round((startPosX + (startWidth - newSize.width)) * 2) / 2;
+              newSize.width = Math.max(6, Math.round((startWidth - deltaX) / 2) * 2);
+              newSize.height = Math.max(6, Math.round((startHeight + deltaY) / 2) * 2);
+              newPosition.x = Math.round((startPosX + (startWidth - newSize.width)) / 2) * 2;
               break;
             case 'w':
-              newSize.width = Math.max(5, Math.round((startWidth - deltaX) * 2) / 2);
-              newPosition.x = Math.round((startPosX + (startWidth - newSize.width)) * 2) / 2;
+              newSize.width = Math.max(6, Math.round((startWidth - deltaX) / 2) * 2);
+              newPosition.x = Math.round((startPosX + (startWidth - newSize.width)) / 2) * 2;
               break;
           }
 
           // 円形の場合は縦横比を1:1に保つ
           if (frame.type === 'circle') {
-            const size = Math.round(Math.max(newSize.width, newSize.height) * 2) / 2;
+            const size = Math.round(Math.max(newSize.width, newSize.height) / 2) * 2;
             const centerX = startPosX + startWidth / 2;
             const centerY = startPosY + startHeight / 2;
             newSize.width = size;
             newSize.height = size;
-            newPosition.x = Math.round((centerX - size / 2) * 2) / 2;
-            newPosition.y = Math.round((centerY - size / 2) * 2) / 2;
+            newPosition.x = Math.round((centerX - size / 2) / 2) * 2;
+            newPosition.y = Math.round((centerY - size / 2) / 2) * 2;
           }
 
           // 画像の場合は元の縦横比を保つ（BackgroundFrameには画像タイプはありません） 
@@ -265,10 +265,10 @@ export default function BackgroundFrameResizeHandles({
           //   // ハンドルの種類に応じて基準となる辺を決定
           //   if (['e', 'w'].includes(handle)) {
           //     // 横方向のリサイズ: 幅に合わせて高さを調整
-          //     newSize.height = Math.round((newSize.width / aspectRatio) * 2) / 2;
+          //     newSize.height = Math.round((newSize.width / aspectRatio) / 2) * 2;
           //   } else if (['n', 's'].includes(handle)) {
           //     // 縦方向のリサイズ: 高さに合わせて幅を調整
-          //     newSize.width = Math.round((newSize.height * aspectRatio) * 2) / 2;
+          //     newSize.width = Math.round((newSize.height * aspectRatio) / 2) * 2;
           //   } else {
           //     // 角のハンドル: より大きな変化量に合わせる
           //     const widthRatio = newSize.width / startWidth;
@@ -276,20 +276,20 @@ export default function BackgroundFrameResizeHandles({
           //     
           //     if (Math.abs(widthRatio - 1) > Math.abs(heightRatio - 1)) {
           //       // 幅の変化が大きい場合
-          //       newSize.height = Math.round((newSize.width / aspectRatio) * 2) / 2;
+          //       newSize.height = Math.round((newSize.width / aspectRatio) / 2) * 2;
           //     } else {
           //       // 高さの変化が大きい場合
-          //       newSize.width = Math.round((newSize.height * aspectRatio) * 2) / 2;
+          //       newSize.width = Math.round((newSize.height * aspectRatio) / 2) * 2;
           //     }
           //   }
           // 
           //   // 位置調整（左上を基準とする場合は不要だが、他のハンドルの場合は調整が必要）
           //   if (['nw', 'n', 'w'].includes(handle)) {
           //     if (['nw', 'n'].includes(handle)) {
-          //       newPosition.y = Math.round((startPosY + startHeight - newSize.height) * 2) / 2;
+          //       newPosition.y = Math.round((startPosY + startHeight - newSize.height) / 2) * 2;
           //     }
           //     if (['nw', 'w'].includes(handle)) {
-          //       newPosition.x = Math.round((startPosX + startWidth - newSize.width) * 2) / 2;
+          //       newPosition.x = Math.round((startPosX + startWidth - newSize.width) / 2) * 2;
           //     }
           //   }
           // }

@@ -1,279 +1,283 @@
-import React, { useState, useCallback, useRef, useEffect } from "react";
-import { X } from "lucide-react";
-import A4Canvas from "../print/A4Canvas";
-import type { PrintDataResponse } from "@/src/application";
+"use client";
+
+import React, { useRef } from "react";
+import { PopResponse } from "@/src/application";
+import PrintLayout from "../print/PrintLayout";
+import { X, Printer, FileDown } from "lucide-react";
 
 interface PrintPreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
-  printData: PrintDataResponse;
+  pops: PopResponse[];
 }
 
-export default function PrintPreviewModal({
+const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
   isOpen,
   onClose,
-  printData,
-}: PrintPreviewModalProps) {
-  const [currentPage, setCurrentPage] = useState(0);
-  const [canvases, setCanvases] = useState<HTMLCanvasElement[]>([]);
-  const [dpi, setDpi] = useState(300);
-  const currentPageRef = useRef(currentPage);
-
-  // currentPageRefを更新
-  useEffect(() => {
-    currentPageRef.current = currentPage;
-  }, [currentPage]);
-
-  const handleCanvasReady = useCallback(
-    (canvas: HTMLCanvasElement) => {
-      const pageIndex = currentPageRef.current;
-      setCanvases((prev) => {
-        const newCanvases = [...prev];
-        newCanvases[pageIndex] = canvas;
-        return newCanvases;
-      });
-    },
-    [] // 依存配列を空にして、関数を安定化
-  );
-
-  // DPI変更時にキャンバスをクリア
-  const handleDpiChange = useCallback(
-    (newDpi: number) => {
-      console.log("🔄 PrintPreviewModal: DPI changed", {
-        from: dpi,
-        to: newDpi,
-      });
-      setDpi(newDpi);
-      setCanvases([]); // キャンバスをクリアして再生成を促す
-    },
-    [dpi]
-  );
-
-  const downloadCurrentPage = () => {
-    const canvas = canvases[currentPage];
-    if (!canvas) return;
-
-    const link = document.createElement("a");
-    link.download = `discogs-pop-page-${currentPage + 1}.png`;
-    link.href = canvas.toDataURL("image/png");
-    link.click();
-  };
-
-  const downloadAllPages = () => {
-    canvases.forEach((canvas, index) => {
-      if (canvas) {
-        const link = document.createElement("a");
-        link.download = `discogs-pop-page-${index + 1}.png`;
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-
-        // ダウンロード間隔を空ける
-        setTimeout(() => {}, 200);
-      }
-    });
-  };
+  pops,
+}) => {
+  const printRef = useRef<HTMLDivElement>(null);
 
   if (!isOpen) return null;
 
-  const currentPageData = printData.layout.pages[currentPage];
+  // 印刷処理
+  const handlePrint = () => {
+    window.print();
+  };
+
+  // PDFとして保存（ブラウザの印刷ダイアログでPDF選択）
+  const handleSaveAsPDF = () => {
+    window.print();
+  };
+
+  // ページ数の計算
+  const pageCount = Math.ceil(pops.length / 8);
 
   return (
-    <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4'>
-      <div className='bg-white rounded-lg max-w-7xl max-h-[95vh] w-full flex flex-col relative @container'>
-        {/* ヘッダー */}
-        <div className=''>
-          <div className='flex flex-col @[500px]:flex-row justify-between items-start @[500px]:items-center p-6 border-b gap-4 @[500px]:gap-0'>
-            <div>
-              <h2 className='text-2xl font-bold text-gray-900'>
-                印刷プレビュー
-              </h2>
-              <p className='text-gray-700'>
-                {printData.totalPops}個のポップ • {printData.totalPages}ページ
-              </p>
-            </div>
-
-            <div className='flex flex-col @[500px]:flex-row items-start @[500px]:items-center gap-4 @[500px]:gap-4'>
-              {/* DPI設定 */}
-              <div className='flex items-center space-x-2'>
-                <label className='text-sm font-medium text-gray-800'>
-                  DPI:
-                </label>
-                <select
-                  value={dpi}
-                  onChange={(e) => handleDpiChange(Number(e.target.value))}
-                  className='px-2 py-1 border border-border rounded text-sm text-gray-800'
-                >
-                  <option value={150}>150 (プレビュー)</option>
-                  <option value={300}>300 (高品質)</option>
-                  <option value={600}>600 (超高品質)</option>
-                </select>
-              </div>
-            </div>
-
-            {/* 閉じるボタン（絶対位置で右上に固定） */}
+    <>
+      <div className="print-preview-modal">
+        <div className="modal-overlay" onClick={onClose} />
+        <div className="modal-content">
+          <div className="modal-header">
+            <h2 className="modal-title">
+              印刷プレビュー
+              <span className="page-info">
+                （{pops.length}個 / {pageCount}ページ）
+              </span>
+            </h2>
             <button
               onClick={onClose}
-              className='absolute top-1 right-1 text-gray-500 hover:text-gray-800 z-10 p-1 rounded-md hover:bg-gray-100 transition-colors'
+              className="close-button"
+              aria-label="閉じる"
             >
-              <X size={20} />
+              <X size={24} />
             </button>
           </div>
-        </div>
 
-        {/* コンテンツエリア */}
-        <div className='flex-1 flex flex-col @[1000px]:flex-row overflow-hidden'>
-          {/* メインプレビュー */}
-          <div className='flex-1 flex flex-col'>
-            {/* ページナビゲーション */}
-            {printData.totalPages > 0 && (
-              <div className='flex justify-center items-center py-4 border-b space-x-4'>
-                <button
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.max(0, prev - 1))
-                  }
-                  disabled={currentPage === 0}
-                  className='px-3 py-1 bg-secondary text-secondary-foreground rounded disabled:opacity-50'
-                >
-                  ← 前のページ
-                </button>
-
-                <span className='text-sm text-gray-800'>
-                  ページ {currentPage + 1} / {printData.totalPages}
-                </span>
-
-                <button
-                  onClick={() =>
-                    setCurrentPage((prev) =>
-                      Math.min(printData.totalPages - 1, prev + 1)
-                    )
-                  }
-                  disabled={currentPage === printData.totalPages - 1}
-                  className='px-3 py-1 bg-secondary text-secondary-foreground rounded disabled:opacity-50'
-                >
-                  次のページ →
-                </button>
-              </div>
-            )}
-
-            {/* Canvas表示 */}
-            <div className='flex-1 overflow-auto p-6 bg-gray-50'>
-              <div className='flex justify-center items-center min-h-full'>
-                {currentPageData && (
-                  <A4Canvas
-                    pageData={currentPageData}
-                    dpi={dpi}
-                    scale={0.25}
-                    onCanvasReady={handleCanvasReady}
-                  />
-                )}
-              </div>
-            </div>
-
-            {/* 右クリック保存のヒント */}
-            <div className='p-4 bg-blue-50 border-t text-center'>
-              <p className='text-sm text-blue-800'>
-                💡 <strong>ヒント:</strong>{" "}
-                画像を右クリックして「名前を付けて画像を保存」で保存できます
-              </p>
+          <div className="modal-body">
+            <div className="preview-container" ref={printRef}>
+              <PrintLayout pops={pops} forPrint={false} />
             </div>
           </div>
 
-          {/* サイドバー */}
-          <div className='w-full lg:w-96 border-t lg:border-l lg:border-t-0 p-6 bg-gray-50 overflow-y-auto'>
-            {/* アクション */}
-            <div className='space-y-3 mb-6'>
-              <h3 className='font-semibold text-gray-900'>ダウンロード</h3>
-
+          <div className="modal-footer">
+            <div className="action-buttons">
               <button
-                onClick={downloadCurrentPage}
-                disabled={!canvases[currentPage]}
-                className='w-full bg-primary text-primary-foreground py-2 px-4 rounded hover:bg-primary/90 disabled:opacity-50'
+                onClick={handlePrint}
+                className="btn btn-primary"
               >
-                現在のページを保存
+                <Printer size={20} />
+                印刷
               </button>
-
-              {printData.totalPages > 1 && (
-                <button
-                  onClick={downloadAllPages}
-                  disabled={canvases.length === 0}
-                  className='w-full bg-secondary text-secondary-foreground py-2 px-4 rounded hover:bg-secondary/90 disabled:opacity-50'
-                >
-                  全ページを一括保存
-                </button>
-              )}
+              <button
+                onClick={handleSaveAsPDF}
+                className="btn btn-secondary"
+              >
+                <FileDown size={20} />
+                PDFとして保存
+              </button>
+              <button
+                onClick={onClose}
+                className="btn btn-cancel"
+              >
+                キャンセル
+              </button>
             </div>
-
-            {/* 印刷情報 */}
-            <div className='space-y-4'>
-              <h3 className='font-semibold text-gray-900'>印刷情報</h3>
-
-              <div className='bg-white rounded-lg border border-gray-200 p-4 space-y-3 text-sm text-gray-800'>
-                <div className='flex justify-between items-center'>
-                  <span className='font-medium'>用紙サイズ:</span>
-                  <span className='text-gray-600'>A4 (210×297mm)</span>
-                </div>
-
-                <div className='flex justify-between items-center'>
-                  <span className='font-medium'>ポップサイズ:</span>
-                  <span className='text-gray-600'>A7 (105×74mm)</span>
-                </div>
-
-                <div className='flex justify-between items-center'>
-                  <span className='font-medium'>配置:</span>
-                  <span className='text-gray-600'>2×4 (8枚/ページ)</span>
-                </div>
-
-                <div className='flex justify-between items-center'>
-                  <span className='font-medium'>解像度:</span>
-                  <span className='text-gray-600'>{dpi} DPI</span>
-                </div>
-              </div>
+            <div className="print-tips">
+              <p className="tip">💡 印刷時は「背景のグラフィック」を有効にしてください</p>
+              <p className="tip">💡 用紙サイズ: A4 / 余白: なし を推奨</p>
             </div>
-
-            {/* 現在ページのポップ一覧 */}
-            {currentPageData && (
-              <div className='mt-6 space-y-4'>
-                <h3 className='font-semibold text-gray-900'>
-                  このページのポップ ({currentPageData.pops.length}個)
-                </h3>
-
-                <div className='space-y-3'>
-                  {currentPageData.pops.map((popPosition) => (
-                    <div
-                      key={popPosition.pop.id}
-                      className='p-4 bg-white rounded-lg border border-gray-200 text-sm text-gray-800 shadow-sm'
-                    >
-                      <div className='font-semibold text-gray-900 mb-2'>
-                        {popPosition.pop.release.fullTitle}
-                      </div>
-                      <div className='text-gray-600 text-xs mb-2'>
-                        {popPosition.pop.release.label}
-                      </div>
-                      {popPosition.pop.comment && (
-                        <div className='text-gray-700 text-xs mb-2 p-2 bg-gray-50 rounded'>
-                          {popPosition.pop.comment}
-                        </div>
-                      )}
-                      {popPosition.pop.badges.length > 0 && (
-                        <div className='flex flex-wrap gap-1'>
-                          {popPosition.pop.badges.map((badge) => (
-                            <span
-                              key={badge.type}
-                              className='px-2 py-1 bg-primary/20 text-primary text-xs rounded font-medium'
-                            >
-                              {badge.displayName}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
-    </div>
+
+      {/* 印刷用の非表示エリア */}
+      <div className="print-only">
+        <PrintLayout pops={pops} forPrint={true} />
+      </div>
+
+      <style jsx>{`
+        .print-preview-modal {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          z-index: 9999;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .modal-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.5);
+          backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+          position: relative;
+          background: white;
+          border-radius: 12px;
+          width: 90vw;
+          max-width: 1200px;
+          height: 90vh;
+          display: flex;
+          flex-direction: column;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 20px 24px;
+          border-bottom: 1px solid #e5e5e5;
+        }
+
+        .modal-title {
+          font-size: 20px;
+          font-weight: 600;
+          color: #1a1a1a;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .page-info {
+          font-size: 14px;
+          font-weight: 400;
+          color: #666;
+        }
+
+        .close-button {
+          background: none;
+          border: none;
+          padding: 8px;
+          cursor: pointer;
+          color: #666;
+          border-radius: 8px;
+          transition: all 0.2s;
+        }
+
+        .close-button:hover {
+          background: #f0f0f0;
+          color: #333;
+        }
+
+        .modal-body {
+          flex: 1;
+          overflow: auto;
+          padding: 24px;
+          background: #f8f8f8;
+        }
+
+        .preview-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .modal-footer {
+          padding: 20px 24px;
+          border-top: 1px solid #e5e5e5;
+          background: white;
+        }
+
+        .action-buttons {
+          display: flex;
+          gap: 12px;
+          margin-bottom: 16px;
+        }
+
+        .btn {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 10px 20px;
+          border-radius: 8px;
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s;
+          border: none;
+        }
+
+        .btn-primary {
+          background: #2563eb;
+          color: white;
+        }
+
+        .btn-primary:hover {
+          background: #1d4ed8;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+          background: #10b981;
+          color: white;
+        }
+
+        .btn-secondary:hover {
+          background: #059669;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-cancel {
+          background: #e5e5e5;
+          color: #666;
+        }
+
+        .btn-cancel:hover {
+          background: #d4d4d4;
+          color: #333;
+        }
+
+        .print-tips {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .tip {
+          font-size: 12px;
+          color: #666;
+          margin: 0;
+        }
+
+        /* 印刷時のみ表示 */
+        .print-only {
+          display: none;
+        }
+
+        @media print {
+          .print-preview-modal {
+            display: none !important;
+          }
+
+          .print-only {
+            display: block !important;
+          }
+
+          /* メインページコンテンツを非表示 */
+          .max-w-6xl.mx-auto.space-y-8 {
+            display: none !important;
+          }
+
+          /* print-only内のPrintLayoutのみを表示 */
+          .print-only .print-layout {
+            display: block !important;
+          }
+        }
+      `}</style>
+    </>
   );
-}
+};
+
+export default PrintPreviewModal;
