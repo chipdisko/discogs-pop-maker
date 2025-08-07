@@ -1,6 +1,6 @@
 # カスタムバッジ機能 要件定義
 
-最終更新日: 2025-08-07
+最終更新日: 2025-08-07（現状仕様反映版）
 
 ## 概要
 
@@ -26,7 +26,11 @@
 - **背景色**: カラーピッカーで選択（デフォルト: #3b82f6）
 - **文字色**: カラーピッカーで選択（デフォルト: #ffffff）
 - **フォントサイズ**: 8px〜24pxのスライダー（デフォルト: 12px）
-- **フォントファミリー**: Arialで固定（visual-editor統一設定と連携）
+- **フォント設定（充実）**:
+  - **フォントファミリー**: Arial、Impact、Georgia、Helvetica、Verdana、Times New Roman、Courier Newから選択
+  - **太字・斜体**: ON/OFFトグル
+  - **長体化**: 50%〜150%のスライダー（横方向圧縮率・文字のみに適用）
+  - **文字間隔**: -20%〜50%のスライダー（em単位）
 - **枠線設定**:
   - **枠線の有無**: ON/OFF切り替え（デフォルト: ON）
   - **枠線の色**: カラーピッカーで選択（デフォルト: #ffffff 白）
@@ -56,10 +60,10 @@
 #### 2.2 バッジ一覧表示
 - **表示形式**: グリッドレイアウト（1-2列）
 - **情報**:
-  - バッジプレビュー（実際のサイズ）
+  - バッジプレビュー（実際のサイズで表示）
   - バッジ名
   - タイプ（テキスト/画像）
-  - 作成日時
+  - 表示テキスト
 - **操作**: 編集・削除ボタン
 
 #### 2.3 バッジ作成・編集フォーム
@@ -92,13 +96,14 @@
 
 ### 5. レンダリング・表示
 
-#### 5.1 CustomBadgeRenderer
-- **役割**: 既存BadgeRendererを完全置き換え
+#### 5.1 BadgeRenderer
+- **役割**: 既存BadgeRendererを完全置き換え（完了）
 - **対応**: テキスト・画像両タイプの描画
 - **特徴**:
-  - 円形描画
+  - 円形・四角形描画
   - 文字の中央配置
-  - フォントサイズの自動調整（円からはみ出し防止）
+  - 長体化は文字のみに適用
+  - ユーザー設定フォントサイズをそのまま使用（自動調整なし）
 
 #### 5.2 ビジュアルエディタ連携
 - **配置**: ドラッグ&ドロップ対応
@@ -131,7 +136,14 @@ interface CustomBadge {
   text?: string;                 // 表示テキスト
   backgroundColor?: string;       // 背景色
   textColor?: string;            // 文字色
-  fontSize?: number;             // フォントサイズ
+  fontSize?: number;             // フォントサイズ(px)
+  
+  // フォント設定
+  fontFamily?: string;           // フォントファミリー
+  fontWeight?: 'normal' | 'bold'; // 太字設定
+  fontStyle?: 'normal' | 'italic'; // 斜体設定
+  letterSpacing?: number;        // 文字間隔(em単位)
+  scaleX?: number;              // 長体化設定（横方向圧縮率 0.5～1.5）
   
   // 枠線設定
   borderEnabled?: boolean;       // 枠線の有無
@@ -177,15 +189,15 @@ customBadgeId?: string | null;
 
 ### UI コンポーネント
 
-#### 新規作成
-- `CustomBadgeManagerModal.tsx` - メイン管理画面
-- `CustomBadgeRenderer.tsx` - 描画コンポーネント
-- `CustomBadgeSelector.tsx` - POP作成時の選択UI
+#### 作成済み
+- `CustomBadgeManagerModal.tsx` - メイン管理画面（完了）
+- `BadgeRenderer.tsx` - 統一描画コンポーネント（完了）
+- `badgeStorage.ts` - データ管理ユーティリティ（完了）
 
-#### 更新対象
-- `CreatePopModal.tsx` - バッジ選択UI追加
-- `BadgeRenderer.tsx` - CustomBadgeRendererに置き換え
-- サンプルデータ - 旧バッジから新バッジへ
+#### 更新済み
+- `CreatePopModal.tsx` - バッジ選択UI追加（完了）
+- `PopCard.tsx` - カスタムバッジ表示対応（完了）
+- サンプルデータ - 新バッジ対応（完了）
 
 ## 既存機能との関係
 
@@ -204,20 +216,21 @@ customBadgeId?: string | null;
 ## 実装フェーズ
 
 ### Phase 1 - 基盤（完了）
-- [x] 型定義作成（CustomBadge、更新されたPopResponse）
+- [x] 型定義作成（Badge、更新されたPopResponse）
 - [x] LocalStorage管理ユーティリティ作成
 - [x] CustomBadgeManagerModal作成
 - [x] メインページにボタン追加
 
-### Phase 2 - 描画・選択機能
-- [ ] CustomBadgeRenderer作成（円形テキスト描画）
-- [ ] CreatePopModal内にバッジ選択UI追加
-- [ ] 既存BadgeRenderer置き換え
+### Phase 2 - 描画・選択機能（完了）
+- [x] BadgeRenderer作成（円形・四角形テキスト描画）
+- [x] CreatePopModal内にバッジ選択UI追加
+- [x] 既存BadgeRenderer統合完了
 
-### Phase 3 - データ移行・完成
-- [ ] サンプルデータ更新
-- [ ] 旧バッジ関連コード削除
-- [ ] マイグレーション処理
+### Phase 3 - フォント機能・統一（完了）
+- [x] フォント設定充実（ファミリー、太字、斜体、長体化、文字間隔）
+- [x] 表示統一（編集プレビュー、VisualEditor、印刷）
+- [x] サイズ仕様統一（mm→px変換、フォントサイズpx統一）
+- [x] バグ修正・最適化
 
 ### Phase 4 - 将来拡張（未定）
 - [ ] 画像バッジ機能
