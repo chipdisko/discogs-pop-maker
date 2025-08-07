@@ -107,6 +107,13 @@ export class BadgeStorageManager {
       textColor: input.textColor || DEFAULT_BADGE_VALUES.textColor,
       fontSize: input.fontSize || DEFAULT_BADGE_VALUES.fontSize,
       
+      // フォント設定
+      fontFamily: input.fontFamily || DEFAULT_BADGE_VALUES.fontFamily,
+      fontWeight: input.fontWeight || DEFAULT_BADGE_VALUES.fontWeight,
+      fontStyle: input.fontStyle || DEFAULT_BADGE_VALUES.fontStyle,
+      letterSpacing: input.letterSpacing ?? DEFAULT_BADGE_VALUES.letterSpacing,
+      scaleX: input.scaleX ?? DEFAULT_BADGE_VALUES.scaleX,
+      
       // 枠線設定
       borderEnabled: input.borderEnabled ?? DEFAULT_BADGE_VALUES.borderEnabled,
       borderColor: input.borderColor || DEFAULT_BADGE_VALUES.borderColor,
@@ -159,6 +166,13 @@ export class BadgeStorageManager {
       backgroundColor: input.backgroundColor || DEFAULT_BADGE_VALUES.backgroundColor,
       textColor: input.textColor || DEFAULT_BADGE_VALUES.textColor,
       fontSize: input.fontSize || DEFAULT_BADGE_VALUES.fontSize,
+      
+      // フォント設定
+      fontFamily: input.fontFamily || DEFAULT_BADGE_VALUES.fontFamily,
+      fontWeight: input.fontWeight || DEFAULT_BADGE_VALUES.fontWeight,
+      fontStyle: input.fontStyle || DEFAULT_BADGE_VALUES.fontStyle,
+      letterSpacing: input.letterSpacing ?? DEFAULT_BADGE_VALUES.letterSpacing,
+      scaleX: input.scaleX ?? DEFAULT_BADGE_VALUES.scaleX,
       
       // 枠線設定
       borderEnabled: input.borderEnabled ?? DEFAULT_BADGE_VALUES.borderEnabled,

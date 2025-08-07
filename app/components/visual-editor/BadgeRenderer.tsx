@@ -42,6 +42,11 @@ export default function BadgeRenderer({
         backgroundColor: '#3b82f6',
         textColor: '#ffffff',
         fontSize: 12,
+        fontFamily: 'Arial, sans-serif',
+        fontWeight: 'bold',
+        fontStyle: 'normal',
+        letterSpacing: 0,
+        scaleX: 1,
         borderEnabled: true,
         borderColor: '#ffffff',
         borderWidth: 1,
@@ -122,10 +127,12 @@ export default function BadgeRenderer({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: (badgeData.fontSize || 12) * zoom,
+    fontSize: (badgeData.fontSize || 12) * (zoom === 1 ? 3.7795275591 : zoom),
     color: badgeData.textColor || '#ffffff',
-    fontFamily: 'Arial, sans-serif',
-    fontWeight: 'bold',
+    fontFamily: badgeData.fontFamily || 'Arial, sans-serif',
+    fontWeight: badgeData.fontWeight || 'bold',
+    fontStyle: badgeData.fontStyle || 'normal',
+    letterSpacing: `${badgeData.letterSpacing || 0}em`,
     textAlign: 'center',
     lineHeight: 1,
     overflow: 'hidden',
@@ -154,10 +161,11 @@ export default function BadgeRenderer({
     const text = badgeData.text || 'バッジ';
     
     // 文字数に応じてフォントサイズを調整する簡易ロジック
+    const scaleForPrint = zoom === 1 ? 3.7795275591 : zoom;
     if (text.length > 8) {
-      badgeStyle.fontSize = ((badgeData.fontSize || 12) * 0.7) * zoom;
+      badgeStyle.fontSize = (badgeData.fontSize || 12) * 0.7 * scaleForPrint;
     } else if (text.length > 5) {
-      badgeStyle.fontSize = ((badgeData.fontSize || 12) * 0.8) * zoom;
+      badgeStyle.fontSize = (badgeData.fontSize || 12) * 0.8 * scaleForPrint;
     }
 
     return text;
@@ -183,7 +191,13 @@ export default function BadgeRenderer({
   // テキストバッジの場合
   return (
     <div style={badgeStyle}>
-      {getAdjustedText()}
+      <span
+        style={{
+          transform: badgeData.scaleX !== undefined && badgeData.scaleX !== 1 ? `scaleX(${badgeData.scaleX})` : undefined,
+        }}
+      >
+        {getAdjustedText()}
+      </span>
     </div>
   );
 }

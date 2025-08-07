@@ -20,6 +20,13 @@ export interface Badge {
   textColor?: string; // 文字色（デフォルト: #ffffff）
   fontSize?: number; // フォントサイズ（デフォルト: 12px）
   
+  // フォント設定
+  fontFamily?: string; // フォントファミリー
+  fontWeight?: 'normal' | 'bold'; // 太字設定
+  fontStyle?: 'normal' | 'italic'; // 斜体設定
+  letterSpacing?: number; // 文字間隔(em単位)
+  scaleX?: number; // 長体化設定（横方向圧縮率 0.5～1.5）
+  
   // 枠線設定
   borderEnabled?: boolean; // 枠線の有無
   borderColor?: string; // 枠線の色
@@ -70,6 +77,13 @@ export interface BadgeInput {
   textColor?: string;
   fontSize?: number;
   
+  // フォント設定
+  fontFamily?: string;
+  fontWeight?: 'normal' | 'bold';
+  fontStyle?: 'normal' | 'italic';
+  letterSpacing?: number;
+  scaleX?: number;
+  
   // 枠線設定
   borderEnabled?: boolean;
   borderColor?: string;
@@ -96,6 +110,13 @@ export const DEFAULT_BADGE_VALUES = {
   fontSize: 12,
   text: 'バッジ',
   
+  // フォント設定
+  fontFamily: 'Arial, sans-serif',
+  fontWeight: 'bold' as const,
+  fontStyle: 'normal' as const,
+  letterSpacing: 0,
+  scaleX: 1,
+  
   // 枠線設定
   borderEnabled: true,
   borderColor: '#ffffff', // white
@@ -121,6 +142,10 @@ export const BADGE_LIMITS = {
   // フォント制限
   MIN_FONT_SIZE: 8,
   MAX_FONT_SIZE: 24,
+  MIN_LETTER_SPACING: -0.2,
+  MAX_LETTER_SPACING: 0.5,
+  MIN_SCALE_X: 0.5,
+  MAX_SCALE_X: 1.5,
   
   // 枠線制限
   MIN_BORDER_WIDTH: 0.5,
