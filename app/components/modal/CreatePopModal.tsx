@@ -753,7 +753,7 @@ export default function CreatePopModal({
                               height: badge.height * 3.7795275591 * 0.6,
                               backgroundColor: badge.backgroundColor || '#3b82f6',
                               color: badge.textColor || '#ffffff',
-                              fontSize: Math.max((badge.fontSize || 12) * 3.7795275591 * 0.6, 8),
+                              fontSize: Math.max((badge.fontSize || 12) * 0.6, 8), // モーダル用縮小
                               fontWeight: badge.fontWeight || 'bold',
                               fontStyle: badge.fontStyle || 'normal',
                               fontFamily: badge.fontFamily || 'Arial, sans-serif',

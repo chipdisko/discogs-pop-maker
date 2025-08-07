@@ -211,7 +211,7 @@ export default function BadgeManagerModal({
       height: previewHeight,
       backgroundColor: badge.backgroundColor || "#3b82f6",
       color: badge.textColor || "#ffffff",
-      fontSize: Math.max((badge.fontSize || 12) * 3.7795275591, 8), // mm to px 変換
+      fontSize: Math.max(badge.fontSize || 12, 8), // px単位そのまま使用
       fontWeight: badge.fontWeight || "bold",
       fontStyle: badge.fontStyle || "normal",
       letterSpacing: `${badge.letterSpacing || 0}em`,

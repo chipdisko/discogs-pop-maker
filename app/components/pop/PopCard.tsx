@@ -133,7 +133,7 @@ export default function PopCard({
               height: badge.height * 3.7795275591 * 0.8,
               backgroundColor: badge.backgroundColor || '#3b82f6',
               color: badge.textColor || '#ffffff',
-              fontSize: Math.max((badge.fontSize || 12) * 3.7795275591 * 0.8, 8),
+              fontSize: Math.max((badge.fontSize || 12) * 0.8, 8), // カード用縮小
               fontWeight: badge.fontWeight || 'bold',
               fontStyle: badge.fontStyle || 'normal',
               fontFamily: badge.fontFamily || 'Arial, sans-serif',
