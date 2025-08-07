@@ -201,17 +201,17 @@ export default function BadgeManagerModal({
   };
 
   const renderBadgePreview = (badge: Badge | BadgeInput) => {
-    // プレビューサイズを実際のサイズに基づいて計算（スケール調整）
-    const scale = 2; // プレビュー用のスケール
-    const previewWidth = (badge.width || 20) * scale;
-    const previewHeight = (badge.height || 20) * scale;
+    // mm to px 変換（VisualEditorと同じ仕様）
+    const mmToPx = (mm: number) => mm * 3.7795275591;
+    const previewWidth = mmToPx(badge.width || 20);
+    const previewHeight = mmToPx(badge.height || 20);
 
     const previewStyle: React.CSSProperties = {
       width: previewWidth,
       height: previewHeight,
       backgroundColor: badge.backgroundColor || "#3b82f6",
       color: badge.textColor || "#ffffff",
-      fontSize: Math.max((badge.fontSize || 12) * scale * 0.8, 8), // 最小8px
+      fontSize: Math.max((badge.fontSize || 12) * 3.7795275591, 8), // mm to px 変換
       fontWeight: badge.fontWeight || "bold",
       fontStyle: badge.fontStyle || "normal",
       letterSpacing: `${badge.letterSpacing || 0}em`,
@@ -227,13 +227,13 @@ export default function BadgeManagerModal({
     if (badge.shape === "circle") {
       previewStyle.borderRadius = "50%";
     } else if (badge.shape === "rectangle") {
-      const borderRadius = (badge.borderRadius || 0) * scale;
+      const borderRadius = mmToPx(badge.borderRadius || 0);
       previewStyle.borderRadius = `${borderRadius}px`;
     }
 
     // 枠線設定
     if (badge.borderEnabled) {
-      const borderWidth = (badge.borderWidth || 1) * scale;
+      const borderWidth = mmToPx(badge.borderWidth || 1);
       previewStyle.border = `${borderWidth}px solid ${
         badge.borderColor || "#ffffff"
       }`;
@@ -846,7 +846,7 @@ export default function BadgeManagerModal({
                       {renderBadgePreview(formData)}
                     </div>
                     <div className='text-center mt-4 text-sm text-gray-500 dark:text-gray-400'>
-                      実際のサイズは可変です
+                      実際のサイズで表示
                     </div>
                   </div>
                 </div>

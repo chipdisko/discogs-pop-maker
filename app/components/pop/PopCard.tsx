@@ -128,11 +128,12 @@ export default function PopCard({
         <div className='flex items-center gap-2'>
           <div 
             style={{
-              width: badge.width * 1.5, // カード用スケール
-              height: badge.height * 1.5,
+              // mm to px 変換（VisualEditorと同じ仕様）+ カード用スケール 0.8
+              width: badge.width * 3.7795275591 * 0.8,
+              height: badge.height * 3.7795275591 * 0.8,
               backgroundColor: badge.backgroundColor || '#3b82f6',
               color: badge.textColor || '#ffffff',
-              fontSize: Math.max((badge.fontSize || 12) * 1.2, 8),
+              fontSize: Math.max((badge.fontSize || 12) * 3.7795275591 * 0.8, 8),
               fontWeight: badge.fontWeight || 'bold',
               fontStyle: badge.fontStyle || 'normal',
               fontFamily: badge.fontFamily || 'Arial, sans-serif',
@@ -142,8 +143,8 @@ export default function PopCard({
               justifyContent: 'center',
               textAlign: 'center',
               overflow: 'hidden',
-              borderRadius: badge.shape === 'circle' ? '50%' : `${(badge.borderRadius || 0) * 1.5}px`,
-              border: badge.borderEnabled ? `${(badge.borderWidth || 1) * 1.5}px solid ${badge.borderColor || '#ffffff'}` : 'none',
+              borderRadius: badge.shape === 'circle' ? '50%' : `${(badge.borderRadius || 0) * 3.7795275591 * 0.8}px`,
+              border: badge.borderEnabled ? `${(badge.borderWidth || 1) * 3.7795275591 * 0.8}px solid ${badge.borderColor || '#ffffff'}` : 'none',
               flexShrink: 0
             }}
           >

@@ -748,11 +748,12 @@ export default function CreatePopModal({
                           {/* ミニプレビュー表示 */}
                           <div 
                             style={{
-                              width: badge.width * 2, // プレビュー用スケール
-                              height: badge.height * 2,
+                              // mm to px 変換（VisualEditorと同じ仕様）+ モーダル用スケール 0.6
+                              width: badge.width * 3.7795275591 * 0.6,
+                              height: badge.height * 3.7795275591 * 0.6,
                               backgroundColor: badge.backgroundColor || '#3b82f6',
                               color: badge.textColor || '#ffffff',
-                              fontSize: Math.max((badge.fontSize || 12) * 1.5, 8),
+                              fontSize: Math.max((badge.fontSize || 12) * 3.7795275591 * 0.6, 8),
                               fontWeight: badge.fontWeight || 'bold',
                               fontStyle: badge.fontStyle || 'normal',
                               fontFamily: badge.fontFamily || 'Arial, sans-serif',
@@ -762,8 +763,8 @@ export default function CreatePopModal({
                               justifyContent: 'center',
                               textAlign: 'center',
                               overflow: 'hidden',
-                              borderRadius: badge.shape === 'circle' ? '50%' : `${(badge.borderRadius || 0) * 2}px`,
-                              border: badge.borderEnabled ? `${(badge.borderWidth || 1) * 2}px solid ${badge.borderColor || '#ffffff'}` : 'none'
+                              borderRadius: badge.shape === 'circle' ? '50%' : `${(badge.borderRadius || 0) * 3.7795275591 * 0.6}px`,
+                              border: badge.borderEnabled ? `${(badge.borderWidth || 1) * 3.7795275591 * 0.6}px solid ${badge.borderColor || '#ffffff'}` : 'none'
                             }}
                           >
                             <span
