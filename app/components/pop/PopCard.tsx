@@ -133,19 +133,27 @@ export default function PopCard({
               backgroundColor: badge.backgroundColor || '#3b82f6',
               color: badge.textColor || '#ffffff',
               fontSize: Math.max((badge.fontSize || 12) * 1.2, 8),
-              fontWeight: 'bold',
+              fontWeight: badge.fontWeight || 'bold',
+              fontStyle: badge.fontStyle || 'normal',
+              fontFamily: badge.fontFamily || 'Arial, sans-serif',
+              letterSpacing: `${badge.letterSpacing || 0}em`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               textAlign: 'center',
               overflow: 'hidden',
-              fontFamily: 'Arial, sans-serif',
               borderRadius: badge.shape === 'circle' ? '50%' : `${(badge.borderRadius || 0) * 1.5}px`,
               border: badge.borderEnabled ? `${(badge.borderWidth || 1) * 1.5}px solid ${badge.borderColor || '#ffffff'}` : 'none',
               flexShrink: 0
             }}
           >
-            {badge.type === 'text' ? badge.text || 'バッジ' : '📷'}
+            <span
+              style={{
+                transform: badge.scaleX !== undefined && badge.scaleX !== 1 ? `scaleX(${badge.scaleX})` : undefined,
+              }}
+            >
+              {badge.type === 'text' ? badge.text || 'バッジ' : '📷'}
+            </span>
           </div>
           <span className='text-xs text-gray-400'>
             {badge.name}
