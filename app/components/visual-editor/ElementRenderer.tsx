@@ -27,6 +27,7 @@ export default function ElementRenderer({
   showBackSidePreview = false,
   useSampleData = true,
   zoom = 1,
+  sampleKey,
   template,
 }: ElementRendererProps) {
   // データバインディングから実際の値またはサンプル値を取得
@@ -68,7 +69,7 @@ export default function ElementRenderer({
       default:
         return "";
     }
-  }, [element.id, element.dataBinding, element.customText, pop, useSampleData]);
+  }, [element.id, element.dataBinding, element.customText, pop, useSampleData, sampleKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 実際に返される値をログ出力
   console.log(`✅ Final value for ${element.id} (${element.dataBinding}): "${dataValue}"`);
