@@ -184,17 +184,33 @@ export default function ElementRenderer({
   const autoFitStyle = useMemo(() => {
     if (element.type !== "text" || !dataValue) return {};
 
-    // 実際の寸法をピクセルに変換（仮の値、実際はmm→pxの変換が必要）
+    // 実際の寸法をピクセルに変換
     const containerWidth = element.size.width * 3.7795275591; // mm to px
     const containerHeight = element.size.height * 3.7795275591;
+
+    // paddingを考慮（px-1 = 左右4pxずつ = 合計8px）
+    const paddingX = 8; // px-1 = 4px * 2
+    
+    // Canvas測定とブラウザレンダリングの差異を補正するマージンを増加
+    // 元々2mm(≈8px)だったが、より確実にするため4mm(≈15px)に増加
+    const safetyMargin = 15; // px (約4mm相当)
+    
+    const effectiveWidth = containerWidth - paddingX - safetyMargin;
+
+    // 統一フォント設定から文字間隔を取得（カスタムテキスト以外）
+    const contentFontSettings = template.settings.unifiedFonts?.content;
+    const letterSpacing = element.dataBinding === "custom" ? 
+      0 : // カスタムテキストは個別設定なので文字間隔は考慮しない
+      contentFontSettings?.letterSpacing;
 
     return calculateAutoFitStyle(
       element,
       dataValue,
-      containerWidth,
-      containerHeight
+      Math.max(effectiveWidth, 20), // 最小20px幅を保証（10pxから増加）
+      containerHeight,
+      letterSpacing // 文字間隔を渡す
     );
-  }, [element, dataValue]);
+  }, [element, dataValue, template.settings.unifiedFonts]);;;;;;
 
   // 外側のコンテナスタイル（レイアウト用）
   const containerStyle: React.CSSProperties = useMemo(() => {

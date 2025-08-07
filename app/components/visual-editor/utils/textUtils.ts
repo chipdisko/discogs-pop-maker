@@ -17,7 +17,8 @@ export function measureText(
   maxWidth: number,
   maxHeight: number,
   maxLines?: number,
-  singleLine?: boolean  // 1行表示を強制するオプション
+  singleLine?: boolean,  // 1行表示を強制するオプション
+  letterSpacing?: number  // 文字間隔（em単位）
 ): TextMeasurement {
   // 測定用のキャンバスを作成
   const canvas = document.createElement('canvas');
@@ -49,7 +50,21 @@ export function measureText(
   }
 
   // 各行の幅を測定し、最も長い行の幅を取得
-  const lineWidths = lines.map(line => ctx.measureText(line).width);
+  const lineWidths = lines.map(line => {
+    const baseWidth = ctx.measureText(line).width;
+    
+    // 文字間隔を考慮（letterSpacingが設定されている場合）
+    if (letterSpacing && letterSpacing !== 0 && line.length > 1) {
+      // letterSpacingはem単位なので、fontSize をかけてpx単位に変換
+      // 文字間隔は文字数-1回適用される
+      const letterSpacingPx = letterSpacing * fontSize;
+      const totalLetterSpacing = letterSpacingPx * (line.length - 1);
+      return baseWidth + totalLetterSpacing;
+    }
+    
+    return baseWidth;
+  });
+  
   const actualWidth = lineWidths.length > 0 ? Math.max(...lineWidths) : 0;
   // フォントサイズから実際の文字の高さを推定（lineHeightは行間込みなので、文字自体の高さを考慮）
   const actualHeight = singleLine ? fontSize : lines.length * lineHeight;
@@ -59,7 +74,7 @@ export function measureText(
   const adjustedFontSize = fontSize;
   let needsCompression = false;
 
-  // 幅の圧縮が必要かチェック
+  // 幅の圧縮が必要かチェック（余裕をもって早めに発動させる）
   if (actualWidth > maxWidth) {
     compressedScaleX = Math.max(0.5, maxWidth / actualWidth); // 最小50%
     needsCompression = true;
@@ -138,9 +153,19 @@ export function calculateAutoFitStyle(
   element: { style?: ElementStyle; dataBinding: string },
   text: string,
   containerWidth: number,
-  containerHeight: number
+  containerHeight: number,
+  letterSpacing?: number // 文字間隔を追加
 ): Partial<ElementStyle> {
   // 全てのテキスト要素に自動調整を適用
+  
+  // デバッグ用ログ（本番では削除予定）
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`📐 AutoFit for ${element.dataBinding}:`, {
+      text: text.substring(0, 15) + '...',
+      containerWidth: Math.round(containerWidth),
+      letterSpacing,
+    });
+  }
 
   const fontSize = element.style?.fontSize || 12;
   const fontFamily = element.style?.fontFamily || 'Arial, sans-serif';
@@ -156,8 +181,17 @@ export function calculateAutoFitStyle(
     containerWidth,
     containerHeight,
     undefined,
-    singleLine
+    singleLine,
+    letterSpacing // 文字間隔を渡す
   );
+
+  if (process.env.NODE_ENV === 'development' && measurement.needsCompression) {
+    console.log(`🔄 Compression needed for ${element.dataBinding}:`, {
+      actualWidth: Math.round(measurement.actualWidth),
+      containerWidth: Math.round(containerWidth),
+      scaleX: Math.round(measurement.compressedScaleX * 100) / 100,
+    });
+  }
 
   if (!measurement.needsCompression) {
     return {};
