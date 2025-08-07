@@ -6,7 +6,7 @@ import type { TemplateElement, VisualTemplate } from "./types";
 import { calculateAutoFitStyle } from "./utils/textUtils";
 import { getSampleValue } from "./utils/sampleData";
 import QRCodeRenderer from "./QRCodeRenderer";
-import BadgeRenderer from "./CustomBadgeRenderer";
+import BadgeRenderer from "./BadgeRenderer";
 import ImageRenderer from "./ImageRenderer";
 
 interface ElementRendererProps {
@@ -421,6 +421,8 @@ export default function ElementRenderer({
             zoom={zoom}
             containerWidth={element.size.width * 3.7795275591} // mm to px
             containerHeight={element.size.height * 3.7795275591}
+            horizontalAlign={element.badgeSettings?.horizontalAlign || 'center'}
+            verticalAlign={element.badgeSettings?.verticalAlign || 'middle'}
           />
         );
 

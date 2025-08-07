@@ -11,6 +11,9 @@ interface BadgeRendererProps {
   // ビジュアルエディタでの配置設定（要素サイズとは別）
   containerWidth?: number; // コンテナ幅(px)
   containerHeight?: number; // コンテナ高さ(px)
+  // 配置設定（ビジュアルエディタから渡される）
+  horizontalAlign?: 'left' | 'center' | 'right';
+  verticalAlign?: 'top' | 'middle' | 'bottom';
 }
 
 export default function BadgeRenderer({
@@ -19,6 +22,8 @@ export default function BadgeRenderer({
   zoom = 1,
   containerWidth,
   containerHeight,
+  horizontalAlign = 'center',
+  verticalAlign = 'middle',
 }: BadgeRendererProps) {
   // バッジデータを取得
   const badgeData = useMemo((): Badge | null => {
@@ -71,8 +76,8 @@ export default function BadgeRenderer({
     let left = 0;
     let top = 0;
 
-    // 水平配置
-    switch (badgeData.badgeAlign) {
+    // 水平配置（ビジュアルエディタの設定を優先）
+    switch (horizontalAlign) {
       case 'left':
         left = 0;
         break;
@@ -86,8 +91,8 @@ export default function BadgeRenderer({
         left = (containerWidth - badgeWidthPx) / 2;
     }
 
-    // 垂直配置
-    switch (badgeData.badgeVerticalAlign) {
+    // 垂直配置（ビジュアルエディタの設定を優先）
+    switch (verticalAlign) {
       case 'top':
         top = 0;
         break;

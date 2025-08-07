@@ -212,6 +212,10 @@ export function createElement(
       break;
     case "badge":
       baseElement.size = { width: 20, height: 6 };
+      baseElement.badgeSettings = {
+        horizontalAlign: 'center',
+        verticalAlign: 'middle',
+      };
       break;
   }
 

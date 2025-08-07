@@ -51,6 +51,11 @@ export interface TemplateElement {
       height: number; // クロップ高さ（元画像に対する比率 0-1）
     };
   };
+  // バッジ要素専用
+  badgeSettings?: {
+    horizontalAlign: 'left' | 'center' | 'right'; // 水平配置
+    verticalAlign: 'top' | 'middle' | 'bottom'; // 垂直配置
+  };
 }
 
 export interface BackgroundFrame {

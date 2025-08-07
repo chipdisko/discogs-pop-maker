@@ -521,9 +521,73 @@ export default function PropertyPanel({
           </div>
         )}
 
-        {/* 枠線設定 */}
-        <div>
-          <h4 className='text-sm font-medium mb-2'>枠線設定</h4>
+        {/* バッジ配置設定 */}
+        {selectedElement.type === "badge" && (
+          <div>
+            <h4 className='text-sm font-medium mb-2'>バッジ配置</h4>
+            <div className='space-y-2'>
+              <div>
+                <label className='text-xs text-gray-600 dark:text-gray-400'>
+                  水平配置
+                </label>
+                <div className='flex gap-1 mt-1'>
+                  {(["left", "center", "right"] as const).map((align) => (
+                    <button
+                      key={align}
+                      onClick={() => 
+                        onUpdateElement(selectedElement.id, {
+                          badgeSettings: {
+                            horizontalAlign: align,
+                            verticalAlign: selectedElement.badgeSettings?.verticalAlign || 'middle',
+                          },
+                        })
+                      }
+                      className={`px-2 py-1 text-xs border rounded ${
+                        (selectedElement.badgeSettings?.horizontalAlign || "center") === align
+                          ? "bg-blue-500 text-white border-blue-500"
+                          : "border-gray-300 dark:border-gray-600"
+                      }`}
+                    >
+                      {align === "left" ? "左" : align === "center" ? "中央" : "右"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className='text-xs text-gray-600 dark:text-gray-400'>
+                  垂直配置
+                </label>
+                <div className='flex gap-1 mt-1'>
+                  {(["top", "middle", "bottom"] as const).map((align) => (
+                    <button
+                      key={align}
+                      onClick={() =>
+                        onUpdateElement(selectedElement.id, {
+                          badgeSettings: {
+                            horizontalAlign: selectedElement.badgeSettings?.horizontalAlign || 'center',
+                            verticalAlign: align,
+                          },
+                        })
+                      }
+                      className={`px-2 py-1 text-xs border rounded ${
+                        (selectedElement.badgeSettings?.verticalAlign || "middle") === align
+                          ? "bg-blue-500 text-white border-blue-500"
+                          : "border-gray-300 dark:border-gray-600"
+                      }`}
+                    >
+                      {align === "top" ? "上" : align === "middle" ? "中央" : "下"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 枠線設定（バッジ要素以外） */}
+        {selectedElement.type !== "badge" && (
+          <div>
+            <h4 className='text-sm font-medium mb-2'>枠線設定</h4>
           <div className='space-y-3'>
             {(["Top", "Right", "Bottom", "Left"] as const).map((side) => {
               const borderKey =
@@ -606,10 +670,12 @@ export default function PropertyPanel({
               );
             })}
           </div>
-        </div>
+          </div>
+        )}
 
-        {/* 角丸設定 */}
-        <div>
+        {/* 角丸設定（バッジ要素以外） */}
+        {selectedElement.type !== "badge" && (
+          <div>
           <h4 className='text-sm font-medium mb-2'>角丸設定</h4>
           <div className='space-y-2'>
             <div className='grid grid-cols-2 gap-2'>
@@ -705,10 +771,12 @@ export default function PropertyPanel({
               </button>
             </div>
           </div>
-        </div>
+          </div>
+        )}
 
-        {/* データ名ラベル設定 */}
-        <div>
+        {/* データ名ラベル設定（バッジ要素以外） */}
+        {selectedElement.type !== "badge" && (
+          <div>
           <h4 className='text-sm font-medium mb-2'>データ名ラベル</h4>
           <div className='space-y-2'>
             <label className='flex items-center'>
@@ -1084,7 +1152,8 @@ export default function PropertyPanel({
               </div>
             )}
           </div>
-        </div>
+          </div>
+        )}
       </div>
 
       {/* 画像トリミングモーダル */}
