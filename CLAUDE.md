@@ -87,21 +87,23 @@ Discogs から取得したレコード情報：
 
 ## 開発コマンド
 
+**このプロジェクトはyarnを使用します。npmではなくyarnを使ってください。**
+
 ```bash
 # 開発サーバー起動
-npm run dev
+yarn dev
 
 # ビルド
-npm run build
+yarn build
 
 # 型チェック
-npm run typecheck
+yarn typecheck
 
 # リント
-npm run lint
+yarn lint
 
 # フォーマット
-npm run format
+yarn format
 ```
 
 ## 重要な開発ルール
@@ -111,9 +113,9 @@ npm run format
 **すべての作業後、必ず以下のコマンドを実行してエラーがないことを確認してください：**
 
 ```bash
-npm run build
-npm run typecheck
-npm run lint
+yarn build
+yarn typecheck
+yarn lint
 ```
 
 これらのコマンドがすべて通ることを確認してから作業を完了としてください。
@@ -159,8 +161,8 @@ npm run lint
 2. Application 層に DTO とサービスメソッドを追加
 3. Infrastructure 層に必要な実装を追加
 4. Presentation 層で UI を実装
-5. `npm run build` でビルドエラーがないことを確認
-6. `npm run typecheck` で型エラーがないことを確認
+5. `yarn build` でビルドエラーがないことを確認
+6. `yarn typecheck` で型エラーがないことを確認
 
 ### Discogs 連携の追加
 
