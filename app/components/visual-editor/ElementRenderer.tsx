@@ -90,14 +90,14 @@ export default function ElementRenderer({
   };
 
   // 統一カラー設定の適用（カスタムテキスト以外）
-  const getElementColor = () => {
+  const getElementColor = useCallback(() => {
     // カスタムテキストの場合は個別色設定を保持
     if (element.dataBinding === "custom") {
       return element.style?.color || "#000000";
     }
     // カスタムテキスト以外は統一色設定を使用（フォールバック付き）
     return template.settings.unifiedColors?.contentColor || "#000000";
-  };
+  }, [element.dataBinding, element.style?.color, template.settings.unifiedColors?.contentColor]);
 
   const getLabelColor = () => {
     // カスタムテキストの場合は個別色設定を保持
@@ -265,7 +265,7 @@ export default function ElementRenderer({
     }
 
     return baseStyle;
-  }, [element, autoFitStyle, isBackSide, showBackSidePreview, zoom, template.settings.unifiedColors, template.settings.unifiedFonts, getContentFontStyle, getElementColor]);
+  }, [element, autoFitStyle, isBackSide, showBackSidePreview, zoom, getContentFontStyle, getElementColor]);
 
   // 内側のコンテンツスタイル（テキスト配置用）
   const innerStyle: React.CSSProperties = useMemo(() => {

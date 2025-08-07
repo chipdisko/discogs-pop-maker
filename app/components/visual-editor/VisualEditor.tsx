@@ -110,7 +110,7 @@ export default function VisualEditor({
 
       // 変更前のデータを抽出（updatesのキーのみ）
       const oldData = Object.fromEntries(
-        Object.keys(updates).map(key => [key, (currentElement as any)[key]])
+        Object.keys(updates).map(key => [key, (currentElement as unknown as Record<string, unknown>)[key]])
       ) as Partial<TemplateElement>;
 
       updateElementWithCommand(elementId, oldData, updates);
@@ -154,19 +154,19 @@ export default function VisualEditor({
     if (templateName) {
       const templateToSave = { ...template, name: templateName };
       saveTemplate(templateToSave);
-      setTemplate(templateToSave);
+      setTemplateDirectly(templateToSave);
       alert("テンプレートを保存しました");
     }
-  }, [template]);
+  }, [template, setTemplateDirectly]);
 
   // テンプレート読み込み
   const handleLoadTemplate = useCallback(
     (loadedTemplate: VisualTemplate) => {
-      setTemplate(loadedTemplate);
+      setTemplateDirectly(loadedTemplate);
       onTemplateChange?.(loadedTemplate);
       clearAutoSave();
     },
-    [onTemplateChange]
+    [onTemplateChange, setTemplateDirectly]
   );
 
 
@@ -174,29 +174,29 @@ export default function VisualEditor({
   const handleUpdateTemplate = useCallback(
     (updates: Partial<VisualTemplate>) => {
       const newTemplate = { ...template, ...updates };
-      setTemplate(newTemplate);
+      setTemplateDirectly(newTemplate);
       onTemplateChange?.(newTemplate);
     },
-    [template, onTemplateChange]
+    [template, onTemplateChange, setTemplateDirectly]
   );
 
   // テンプレートリセット
   const handleResetTemplate = useCallback(() => {
     if (confirm("現在の編集内容をリセットしますか？")) {
       const newTemplate = createDefaultTemplate();
-      setTemplate(newTemplate);
+      setTemplateDirectly(newTemplate);
       clearAutoSave();
       onTemplateChange?.(newTemplate);
     }
-  }, [onTemplateChange]);
+  }, [onTemplateChange, setTemplateDirectly]);
 
   // サンプル変更のハンドラー
   const handleSampleChange = useCallback((sample: 1 | 2 | 3) => {
     setSampleData(sample);
     setCurrentSample(sample);
     // テンプレートを強制的に再レンダリングするために、stateを更新
-    setTemplate((prev) => ({ ...prev }));
-  }, []);
+    setTemplateDirectly({ ...template });
+  }, [template, setTemplateDirectly]);
 
   // 編集モード切り替えのハンドラー
   const handleEditModeChange = useCallback(
@@ -232,7 +232,7 @@ export default function VisualEditor({
 
       // 変更前のデータを抽出
       const oldData = Object.fromEntries(
-        Object.keys(updates).map(key => [key, (currentFrame as any)[key]])
+        Object.keys(updates).map(key => [key, (currentFrame as unknown as Record<string, unknown>)[key]])
       ) as Partial<BackgroundFrame>;
 
       updateBackgroundFrameWithCommand(frameId, oldData, updates);
