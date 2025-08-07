@@ -262,13 +262,19 @@ export default function EditorCanvas({
 
     // 直線の場合は始点・終点も移動
     if (frame.type === 'line' && frame.lineStart && frame.lineEnd) {
+      const newStartX = frame.lineStart.x + deltaMmX;
+      const newStartY = frame.lineStart.y + deltaMmY;
+      const newEndX = frame.lineEnd.x + deltaMmX;
+      const newEndY = frame.lineEnd.y + deltaMmY;
+
+      // 2mmグリッドに丸める
       updates.lineStart = {
-        x: frame.lineStart.x + deltaMmX,
-        y: frame.lineStart.y + deltaMmY,
+        x: Math.round(newStartX / 2) * 2,
+        y: Math.round(newStartY / 2) * 2,
       };
       updates.lineEnd = {
-        x: frame.lineEnd.x + deltaMmX,
-        y: frame.lineEnd.y + deltaMmY,
+        x: Math.round(newEndX / 2) * 2,
+        y: Math.round(newEndY / 2) * 2,
       };
     }
 
