@@ -4,7 +4,7 @@ import {
   PopId,
   Release,
   Comment,
-  Badge,
+
   Condition,
   Price,
   PopDimensions,
@@ -25,7 +25,7 @@ interface PopStorageData {
     styles: string[];
   };
   comment: string;
-  badges: string[]; // BadgeTypeの配列
+  badgeId: string | null; // バッジID
   condition: string; // ConditionType
   price: number; // 価格
   dimensions: {
@@ -208,7 +208,7 @@ export class PopRepositoryImpl implements PopRepository {
         styles: release.getStyles(),
       },
       comment: pop.getComment().getValue(),
-      badges: pop.getBadges().map((badge) => badge.getValue()),
+      badgeId: pop.getBadgeId(),
       condition: pop.getCondition().getValue(),
       price: pop.getPrice().getValue(),
       dimensions: {
@@ -240,7 +240,7 @@ export class PopRepositoryImpl implements PopRepository {
     // 他のValue Objects復元
     const id = PopId.fromString(data.id);
     const comment = new Comment(data.comment);
-    const badges = data.badges.map((badgeType) => Badge.fromString(badgeType));
+    const badgeId = data.badgeId || null;
     const condition = Condition.fromString(data.condition || "New");
     const price = Price.create(data.price || 0);
     const dimensions = new PopDimensions(
@@ -255,7 +255,7 @@ export class PopRepositoryImpl implements PopRepository {
       id,
       release,
       comment,
-      badges,
+      badgeId,
       condition,
       price,
       dimensions,

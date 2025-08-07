@@ -1,5 +1,4 @@
 import type { PopResponse } from "@/src/application";
-import type { BadgeType } from "@/src/domain";
 
 // サンプル1: よくあるサンプル
 export const SAMPLE_POP_DATA_1: PopResponse = {
@@ -8,9 +7,7 @@ export const SAMPLE_POP_DATA_1: PopResponse = {
   condition: "VG+",
   comment:
     "名盤中の名盤。\nモード・ジャズの傑作。\nコレクター必携の一枚。",
-  badges: [
-    { type: "RECOMMEND" as BadgeType, displayName: "おすすめ" },
-  ],
+  badgeId: "sample-badge-recommend",
   release: {
     discogsId: "sample-release-001",
     artistName: "Miles Davis",
@@ -46,10 +43,7 @@ export const SAMPLE_POP_DATA_2: PopResponse = {
   condition: "VG+",
   comment:
     "ジャズの名盤として知られる傑作アルバム。マイルス・デイヴィスの代表作の一つで、モード・ジャズの金字塔とも呼ばれる歴史的名作。\n1959年に録音されたこのアルバムは、モダン・ジャズの方向性を決定づけた重要な作品として今なお語り継がれている。\nコレクター垂涎の初回プレス盤です。",
-  badges: [
-    { type: "RECOMMEND" as BadgeType, displayName: "おすすめ" },
-    { type: "MUST" as BadgeType, displayName: "マスト" },
-  ],
+  badgeId: "sample-badge-must",
   release: {
     discogsId: "sample-release-002",
     artistName: "Miles Davis Master Piece of Cakes The King of Bebop and Modal Jazz Extraordinaire",
@@ -85,9 +79,7 @@ export const SAMPLE_POP_DATA_3: PopResponse = {
   condition: "EX",
   comment:
     "昭和の名曲が詰まった傑作アルバム。\n時代を超えて愛される不朽の名作。\n和製ポップスの金字塔。",
-  badges: [
-    { type: "RECOMMEND" as BadgeType, displayName: "おすすめ" },
-  ],
+  badgeId: "sample-badge-recommend",
   release: {
     discogsId: "sample-release-003",
     artistName: "竹内まりや",
@@ -167,14 +159,15 @@ export function getSampleValue(
       return customText || "カスタムテキスト";
     case "discogsUrl":
       return "https://www.discogs.com/Miles-Davis-Kind-Of-Blue/release/1234567";
-    case "badges":
-      return SAMPLE_POP_DATA.badges.map((b) => b.displayName).join(", ");
+    case "customBadge":
+      // カスタムバッジの名前を返す（実際のバッジデータは存在しないのでプレースホルダー）
+      return SAMPLE_POP_DATA.badgeId ? "バッジ" : "";
     default:
       return `[${dataBinding}]`;
   }
 }
 
-// バッジ用のサンプルデータを取得
-export function getSampleBadges() {
-  return SAMPLE_POP_DATA.badges;
+// バッジIDを取得
+export function getSampleBadgeId(): string | null {
+  return SAMPLE_POP_DATA.badgeId || null;
 }

@@ -4,11 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 interface CreatePopSectionProps {
   onCreateClick: () => void;
   onTemplateDesignClick: () => void;
+  onBadgeManagerClick: () => void;
 }
 
 export default function CreatePopSection({
   onCreateClick,
   onTemplateDesignClick,
+  onBadgeManagerClick,
 }: CreatePopSectionProps) {
   return (
     <Card>
@@ -27,6 +29,14 @@ export default function CreatePopSection({
             size='lg'
           >
             🎨 テンプレートをデザイン
+          </Button>
+          <Button 
+            onClick={onBadgeManagerClick} 
+            variant='outline' 
+            className='w-full' 
+            size='lg'
+          >
+            🏷️ カスタムバッジ管理
           </Button>
         </div>
       </CardContent>

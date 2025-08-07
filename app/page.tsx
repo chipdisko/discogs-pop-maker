@@ -3,6 +3,7 @@
 import CreatePopModal from "./components/modal/CreatePopModal";
 import VisualEditorModal from "./components/modal/VisualEditorModal";
 import PrintPreviewModal from "./components/modal/PrintPreviewModal";
+import BadgeManagerModal from "./components/modal/CustomBadgeManagerModal";
 import Header from "./components/layout/Header";
 import ErrorDisplay from "./components/layout/ErrorDisplay";
 import CreatePopSection from "./components/pop/CreatePopSection";
@@ -45,6 +46,9 @@ export default function Home() {
   // 印刷プレビュー用の状態
   const [isPrintPreviewOpen, setIsPrintPreviewOpen] = useState(false);
 
+  // カスタムバッジマネージャー用の状態
+  const [isBadgeManagerOpen, setIsBadgeManagerOpen] = useState(false);
+
 
   // 印刷プレビューを開く
   const handleOpenPrintPreview = () => {
@@ -64,6 +68,7 @@ export default function Home() {
         <CreatePopSection 
           onCreateClick={() => setIsCreateModalOpen(true)}
           onTemplateDesignClick={() => setIsVisualEditorOpen(true)}
+          onBadgeManagerClick={() => setIsBadgeManagerOpen(true)}
         />
 
         {/* ポップ一覧・印刷機能 */}
@@ -111,7 +116,7 @@ export default function Home() {
                 genres: editingPop.release.genres,
                 styles: editingPop.release.styles,
                 comment: editingPop.comment,
-                badges: editingPop.badges.map((badge) => badge.type),
+                badgeId: editingPop.badgeId,
                 condition: editingPop.condition,
                 price: editingPop.price,
                 priceSuggestions: undefined, // 編集時は価格提案を再取得
@@ -137,6 +142,12 @@ export default function Home() {
         isOpen={isPrintPreviewOpen}
         onClose={() => setIsPrintPreviewOpen(false)}
         pops={pops}
+      />
+
+      {/* カスタムバッジマネージャーモーダル */}
+      <BadgeManagerModal
+        isOpen={isBadgeManagerOpen}
+        onClose={() => setIsBadgeManagerOpen(false)}
       />
     </div>
   );

@@ -11,9 +11,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
+
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import type { BadgeType, ConditionType } from "@/src/domain";
+import type { ConditionType } from "@/src/domain";
+import type { Badge } from "@/app/types/badge";
+import { BadgeStorageManager } from "@/app/utils/badgeStorage";
+
 import type { ReleaseResponse } from "@/src/application";
 import type {
   DiscogsReleaseData,
@@ -40,7 +43,7 @@ export interface CreatePopFormData {
   genres: string[];
   styles: string[];
   comment: string;
-  badges: BadgeType[];
+  badgeId?: string | null;
   condition: ConditionType;
   price: number;
   priceSuggestions?: DiscogsPriceSuggestionsData;
@@ -59,7 +62,7 @@ const DEFAULT_FORM_DATA: CreatePopFormData = {
   genres: [],
   styles: [],
   comment: "",
-  badges: [],
+  badgeId: null,
   condition: "New",
   price: 0,
   priceSuggestions: undefined,
@@ -67,16 +70,7 @@ const DEFAULT_FORM_DATA: CreatePopFormData = {
   discogsType: undefined,
 };
 
-const availableBadges: {
-  value: BadgeType;
-  label: string;
-  description: string;
-}[] = [
-  { value: "RECOMMEND", label: "RECOMMEND", description: "おすすめ" },
-  { value: "MUST", label: "MUST", description: "必聴" },
-  { value: "RAVE", label: "RAVE", description: "レイブ" },
-  { value: "ACID", label: "ACID", description: "アシッド" },
-];
+
 
 const conditions: {
   value: ConditionType;
@@ -129,6 +123,9 @@ export default function CreatePopModal({
   const [isGenresFocused, setIsGenresFocused] = useState(false);
   const [isStylesFocused, setIsStylesFocused] = useState(false);
 
+  // カスタムバッジ管理
+  const [badges, setBadges] = useState<Badge[]>([]);
+
   // フォームを完全にリセットする関数
   const resetForm = useCallback(() => {
     setFormData(DEFAULT_FORM_DATA);
@@ -160,19 +157,29 @@ export default function CreatePopModal({
     }
   }, [isOpen, isEditMode, initialData, resetForm, initializeEditMode]);
 
+  // カスタムバッジ一覧を読み込み
+  useEffect(() => {
+    if (isOpen) {
+      try {
+        const badgeList = BadgeStorageManager.getAllBadges();
+        setBadges(badgeList);
+      } catch (error) {
+        console.error('カスタムバッジの読み込みに失敗:', error);
+      }
+    }
+  }, [isOpen]);
+
   // フォーム送信処理
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(formData);
   };
 
-  // バッジ選択処理
-  const handleBadgeChange = (badge: BadgeType, checked: boolean) => {
+  // カスタムバッジ選択処理
+  const handleBadgeChange = (badgeId: string | null) => {
     setFormData((prev) => ({
       ...prev,
-      badges: checked
-        ? [...prev.badges, badge]
-        : prev.badges.filter((b) => b !== badge),
+      badgeId: badgeId,
     }));
   };
 
@@ -688,30 +695,91 @@ export default function CreatePopModal({
             </div>
 
             <div className='space-y-3'>
-              <Label>バッジ（複数選択可）</Label>
-              <div className='grid grid-cols-2 gap-3'>
-                {availableBadges.map((badge) => (
-                  <div
-                    key={badge.value}
-                    className='flex items-center space-x-2'
-                  >
-                    <Checkbox
-                      id={badge.value}
-                      checked={formData.badges.includes(badge.value)}
-                      onCheckedChange={(checked) =>
-                        handleBadgeChange(badge.value, checked as boolean)
-                      }
+              <Label>カスタムバッジ（1つまで選択可能）</Label>
+              {badges.length === 0 ? (
+                <div className='text-center py-4 text-muted-foreground'>
+                  <div className='text-2xl mb-2'>🏷️</div>
+                  <p className='text-sm'>カスタムバッジがありません</p>
+                  <p className='text-xs'>バッジマネージャーから作成してください</p>
+                </div>
+              ) : (
+                <div className='space-y-3'>
+                  {/* 選択なしオプション */}
+                  <div className='flex items-center space-x-3 p-2 border rounded-lg'>
+                    <input
+                      type="radio"
+                      id="no-badge"
+                      name="customBadge"
+                      checked={!formData.badgeId}
+                      onChange={() => handleBadgeChange(null)}
                       disabled={isLoading}
+                      className="h-4 w-4"
                     />
-                    <Label htmlFor={badge.value} className='text-sm'>
-                      <div className='font-medium'>{badge.label}</div>
+                    <label htmlFor="no-badge" className='text-sm cursor-pointer flex-1'>
+                      <div className='font-medium'>バッジなし</div>
                       <div className='text-xs text-muted-foreground'>
-                        {badge.description}
+                        バッジを使用しない
                       </div>
-                    </Label>
+                    </label>
                   </div>
-                ))}
-              </div>
+                  
+                  {/* カスタムバッジ選択 */}
+                  {badges.map((badge) => (
+                    <div
+                      key={badge.id}
+                      className={`flex items-center space-x-3 p-2 border rounded-lg cursor-pointer transition-colors ${
+                        formData.badgeId === badge.id 
+                          ? 'border-primary bg-primary/5' 
+                          : 'border-border hover:bg-muted/50'
+                      }`}
+                      onClick={() => handleBadgeChange(badge.id)}
+                    >
+                      <input
+                        type="radio"
+                        id={badge.id}
+                        name="customBadge"
+                        checked={formData.badgeId === badge.id}
+                        onChange={() => handleBadgeChange(badge.id)}
+                        disabled={isLoading}
+                        className="h-4 w-4"
+                      />
+                      <div className="flex items-center space-x-3 flex-1">
+                        <div className="flex-shrink-0">
+                          {/* ミニプレビュー表示 */}
+                          <div 
+                            style={{
+                              width: badge.width * 2, // プレビュー用スケール
+                              height: badge.height * 2,
+                              backgroundColor: badge.backgroundColor || '#3b82f6',
+                              color: badge.textColor || '#ffffff',
+                              fontSize: Math.max((badge.fontSize || 12) * 1.5, 8),
+                              fontWeight: 'bold',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              textAlign: 'center',
+                              overflow: 'hidden',
+                              fontFamily: 'Arial, sans-serif',
+                              borderRadius: badge.shape === 'circle' ? '50%' : `${(badge.borderRadius || 0) * 2}px`,
+                              border: badge.borderEnabled ? `${(badge.borderWidth || 1) * 2}px solid ${badge.borderColor || '#ffffff'}` : 'none'
+                            }}
+                          >
+                            {badge.type === 'text' ? badge.text || 'バッジ' : '📷'}
+                          </div>
+                        </div>
+                        <label htmlFor={badge.id} className='text-sm cursor-pointer flex-1'>
+                          <div className='font-medium'>{badge.name}</div>
+                          <div className='text-xs text-muted-foreground'>
+                            {badge.type === 'text' ? `テキスト: ${badge.text}` : '画像バッジ'} 
+                            • {badge.width}×{badge.height}mm
+                            • {badge.shape === 'circle' ? '円形' : '四角形'}
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className='space-y-2'>

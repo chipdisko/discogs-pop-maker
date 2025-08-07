@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useMemo } from "react";
 import type { PopResponse } from "@/src/application";
+import type { Badge } from "@/app/types/badge";
+import { BadgeStorageManager } from "@/app/utils/badgeStorage";
 
 interface PopCardProps {
   pop: PopResponse;
@@ -20,6 +22,17 @@ export default function PopCard({
   onDelete,
   isLoading,
 }: PopCardProps) {
+  // カスタムバッジデータを取得
+  const badge = useMemo((): Badge | null => {
+    if (!pop.badgeId) return null;
+    try {
+      return BadgeStorageManager.getBadgeById(pop.badgeId);
+    } catch (error) {
+      console.error('バッジデータの取得に失敗:', error);
+      return null;
+    }
+  }, [pop.badgeId]);
+
   return (
     <div
       className={`border rounded-lg p-4 transition-all duration-300 ${
@@ -110,16 +123,33 @@ export default function PopCard({
       )}
 
       {/* バッジ表示 */}
-      {pop.badges.length > 0 && (
-        <div className='flex flex-wrap gap-1'>
-          {pop.badges.map((badge) => (
-            <span
-              key={badge.type}
-              className='px-2 py-1 bg-primary/20 text-primary text-xs rounded'
-            >
-              {badge.displayName}
-            </span>
-          ))}
+      {/* カスタムバッジ表示 */}
+      {badge && (
+        <div className='flex items-center gap-2'>
+          <div 
+            style={{
+              width: badge.width * 1.5, // カード用スケール
+              height: badge.height * 1.5,
+              backgroundColor: badge.backgroundColor || '#3b82f6',
+              color: badge.textColor || '#ffffff',
+              fontSize: Math.max((badge.fontSize || 12) * 1.2, 8),
+              fontWeight: 'bold',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center',
+              overflow: 'hidden',
+              fontFamily: 'Arial, sans-serif',
+              borderRadius: badge.shape === 'circle' ? '50%' : `${(badge.borderRadius || 0) * 1.5}px`,
+              border: badge.borderEnabled ? `${(badge.borderWidth || 1) * 1.5}px solid ${badge.borderColor || '#ffffff'}` : 'none',
+              flexShrink: 0
+            }}
+          >
+            {badge.type === 'text' ? badge.text || 'バッジ' : '📷'}
+          </div>
+          <span className='text-xs text-gray-400'>
+            {badge.name}
+          </span>
         </div>
       )}
     </div>

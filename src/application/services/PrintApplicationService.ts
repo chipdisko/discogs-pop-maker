@@ -183,7 +183,7 @@ export class PrintApplicationService {
       popId: popResponse.id,
       release: popResponse.release,
       comment: popResponse.comment,
-      badges: popResponse.badges,
+      badgeId: popResponse.badgeId,
     };
 
     return {

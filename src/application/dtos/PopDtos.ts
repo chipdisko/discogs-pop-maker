@@ -1,4 +1,4 @@
-import { BadgeType, ConditionType } from "../../domain";
+import { ConditionType } from "../../domain";
 
 // ========== リクエストDTO ==========
 
@@ -18,7 +18,7 @@ export interface CreatePopRequest {
 
   // ユーザー入力
   comment?: string;
-  badges?: BadgeType[];
+  badgeId?: string | null; // バッジID
   condition?: ConditionType;
   price?: number;
 }
@@ -35,20 +35,12 @@ export interface UpdatePopRequest {
   styles?: string[];
   // ユーザー入力の更新
   comment?: string;
-  badges?: BadgeType[];
+  badgeId?: string | null; // バッジID
   condition?: ConditionType;
   price?: number;
 }
 
-export interface AddBadgeRequest {
-  popId: string;
-  badge: BadgeType;
-}
-
-export interface RemoveBadgeRequest {
-  popId: string;
-  badge: BadgeType;
-}
+// カスタムバッジ関連のリクエストは別途管理
 
 // ========== レスポンスDTO ==========
 
@@ -56,7 +48,7 @@ export interface PopResponse {
   id: string;
   release: ReleaseResponse;
   comment: string;
-  badges: BadgeResponse[];
+  badgeId?: string | null; // バッジID
   condition: ConditionType;
   price: number;
   dimensions: DimensionsResponse;
@@ -79,10 +71,7 @@ export interface ReleaseResponse {
   genreStyleString: string;
 }
 
-export interface BadgeResponse {
-  type: BadgeType;
-  displayName: string;
-}
+// BadgeResponse削除 - カスタムバッジに置き換え
 
 export interface DimensionsResponse {
   width: number;

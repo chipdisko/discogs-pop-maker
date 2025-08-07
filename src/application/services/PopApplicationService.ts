@@ -3,7 +3,7 @@ import {
   PopId,
   Release,
   Comment,
-  Badge,
+
   Condition,
   Price,
   DiscogsUrl,
@@ -15,13 +15,10 @@ import {
 import {
   CreatePopRequest,
   UpdatePopRequest,
-  AddBadgeRequest,
-  RemoveBadgeRequest,
   PopResponse,
   PopListResponse,
   ErrorResponse,
   ReleaseResponse,
-  BadgeResponse,
   DimensionsResponse,
 } from "../dtos/PopDtos";
 
@@ -75,10 +72,8 @@ export class PopApplicationService {
           ? new Comment(request.comment)
           : Comment.empty();
 
-        // バッジを作成
-        const badges = request.badges
-          ? request.badges.map((b) => Badge.fromString(b))
-          : [];
+        // カスタムバッジIDを取得
+        const badgeId = request.badgeId || null;
 
         // コンディションを作成
         const condition = request.condition
@@ -89,7 +84,7 @@ export class PopApplicationService {
         const price = request.price ? Price.create(request.price) : undefined;
 
         // Popを作成
-        const pop = Pop.create(release, comment, badges, condition, price);
+        const pop = Pop.create(release, comment, badgeId, condition, price);
 
         // 保存
         await this.popRepository.save(pop);
@@ -116,10 +111,8 @@ export class PopApplicationService {
         ? new Comment(request.comment)
         : Comment.empty();
 
-      // 5. バッジを作成
-      const badges = request.badges
-        ? request.badges.map((b) => Badge.fromString(b))
-        : [];
+      // 5. カスタムバッジIDを取得
+      const badgeId = request.badgeId || null;
 
       // 6. コンディションを作成
       const condition = request.condition
@@ -130,7 +123,7 @@ export class PopApplicationService {
       const price = request.price ? Price.create(request.price) : undefined;
 
       // 8. Popを作成
-      const pop = Pop.create(release, comment, badges, condition, price);
+      const pop = Pop.create(release, comment, badgeId, condition, price);
 
       // 9. 保存
       await this.popRepository.save(pop);
@@ -172,10 +165,8 @@ export class PopApplicationService {
         ? new Comment(request.comment)
         : Comment.empty();
 
-      // 3. バッジを作成
-      const badges = request.badges
-        ? request.badges.map((b) => Badge.fromString(b))
-        : [];
+      // 3. カスタムバッジIDを取得
+      const badgeId = request.badgeId || null;
 
       // 4. コンディションを作成
       const condition = request.condition
@@ -186,7 +177,7 @@ export class PopApplicationService {
       const price = request.price ? Price.create(request.price) : undefined;
 
       // 6. Popを作成
-      const pop = Pop.create(release, comment, badges, condition, price);
+      const pop = Pop.create(release, comment, badgeId, condition, price);
 
       // 7. 保存
       await this.popRepository.save(pop);
@@ -229,10 +220,9 @@ export class PopApplicationService {
         pop.updateComment(comment);
       }
 
-      // 3. バッジを更新
-      if (request.badges !== undefined) {
-        const badges = request.badges.map((b) => Badge.fromString(b));
-        pop.setBadges(badges);
+      // 3. カスタムバッジIDを更新
+      if (request.badgeId !== undefined) {
+        pop.setBadgeId(request.badgeId);
       }
 
       // 4. コンディションを更新
@@ -288,79 +278,6 @@ export class PopApplicationService {
     }
   }
 
-  /**
-   * バッジを追加
-   */
-  async addBadge(
-    request: AddBadgeRequest
-  ): Promise<PopResponse | ErrorResponse> {
-    try {
-      // 1. ポップを取得
-      const popId = PopId.fromString(request.popId);
-      const pop = await this.popRepository.findById(popId);
-
-      if (!pop) {
-        return {
-          message: "ポップが見つかりません",
-          code: "POP_NOT_FOUND",
-        };
-      }
-
-      // 2. バッジを追加
-      const badge = Badge.fromString(request.badge);
-      pop.addBadge(badge);
-
-      // 3. 保存
-      await this.popRepository.save(pop);
-
-      // 4. レスポンス形式に変換
-      return this.toPopResponse(pop);
-    } catch (error) {
-      return {
-        message:
-          error instanceof Error ? error.message : "不明なエラーが発生しました",
-        code: "ADD_BADGE_ERROR",
-        details: error instanceof Error ? error.stack : undefined,
-      };
-    }
-  }
-
-  /**
-   * バッジを削除
-   */
-  async removeBadge(
-    request: RemoveBadgeRequest
-  ): Promise<PopResponse | ErrorResponse> {
-    try {
-      // 1. ポップを取得
-      const popId = PopId.fromString(request.popId);
-      const pop = await this.popRepository.findById(popId);
-
-      if (!pop) {
-        return {
-          message: "ポップが見つかりません",
-          code: "POP_NOT_FOUND",
-        };
-      }
-
-      // 2. バッジを削除
-      const badge = Badge.fromString(request.badge);
-      pop.removeBadge(badge);
-
-      // 3. 保存
-      await this.popRepository.save(pop);
-
-      // 4. レスポンス形式に変換
-      return this.toPopResponse(pop);
-    } catch (error) {
-      return {
-        message:
-          error instanceof Error ? error.message : "不明なエラーが発生しました",
-        code: "REMOVE_BADGE_ERROR",
-        details: error instanceof Error ? error.stack : undefined,
-      };
-    }
-  }
 
   /**
    * ポップを削除
@@ -458,7 +375,7 @@ export class PopApplicationService {
       id: pop.getId().getValue(),
       release: this.toReleaseResponse(pop.getRelease()),
       comment: pop.getComment().getValue(),
-      badges: pop.getBadges().map((badge) => this.toBadgeResponse(badge)),
+      badgeId: pop.getBadgeId(),
       condition: pop.getCondition().getValue(),
       price: pop.getPrice().getValue(),
       dimensions: this.toDimensionsResponse(pop.getDimensions()),
@@ -484,12 +401,6 @@ export class PopApplicationService {
     };
   }
 
-  private toBadgeResponse(badge: Badge): BadgeResponse {
-    return {
-      type: badge.getValue(),
-      displayName: badge.getDisplayName(),
-    };
-  }
 
   private toDimensionsResponse(dimensions: PopDimensions): DimensionsResponse {
     return {

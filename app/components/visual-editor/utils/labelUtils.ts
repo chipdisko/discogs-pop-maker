@@ -10,7 +10,7 @@ export function getDefaultLabel(dataBinding: string): string {
     price: '価格',
     comment: 'コメント',
     custom: 'カスタム',
-    badges: 'バッジ',
+    customBadge: 'カスタムバッジ',
     discogsUrl: 'QRコード',
   };
   

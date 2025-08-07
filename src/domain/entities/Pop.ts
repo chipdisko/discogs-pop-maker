@@ -1,39 +1,29 @@
 import { PopId } from "./PopId";
 import { Release } from "./Release";
 import { Comment } from "../value-objects/Comment";
-import { Badge } from "../value-objects/Badge";
 import { Condition } from "../value-objects/Condition";
 import { Price } from "../value-objects/Price";
 import { PopDimensions } from "../value-objects/PopDimensions";
 
 export class Pop {
-  private static readonly MAX_BADGES = 4;
-
   constructor(
     private readonly id: PopId,
     private release: Release,
     private comment: Comment,
-    private badges: Badge[],
+    private badgeId: string | null,
     private condition: Condition,
     private price: Price,
     private readonly dimensions: PopDimensions,
     private readonly createdAt: Date,
     private updatedAt: Date
-  ) {
-    this.validate();
-  }
+  ) {}
 
-  private validate(): void {
-    if (this.badges.length > Pop.MAX_BADGES) {
-      throw new Error(`バッジは最大${Pop.MAX_BADGES}個まで設定できます`);
-    }
-  }
 
   // ファクトリーメソッド
   static create(
     release: Release,
     comment?: Comment,
-    badges?: Badge[],
+    badgeId?: string | null,
     condition?: Condition,
     price?: Price,
     dimensions?: PopDimensions
@@ -43,7 +33,7 @@ export class Pop {
       PopId.generate(),
       release,
       comment || Comment.empty(),
-      badges || [],
+      badgeId || null,
       condition || Condition.create("New"),
       price || Price.empty(),
       dimensions || PopDimensions.STANDARD,
@@ -57,7 +47,7 @@ export class Pop {
     id: PopId,
     release: Release,
     comment: Comment,
-    badges: Badge[],
+    badgeId: string | null,
     condition: Condition,
     price: Price,
     dimensions: PopDimensions,
@@ -68,7 +58,7 @@ export class Pop {
       id,
       release,
       comment,
-      badges,
+      badgeId,
       condition,
       price,
       dimensions,
@@ -92,9 +82,9 @@ export class Pop {
     return this.comment;
   }
 
-  // バッジ一覧を取得
-  getBadges(): Badge[] {
-    return [...this.badges];
+  // バッジIDを取得
+  getBadgeId(): string | null {
+    return this.badgeId;
   }
 
   // コンディションを取得
@@ -128,52 +118,15 @@ export class Pop {
     this.updatedAt = new Date();
   }
 
-  // バッジを追加
-  addBadge(badge: Badge): void {
-    if (this.badges.length >= Pop.MAX_BADGES) {
-      throw new Error(`バッジは最大${Pop.MAX_BADGES}個まで設定できます`);
-    }
-
-    // 同じバッジの重複チェック
-    if (this.badges.some((b) => b.equals(badge))) {
-      throw new Error("同じバッジは複数設定できません");
-    }
-
-    this.badges.push(badge);
+  // バッジIDを設定
+  setBadgeId(badgeId: string | null): void {
+    this.badgeId = badgeId;
     this.updatedAt = new Date();
   }
 
-  // バッジを削除
-  removeBadge(badge: Badge): void {
-    const index = this.badges.findIndex((b) => b.equals(badge));
-    if (index >= 0) {
-      this.badges.splice(index, 1);
-      this.updatedAt = new Date();
-    }
-  }
-
-  // 全バッジをクリア
-  clearBadges(): void {
-    this.badges = [];
-    this.updatedAt = new Date();
-  }
-
-  // バッジを設定（既存を置き換え）
-  setBadges(badges: Badge[]): void {
-    if (badges.length > Pop.MAX_BADGES) {
-      throw new Error(`バッジは最大${Pop.MAX_BADGES}個まで設定できます`);
-    }
-
-    // 重複チェック
-    const uniqueBadges = badges.filter(
-      (badge, index, self) => self.findIndex((b) => b.equals(badge)) === index
-    );
-
-    if (uniqueBadges.length !== badges.length) {
-      throw new Error("同じバッジは複数設定できません");
-    }
-
-    this.badges = [...badges];
+  // バッジをクリア
+  clearBadge(): void {
+    this.badgeId = null;
     this.updatedAt = new Date();
   }
 
@@ -195,14 +148,9 @@ export class Pop {
     this.updatedAt = new Date();
   }
 
-  // 特定のバッジを持っているかチェック
-  hasBadge(badge: Badge): boolean {
-    return this.badges.some((b) => b.equals(badge));
-  }
-
-  // バッジ数を取得
-  getBadgeCount(): number {
-    return this.badges.length;
+  // バッジを持っているかチェック
+  hasBadge(): boolean {
+    return this.badgeId !== null;
   }
 
   // ポップのタイトルを取得

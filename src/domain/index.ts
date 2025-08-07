@@ -1,5 +1,4 @@
 // Value Objects
-export { Badge, type BadgeType } from "./value-objects/Badge";
 export { Comment } from "./value-objects/Comment";
 export { Condition, type ConditionType } from "./value-objects/Condition";
 export {

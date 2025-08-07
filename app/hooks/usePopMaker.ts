@@ -76,7 +76,7 @@ export function usePopMaker() {
         genres: formData.genres.length > 0 ? formData.genres : undefined,
         styles: formData.styles.length > 0 ? formData.styles : undefined,
         comment: formData.comment.trim() || undefined,
-        badges: formData.badges.length > 0 ? formData.badges : undefined,
+        badgeId: formData.badgeId || undefined,
         condition: formData.condition,
         price: formData.price > 0 ? formData.price : undefined,
       };
@@ -176,7 +176,7 @@ export function usePopMaker() {
         genres: formData.genres,
         styles: formData.styles,
         comment: formData.comment.trim(),
-        badges: formData.badges,
+        badgeId: formData.badgeId,
         condition: formData.condition,
         price: formData.price,
       });

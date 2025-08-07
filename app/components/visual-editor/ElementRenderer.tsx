@@ -6,7 +6,7 @@ import type { TemplateElement, VisualTemplate } from "./types";
 import { calculateAutoFitStyle } from "./utils/textUtils";
 import { getSampleValue } from "./utils/sampleData";
 import QRCodeRenderer from "./QRCodeRenderer";
-import BadgeRenderer from "./BadgeRenderer";
+import BadgeRenderer from "./CustomBadgeRenderer";
 import ImageRenderer from "./ImageRenderer";
 
 interface ElementRendererProps {
@@ -66,6 +66,9 @@ export default function ElementRenderer({
         // discogsTypeに応じて適切なURLを生成
         const urlType = pop?.release?.discogsType || "release";
         return `https://www.discogs.com/${urlType}/${pop?.release?.discogsId}` || "";
+      case "customBadge":
+        // カスタムバッジは別途CustomBadgeRendererで処理されるため空文字返す
+        return "";
       default:
         return "";
     }
@@ -86,6 +89,7 @@ export default function ElementRenderer({
       price: "価格",
       comment: "コメント",
       custom: "カスタムテキスト",
+      customBadge: "カスタムバッジ",
     };
     return labelMap[dataBinding] || dataBinding;
   };
@@ -409,15 +413,14 @@ export default function ElementRenderer({
         );
 
       case "badge":
-        // バッジのレンダリング
+        // カスタムバッジのレンダリング
         return (
           <BadgeRenderer
-            pop={pop}
+            badgeId={useSampleData ? "sample-badge-recommend" : pop?.badgeId || null}
             useSampleData={useSampleData}
-            style={{
-              fontSize: `${(element.style?.fontSize || 12) * zoom}px`,
-              fontFamily: element.style?.fontFamily || "Arial, sans-serif",
-            }}
+            zoom={zoom}
+            containerWidth={element.size.width * 3.7795275591} // mm to px
+            containerHeight={element.size.height * 3.7795275591}
           />
         );
 

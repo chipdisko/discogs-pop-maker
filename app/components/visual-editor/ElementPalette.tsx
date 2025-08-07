@@ -45,7 +45,7 @@ const PALETTE_ITEMS: PaletteItem[] = [
     icon: "✏️",
   },
   // その他の要素
-  { type: "badge", dataBinding: "badges", label: "バッジ", icon: "🏅" },
+  { type: "badge", dataBinding: "customBadge", label: "カスタムバッジ", icon: "🏅" },
   {
     type: "image",
     dataBinding: "image",

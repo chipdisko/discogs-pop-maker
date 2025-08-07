@@ -1,4 +1,4 @@
-import { PopResponse, ReleaseResponse, BadgeResponse } from "./PopDtos";
+import { PopResponse, ReleaseResponse } from "./PopDtos";
 
 // ========== リクエストDTO ==========
 
@@ -79,7 +79,7 @@ export interface CanvasElementResponse {
   y: number;
   width?: number;
   height?: number;
-  data: PopElementData | TextElementData | BadgeElementData | BackgroundFrameElementData;
+  data: PopElementData | TextElementData | CustomBadgeElementData | BackgroundFrameElementData;
 }
 
 // 要素固有のデータ型
@@ -87,7 +87,7 @@ export interface PopElementData {
   popId: string;
   release: ReleaseResponse;
   comment: string;
-  badges: BadgeResponse[];
+  badgeId?: string | null;
 }
 
 export interface TextElementData {
@@ -98,12 +98,19 @@ export interface TextElementData {
   align: "left" | "center" | "right";
 }
 
-export interface BadgeElementData {
-  badgeType: string;
-  displayName: string;
+export interface CustomBadgeElementData {
+  badgeId: string;
+  shape: 'circle' | 'rectangle';
+  width: number;
+  height: number;
   backgroundColor: string;
   textColor: string;
   fontSize: number;
+  text: string;
+  borderEnabled: boolean;
+  borderColor: string;
+  borderWidth: number;
+  borderRadius?: number;
 }
 
 export interface BackgroundFrameElementData {
@@ -138,7 +145,7 @@ export interface PopTemplateData {
     genres: TextLayoutData;
     styles: TextLayoutData;
     comment: TextLayoutData;
-    badges: BadgeLayoutData[];
+    customBadge?: CustomBadgeLayoutData;
   };
 }
 
@@ -155,16 +162,22 @@ export interface TextLayoutData {
   verticalAlign: "top" | "middle" | "bottom";
 }
 
-export interface BadgeLayoutData {
-  type: string;
-  displayName: string;
+export interface CustomBadgeLayoutData {
+  id: string;
+  name: string;
   x: number;
   y: number;
   width: number;
   height: number;
+  shape: 'circle' | 'rectangle';
   backgroundColor: string;
   textColor: string;
   fontSize: number;
+  text: string;
+  borderEnabled: boolean;
+  borderColor: string;
+  borderWidth: number;
+  borderRadius?: number;
 }
 
 // ========== ビジュアルテンプレート用 ==========
