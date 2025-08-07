@@ -21,6 +21,12 @@
   - 裏面要素（店舗名など、任意のテキスト要素）
   - グリッドスナップ機能（2mm 単位で調整可能）
   - ガイドライン表示（他の要素との整列時に表示）
+- **背景フレーム要素**
+  - 装飾用の背景フレームを追加・配置
+  - 複数の背景フレームを重ねて配置可能
+  - 各フレームのスタイル（色、枠線、角丸等）を個別設定
+  - リサイズハンドルによるインタラクティブなサイズ調整
+  - 背景編集モードと要素編集モードの切り替え
 - **折り線の管理**
   - 15mm 位置の折り線表示（破線で視覚的に表現）
   - 折り線より上部は裏面エリア（折り畳み時に見える面）
@@ -87,6 +93,19 @@
     3. 圧縮率は自動計算（最小 50%まで、それ以下にはしない）
   - プレビューで圧縮状態を確認可能
   - 注意：コメントの行数は増減できない仕様
+- **データ名ラベル設定**
+  - 各要素にデータ名を示すラベルを表示可能
+  - ラベルの表示/非表示切り替え
+  - カスタムラベルテキストの設定（デフォルトはデータバインディング名）
+  - ラベルのスタイル設定：
+    - フォントサイズ調整（デフォルト12px）
+    - 文字色設定（デフォルト#666666）
+  - 表示モード選択：
+    - positioned: 要素の周囲8方向に配置
+    - inline: [ラベル]: [内容] 形式でインライン表示
+  - 配置位置（positionedモード時）：
+    - 外側/内側の選択
+    - 8方向の位置指定（top-left, top-center, top-right, bottom-left, bottom-center, bottom-right, middle-left, middle-right）
 - **要素のスタイル設定**
   - 背景色の設定
   - 枠線（ボーダー）の詳細設定：
@@ -182,6 +201,7 @@
 interface VisualTemplate {
   id: string;
   name: string;
+  backgroundFrames: BackgroundFrame[]; // 背景フレーム要素
   elements: TemplateElement[];
   settings: TemplateSettings;
 }
@@ -199,6 +219,18 @@ interface TemplateElement {
   autoRotate?: boolean; // 裏面エリアで自動180度回転（デフォルトtrue）
   // カスタムテキスト用
   customText?: string; // dataBindingが'custom'の場合の任意テキスト
+  // データ名ラベル設定
+  label?: {
+    show: boolean; // ラベル表示するかどうか
+    text?: string; // カスタムラベルテキスト（未設定時はデフォルト）
+    fontSize?: number; // ラベルフォントサイズ（デフォルト12px）
+    color?: string; // ラベル文字色（デフォルト#666666）
+    // 表示モード
+    displayMode?: 'positioned' | 'inline'; // positioned: 配置モード, inline: [ラベル]: [内容] モード
+    // 配置設定（positioned モードの場合のみ）
+    placement?: 'outside' | 'inside'; // 外側/内側
+    position?: 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right' | 'middle-left' | 'middle-right'; // 8箇所
+  };
   // QRコード要素専用
   qrSettings?: {
     errorCorrectionLevel: "L" | "M" | "Q" | "H";
@@ -268,6 +300,33 @@ interface DisplayCondition {
   field: string;
   operator: "exists" | "equals" | "contains" | "greater" | "less";
   value?: any;
+}
+
+interface BackgroundFrame {
+  id: string;
+  position: { x: number; y: number }; // 単位：mm
+  size: { width: number; height: number }; // 単位：mm
+  style: FrameStyle;
+}
+
+interface FrameStyle {
+  backgroundColor?: string;
+  borderColor?: string;
+  borderWidth?: number;
+  borderStyle?: "solid" | "dashed" | "dotted" | "double" | "none";
+  borderRadius?: number;
+  opacity?: number;
+  shadow?: ShadowStyle;
+}
+
+interface EditorState {
+  selectedElementId: string | null;
+  selectedBackgroundFrameId: string | null;
+  isDragging: boolean;
+  zoom: number; // 50-200%
+  panOffset: { x: number; y: number };
+  showBackSidePreview: boolean; // 裏面の回転プレビュー表示
+  editMode: "background" | "elements"; // 背景/要素編集モード切り替え
 }
 ```
 

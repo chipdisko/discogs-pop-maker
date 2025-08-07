@@ -3,6 +3,7 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { useCommandManager } from "@/app/hooks/useCommandManager";
 import type { PopResponse } from "@/src/application";
 import type {
   VisualTemplate,
@@ -37,8 +38,8 @@ export default function VisualEditor({
   onTemplateChange,
   initialTemplate,
 }: VisualEditorProps) {
-  const [template, setTemplate] = useState<VisualTemplate>(() => {
-    // 初期化時に自動保存されたテンプレートを確認
+  // 初期テンプレートの準備
+  const getInitialTemplate = () => {
     const autoSaved = getAutoSavedTemplate();
     const baseTemplate =
       initialTemplate || autoSaved || createDefaultTemplate();
@@ -49,6 +50,28 @@ export default function VisualEditor({
     }
 
     return baseTemplate;
+  };
+
+  // コマンドマネージャーを使用
+  const {
+    template,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
+    historySize,
+    addElement: addElementWithCommand,
+    updateElement: updateElementWithCommand,
+    deleteElement: deleteElementWithCommand,
+    addBackgroundFrame: addBackgroundFrameWithCommand,
+    updateBackgroundFrame: updateBackgroundFrameWithCommand,
+    deleteBackgroundFrame: deleteBackgroundFrameWithCommand,
+    setTemplateDirectly,
+    debugHistory,
+  } = useCommandManager(getInitialTemplate(), {
+    maxHistorySize: 30,
+    enableMerging: true,
+    mergeTimeWindow: 1000,
   });
 
   const [showAutoSaveNotification, setShowAutoSaveNotification] =
@@ -72,48 +95,42 @@ export default function VisualEditor({
   // 要素の追加
   const handleAddElement = useCallback(
     (element: TemplateElement) => {
-      const newTemplate = {
-        ...template,
-        elements: [...template.elements, element],
-      };
-      setTemplate(newTemplate);
-      onTemplateChange?.(newTemplate);
+      addElementWithCommand(element);
+      onTemplateChange?.(template);
       setEditorState((prev) => ({ ...prev, selectedElementId: element.id }));
     },
-    [template, onTemplateChange]
+    [addElementWithCommand, template, onTemplateChange]
   );
 
   // 要素の更新
   const handleUpdateElement = useCallback(
     (elementId: string, updates: Partial<TemplateElement>) => {
-      const newTemplate = {
-        ...template,
-        elements: template.elements.map((el) =>
-          el.id === elementId ? { ...el, ...updates } : el
-        ),
-      };
-      setTemplate(newTemplate);
-      onTemplateChange?.(newTemplate);
+      const currentElement = template.elements.find(el => el.id === elementId);
+      if (!currentElement) return;
+
+      // 変更前のデータを抽出（updatesのキーのみ）
+      const oldData = Object.fromEntries(
+        Object.keys(updates).map(key => [key, (currentElement as any)[key]])
+      ) as Partial<TemplateElement>;
+
+      updateElementWithCommand(elementId, oldData, updates);
+      onTemplateChange?.(template);
     },
-    [template, onTemplateChange]
+    [template, updateElementWithCommand, onTemplateChange]
   );
 
   // 要素の削除
   const handleDeleteElement = useCallback(
     (elementId: string) => {
-      const newTemplate = {
-        ...template,
-        elements: template.elements.filter((el) => el.id !== elementId),
-      };
-      setTemplate(newTemplate);
-      onTemplateChange?.(newTemplate);
+      deleteElementWithCommand(elementId);
+      onTemplateChange?.(template);
       setEditorState((prev) => ({
         ...prev,
         selectedElementId:
           prev.selectedElementId === elementId ? null : prev.selectedElementId,
       }));
     },
-    [template, onTemplateChange]
+    [deleteElementWithCommand, template, onTemplateChange]
   );
 
   // 要素の選択
@@ -197,47 +214,38 @@ export default function VisualEditor({
   // 背景枠の追加
   const handleAddBackgroundFrame = useCallback(
     (frame: BackgroundFrame) => {
-      const newTemplate = {
-        ...template,
-        backgroundFrames: [...(template.backgroundFrames || []), frame],
-      };
-      setTemplate(newTemplate);
-      onTemplateChange?.(newTemplate);
+      addBackgroundFrameWithCommand(frame);
+      onTemplateChange?.(template);
       setEditorState((prev) => ({
         ...prev,
         selectedBackgroundFrameId: frame.id,
       }));
     },
-    [template, onTemplateChange]
+    [addBackgroundFrameWithCommand, template, onTemplateChange]
   );
 
   // 背景枠の更新
   const handleUpdateBackgroundFrame = useCallback(
     (frameId: string, updates: Partial<BackgroundFrame>) => {
-      const newTemplate = {
-        ...template,
-        backgroundFrames: (template.backgroundFrames || []).map((frame) =>
-          frame.id === frameId ? { ...frame, ...updates } : frame
-        ),
-      };
+      const currentFrame = template.backgroundFrames?.find(f => f.id === frameId);
+      if (!currentFrame) return;
 
-      setTemplate(newTemplate);
-      onTemplateChange?.(newTemplate);
+      // 変更前のデータを抽出
+      const oldData = Object.fromEntries(
+        Object.keys(updates).map(key => [key, (currentFrame as any)[key]])
+      ) as Partial<BackgroundFrame>;
+
+      updateBackgroundFrameWithCommand(frameId, oldData, updates);
+      onTemplateChange?.(template);
     },
-    [template, onTemplateChange]
+    [template, updateBackgroundFrameWithCommand, onTemplateChange]
   );
 
   // 背景枠の削除
   const handleDeleteBackgroundFrame = useCallback(
     (frameId: string) => {
-      const newTemplate = {
-        ...template,
-        backgroundFrames: (template.backgroundFrames || []).filter(
-          (frame) => frame.id !== frameId
-        ),
-      };
-      setTemplate(newTemplate);
-      onTemplateChange?.(newTemplate);
+      deleteBackgroundFrameWithCommand(frameId);
+      onTemplateChange?.(template);
       setEditorState((prev) => ({
         ...prev,
         selectedBackgroundFrameId:
@@ -246,7 +254,7 @@ export default function VisualEditor({
             : prev.selectedBackgroundFrameId,
       }));
     },
-    [template, onTemplateChange]
+    [deleteBackgroundFrameWithCommand, template, onTemplateChange]
   );
 
   // 背景枠の選択
@@ -347,6 +355,12 @@ export default function VisualEditor({
           template={template}
           onLoad={handleLoadTemplate}
           onDeselectAll={handleDeselectAll}
+          onUndo={undo}
+          onRedo={redo}
+          canUndo={canUndo}
+          canRedo={canRedo}
+          historySize={historySize}
+          onDebugHistory={debugHistory}
         />
         <div className='flex bg-gray-50 dark:bg-gray-900 overflow-y-auto min-h-0 grow'>
           {/* 左サイドバー: 要素パレット/背景枠パレット */}

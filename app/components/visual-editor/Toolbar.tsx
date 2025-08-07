@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Settings } from "lucide-react";
+import { Settings, Undo2, Redo2, Bug } from "lucide-react";
 import type { VisualTemplate } from "./types";
 import TemplateManagerModal from "./TemplateManagerModal";
 
@@ -15,6 +15,13 @@ interface ToolbarProps {
   template: VisualTemplate;
   onLoad: (template: VisualTemplate) => void;
   onDeselectAll?: () => void; // 選択状態を解除する関数
+  // Undo/Redo関連
+  onUndo?: () => void;
+  onRedo?: () => void;
+  canUndo?: boolean;
+  canRedo?: boolean;
+  historySize?: number;
+  onDebugHistory?: () => void; // デバッグ用
 }
 
 export default function Toolbar({
@@ -27,6 +34,12 @@ export default function Toolbar({
   template,
   onLoad,
   onDeselectAll,
+  onUndo,
+  onRedo,
+  canUndo = false,
+  canRedo = false,
+  historySize = 0,
+  onDebugHistory,
 }: ToolbarProps) {
   const [showTemplateManager, setShowTemplateManager] = useState(false);
 
@@ -72,6 +85,46 @@ export default function Toolbar({
         >
           リセット
         </button>
+
+        {/* Undo/Redoボタン */}
+        <div className='flex items-center space-x-2 border-l pl-4 border-gray-300 dark:border-gray-600'>
+          <button
+            onClick={onUndo}
+            disabled={!canUndo}
+            className={`p-2 rounded transition-colors ${
+              canUndo
+                ? 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                : 'text-gray-400 dark:text-gray-600 cursor-not-allowed'
+            }`}
+            title='元に戻す (Ctrl+Z)'
+          >
+            <Undo2 className='w-5 h-5' />
+          </button>
+          <button
+            onClick={onRedo}
+            disabled={!canRedo}
+            className={`p-2 rounded transition-colors ${
+              canRedo
+                ? 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                : 'text-gray-400 dark:text-gray-600 cursor-not-allowed'
+            }`}
+            title='やり直す (Ctrl+Y / Ctrl+Shift+Z)'
+          >
+            <Redo2 className='w-5 h-5' />
+          </button>
+          <span className='text-xs text-gray-500 dark:text-gray-400'>
+            履歴: {historySize}
+          </span>
+          {onDebugHistory && (
+            <button
+              onClick={onDebugHistory}
+              className='p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+              title='履歴デバッグ (コンソール出力)'
+            >
+              <Bug className='w-4 h-4' />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* 中央: 空のスペース */}
